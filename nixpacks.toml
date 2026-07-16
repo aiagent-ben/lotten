@@ -1,0 +1,25 @@
+[phases.setup]
+nixPkgs = [
+  "nodejs_22",
+  "postgresql",
+]
+
+[phases.install]
+cmds = [
+  "npm ci --legacy-peer-deps",
+]
+
+[phases.build]
+cmds = [
+  "npm run build",
+]
+
+[phases.start]
+cmd = "npm run start"
+
+[variables]
+NODE_ENV = "production"
+NEXT_TELEMETRY_DISABLED = "1"
+
+[processes]
+web = "npm run start"
