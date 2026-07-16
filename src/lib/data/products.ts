@@ -1025,6 +1025,29 @@ export function formatPrice(price: number, currency = 'MYR'): string {
   }).format(price);
 }
 
+export function getColorHex(code: string): string {
+  // Color code to hex mapping for common furniture finishes
+  const colorMap: Record<string, string> = {
+    '102': '#8B7355',  // Natural
+    '109': '#4A3728',  // Cocoa
+    '113': '#3D2B1F',  // Walnut
+    '114': '#1A1A1A',  // Black
+    '167': '#E8E0D8',  // White Marble
+    '166': '#E8E0D8',  // White Marble (alt)
+    '1001': '#8B7355', // Natural (alt)
+    '802': '#4A3728',  // Cocoa (alt)
+    '111': '#F5F0E8',  // White Wash
+    '112': '#C8B8A8',  // Natural/White
+    '1325': '#2A3B4D', // Space Blue
+    '130': '#F8F8F8',  // White Lacquer
+    '173': '#6B6B6B',  // Grey Marble
+    '185': '#6B6B6B',  // Grey Marble (alt)
+    '179': '#B8A898',  // Oak
+    '1318': '#3D2B1F', // Walnut/Gunmetal
+  };
+  return colorMap[code] || '#CCCCCC';
+}
+
 export function getCollectionBySlug(slug: string): Collection | undefined {
   return collections.find(c => c.slug === slug && c.is_active);
 }
