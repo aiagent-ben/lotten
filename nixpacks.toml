@@ -1,6 +1,8 @@
 # nixpacks.toml for Coolify deployment
+# https://nixpacks.com/docs/config
+
 [phases.setup]
-nixPkgs = ["nodejs_22", "postgresql"]
+nixPkgs = ["nodejs_22", "postgresql", "cacert"]
 
 [phases.install]
 cmds = ["npm ci --legacy-peer-deps"]
@@ -14,6 +16,7 @@ cmd = "npm run start"
 [variables]
 NODE_ENV = "production"
 NEXT_TELEMETRY_DISABLED = "1"
+NPM_CONFIG_LEGACY_PEER_DEPS = "true"
 
 [processes]
 web = "npm run start"
