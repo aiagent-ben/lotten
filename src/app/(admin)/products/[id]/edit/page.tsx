@@ -4,6 +4,7 @@ import { RichTextEditor } from '@/components/admin/RichTextEditor';
 import { MaterialSpecEditor } from '@/components/admin/MaterialSpecEditor';
 import { ColorOptionEditor } from '@/components/admin/ColorOptionEditor';
 import { ImageUploader } from '@/components/admin/ImageUploader';
+import { ProductVariantEditor } from '@/components/admin/ProductVariantEditor';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { formatPrice } from '@/lib/utils';
@@ -686,23 +687,13 @@ export default function EditProductPage() {
             </div>
           </fieldset>
           
-          {/* Images */}
-          <fieldset className="space-y-6 border-t border-gray-100 pt-6">
-            <legend className="form-section-title">Product Images</legend>
-            <ImageUploader
-              productId={params.id as string}
-              initialImages={[]}
-              onChange={(images) => setFormData(prev => ({ ...prev, images: JSON.stringify(images, null, 2) }))}
-            />
-          </fieldset>
-          
           {/* Variants */}
           <fieldset className="space-y-6 border-t border-gray-100 pt-6">
             <legend className="form-section-title">Product Variants</legend>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-              <p className="text-gray-600">Variant management (fabric/finish SKUs) - Coming soon</p>
-              <p className="caption text-gray-500 mt-1">Each variant = separate SKU with own price, stock, attributes</p>
-            </div>
+            <ProductVariantEditor
+              value={[]}
+              onChange={(variants) => setFormData(prev => ({ ...prev, variants: JSON.stringify(variants, null, 2) }))}
+            />
           </fieldset>
           
           {/* Actions */}

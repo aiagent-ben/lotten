@@ -4,6 +4,7 @@ import { ImageUploader } from '@/components/admin/ImageUploader';
 import { RichTextEditor } from '@/components/admin/RichTextEditor';
 import { MaterialSpecEditor } from '@/components/admin/MaterialSpecEditor';
 import { ColorOptionEditor } from '@/components/admin/ColorOptionEditor';
+import { ProductVariantEditor } from '@/components/admin/ProductVariantEditor';
 import { useState, useEffect } from 'react';
 
 interface FormData {
@@ -608,10 +609,10 @@ export default function NewProductPage() {
           {/* Variants */}
           <fieldset className="space-y-6 border-t border-gray-100 pt-6">
             <legend className="form-section-title">Product Variants</legend>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-              <p className="text-gray-600">Variant management (fabric/finish SKUs) - Coming soon</p>
-              <p className="caption text-gray-500 mt-1">Each variant = separate SKU with own price, stock, attributes</p>
-            </div>
+            <ProductVariantEditor
+              value={[]}
+              onChange={(variants) => setFormData(prev => ({ ...prev, variants: JSON.stringify(variants, null, 2) }))}
+            />
           </fieldset>
           
           {/* Actions */}
