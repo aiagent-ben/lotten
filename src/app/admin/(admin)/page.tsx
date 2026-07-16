@@ -14,9 +14,34 @@ interface StatsData {
   pendingOrders: number;
   totalCustomers: number;
   totalRevenue: number;
-  recentOrders: any[];
-  topProducts: any[];
-  lowStockProducts: any[];
+  recentOrders: {
+    id: string;
+    order_number: string;
+    status: string;
+    total_usd: number;
+    created_at: string;
+    customers: {
+      contact_name: string | null;
+      company_name: string | null;
+      email: string | null;
+    } | null;
+  }[];
+  topProducts: {
+    id: string;
+    name: string;
+    slug: string;
+    price_usd: number;
+    stock_available: number;
+    is_active: boolean;
+  }[];
+  lowStockProducts: {
+    id: string;
+    name: string;
+    slug: string;
+    price_usd: number;
+    stock_available: number;
+    is_active: boolean;
+  }[];
 }
 
 export default async function DashboardPage() {

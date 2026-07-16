@@ -8,6 +8,7 @@ import { ProductVariantEditor } from '@/components/admin/ProductVariantEditor';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { formatPrice } from '@/lib/utils';
+import type { MaterialSpec, ColorOption } from '@/lib/types/database';
 
 interface FormData {
   article_no: string;
@@ -70,8 +71,8 @@ interface ProductData {
   carton_length_mm: number | null;
   carton_width_mm: number | null;
   carton_height_mm: number | null;
-  materials: any[] | null;
-  colors: any[] | null;
+  materials: MaterialSpec[] | null;
+  colors: ColorOption[] | null;
   price_usd: number;
   cost_usd: number | null;
   moq: number;
