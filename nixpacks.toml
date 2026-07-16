@@ -2,7 +2,7 @@
 # https://nixpacks.com/docs/config
 
 [phases.setup]
-nixPkgs = ["nodejs_22", "postgresql", "cacert"]
+nixPkgs = ["nodejs_22"]
 
 [phases.install]
 cmds = ["npm ci --legacy-peer-deps"]
