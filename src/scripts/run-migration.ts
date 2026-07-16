@@ -1,9 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
+import dotenv from 'dotenv';
 
-const supabaseUrl = '${NEXT_PUBLIC_SUPABASE_URL}';
-const serviceRoleKey = '${SUPABASE_SERVICE_ROLE_KEY}';
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 const supabase = createClient(supabaseUrl, serviceRoleKey, {
   auth: { autoRefreshToken: false, persistSession: false }
@@ -29,7 +32,6 @@ async function executeMigration() {
     
     try {
       // Execute raw SQL via the pg_metaschema or direct query
-      // We'll use the REST API with a special query
       const response = await fetch(`${supabaseUrl}/rest/v1/rpc/exec_sql`, {
         method: 'POST',
         headers: {
