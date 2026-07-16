@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Search, ChevronLeft, ChevronRight, Edit, Trash2, Mail, Phone, Building2, User, Loader2, X } from 'lucide-react';
-import { formatPrice } from '@/lib/utils';
+import { Plus, Search, ChevronLeft, ChevronRight, Edit, Trash2, Mail, User, Loader2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Customer {
@@ -13,13 +12,25 @@ interface Customer {
   company_name: string | null;
   contact_name: string | null;
   phone: string | null;
-  address: any;
+  address: Record<string, unknown> | null;
   tax_id: string | null;
   credit_limit_usd: number | null;
   payment_terms_days: number | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
+}
+
+interface CustomerFormData {
+  email: string;
+  company_name: string;
+  contact_name: string;
+  phone: string;
+  tax_id: string;
+  address: string;
+  credit_limit_usd: string;
+  payment_terms_days: string;
+  is_active: boolean;
 }
 
 export default function CustomersPage() {

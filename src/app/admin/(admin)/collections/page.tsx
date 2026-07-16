@@ -1,23 +1,35 @@
 import { Metadata } from 'next';
 import { createServiceClient } from '@/lib/db/client';
-import { formatPrice } from '@/lib/utils';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export const metadata: Metadata = {
   title: 'Collections | Lotten Admin',
 };
 
-interface CollectionData {
+interface ColorPaletteItem {
+  name: string;
+  code: string;
+  hex: string;
+}
+
+interface BrandData {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface CollectionWithRelations {
   id: string;
   name: string;
   slug: string;
   description: string | null;
   hero_image_url: string | null;
-  color_palette: any[] | null;
+  color_palette: ColorPaletteItem[] | null;
   is_active: boolean;
   sort_order: number;
   brand_id: string;
-  brands: { id: string; name: string; slug: string } | null;
+  brands: BrandData | null;
   _count: { products: number };
 }
 
@@ -122,14 +134,16 @@ export default async function CollectionsPage() {
                 return (
                   <tr key={collection.id}>
                     <td className="px-4 py-3">
-                      {collection.hero_image_url && (
-                        <img 
-                          src={collection.hero_image_url} 
-                          alt={collection.name}
-                          className="w-12 h-12 object-cover rounded-lg"
-                        />
-                      )}
-                    </td>
+                                          {collection.hero_image_url && (
+                                            <Image
+                                              src={collection.hero_image_url}
+                                              alt={collection.name}
+                                              width={48}
+                                              height={48}
+                                              className="w-12 h-12 object-cover rounded-lg"
+                                            />
+                                          )}
+                                        </td>
                     <td className="px-4 py-3">
                       <div>
                         <p className="font-medium text-gray-900">{collection.name}</p>
@@ -148,22 +162,22 @@ export default async function CollectionsPage() {
                       <span className="text-sm text-gray-700">{activeProducts} / {productCount}</span>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-1">
-                        {collection.color_palette?.slice(0, 4).map((color: any, i: number) => (
-                          <span 
-                            key={i} 
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs"
-                            style={{ backgroundColor: color.hex + '20', borderColor: color.hex }}
-                          >
-                            <span className="w-2 h-2 rounded" style={{ backgroundColor: color.hex }} />
-                            {color.name}
-                          </span>
-                        ))}
-                        {colorCount > 4 && (
-                          <span className="text-xs text-gray-500 px-2">+{colorCount - 4} more</span>
-                        )}
-                      </div>
-                    </td>
+                                          <div className="flex flex-wrap gap-1">
+                                            {collection.color_palette?.slice(0, 4).map((color: ColorPaletteItem, i: number) => (
+                                              <span
+                                                key={i}
+                                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs"
+                                                style={{ backgroundColor: color.hex + '20', borderColor: color.hex }}
+                                              >
+                                                <span className="w-2 h-2 rounded" style={{ backgroundColor: color.hex }} />
+                                                {color.name}
+                                              </span>
+                                            ))}
+                                            {colorCount > 4 && (
+                                              <span className="text-xs text-gray-500 px-2">+{colorCount - 4} more</span>
+                                            )}
+                                          </div>
+                                        </td>
                     <td className="px-4 py-3 text-center">
                       <span className={collection.is_active ? 'badge-success' : 'badge-destructive'}>
                         {collection.is_active ? 'Active' : 'Inactive'}

@@ -343,7 +343,7 @@ export default async function ProductsPage({ searchParams }: Props) {
       {/* CTA Section */}
       <section className="py-16 bg-amber-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="heading-2 text-gray-900 mb-4">Can't Find What You're Looking For?</h2>
+          <h2 className="heading-2 text-gray-900 mb-4">Can&apos;t Find What You&apos;re Looking For?</h2>
           <p className="body-lg text-gray-600 mb-8 max-w-2xl mx-auto">
             We have more products available in our showroom. Contact our team for custom orders 
             or to inquire about upcoming collections.
