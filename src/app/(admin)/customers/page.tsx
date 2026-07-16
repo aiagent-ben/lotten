@@ -237,7 +237,7 @@ export default function CustomersPage() {
               <p className="mt-1 text-gray-500">Create your first customer to get started</p>
             </div>
           ) : (
-            <div>
+            <>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-gray-50">
@@ -333,8 +333,8 @@ export default function CustomersPage() {
                   </div>
                 </div>
               )}
-            </div>
-          </div>
+            </>
+          )}
         </div>
       </div>
 
