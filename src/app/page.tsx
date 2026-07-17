@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getFeaturedProducts, getAllActiveProducts, getCollectionBySlug } from '@/lib/data/products';
 import { formatPrice } from '@/lib/utils';
 
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   const featuredProducts = getFeaturedProducts(8);
-  
+
   // Helper to get collection name from collection_id
   const getCollectionName = (collectionId: string) => {
     const collectionsMap: Record<string, string> = {
@@ -35,44 +36,46 @@ export default function HomePage() {
     };
     return collectionsMap[collectionId] || 'Collection';
   };
-  
+
   return (
     <main className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="relative h-[90vh] min-h-[600px] flex items-center justify-center overflow-hidden">
+      {/* Hero Section - Calm Editorial Style */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/hero-furniture.jpg)' }} />
-        <div className="absolute inset-0 bg-gradient-to-r from-amber-900/90 via-amber-900/70 to-transparent" />
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="max-w-3xl">
-            <span className="inline-block px-4 py-2 rounded-full bg-amber-100/20 text-amber-100 text-sm font-medium mb-6 backdrop-blur-sm border border-amber-200/30">
+        <div className="absolute inset-0 bg-gradient-to-r from-amber-900/95 via-amber-900/80 to-transparent" />
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
+          <div className="max-w-3xl animate-slide-up">
+            <span className="inline-block px-4 py-2 rounded-full bg-amber-600/20 text-amber-100 text-sm font-medium mb-8 tracking-wide backdrop-blur-sm border border-amber-400/30">
               Direct from Manufacturer
             </span>
             <h1 className="heading-1 text-white mb-6 leading-tight">
-              Curated Malaysian Oak Furniture for Modern Homes
+              Curated Malaysian Oak Furniture<br />for Modern Homes
             </h1>
-            <p className="body-lg text-amber-100/90 mb-10 max-w-2xl">
-              Discover timeless pieces crafted from premium Malaysian Oak. 
-              Direct from our workshop to your door — no middlemen, no markups.
+            <p className="body-lg text-amber-100/90 mb-10 max-w-2xl leading-relaxed">
+              Discover timeless pieces crafted from premium Malaysian Oak. Direct from our workshop to your door — no middlemen, no markups, just honest furniture at honest prices.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link 
-                href="/products" 
-                className="btn-primary btn-lg bg-amber-600 hover:bg-amber-700 text-white w-full sm:w-auto text-center"
+              <Link
+                href="/products"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-amber-600 hover:bg-amber-500 text-white font-medium rounded-lg transition-all duration-200"
               >
                 Shop Collection
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
               </Link>
-              <Link 
-                href="/collections" 
-                className="btn-outline btn-lg border-amber-200/50 text-amber-100 hover:bg-amber-100/10 w-full sm:w-auto text-center"
+              <Link
+                href="/collections"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-medium rounded-lg border border-white/20 transition-all duration-200 backdrop-blur-sm"
               >
                 Browse Collections
               </Link>
             </div>
           </div>
         </div>
-        
-        {/* Scroll indicator */}
-        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce" aria-hidden="true">
           <svg className="w-6 h-6 text-amber-200/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
@@ -84,193 +87,238 @@ export default function HomePage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div className="py-4">
-              <svg className="mx-auto h-10 w-10 text-amber-700 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="mx-auto h-8 w-8 text-amber-700 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
               </svg>
-              <h3 className="heading-4 text-gray-900">Quality Guaranteed</h3>
+              <h3 className="heading-4 text-gray-900 mb-1">Quality Guaranteed</h3>
               <p className="caption text-gray-600 mt-1">Premium Malaysian Oak</p>
             </div>
             <div className="py-4">
-              <svg className="mx-auto h-10 w-10 text-amber-700 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="mx-auto h-8 w-8 text-amber-700 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
               </svg>
-              <h3 className="heading-4 text-gray-900">Secure Payment</h3>
+              <h3 className="heading-4 text-gray-900 mb-1">Secure Payment</h3>
               <p className="caption text-gray-600 mt-1">Encrypted checkout</p>
             </div>
             <div className="py-4">
-              <svg className="mx-auto h-10 w-10 text-amber-700 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="mx-auto h-8 w-8 text-amber-700 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
-              <h3 className="heading-4 text-gray-900">Nationwide Delivery</h3>
+              <h3 className="heading-4 text-gray-900 mb-1">Nationwide Delivery</h3>
               <p className="caption text-gray-600 mt-1">Peninsular & East Malaysia</p>
             </div>
             <div className="py-4">
-              <svg className="mx-auto h-10 w-10 text-amber-700 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="mx-auto h-8 w-8 text-amber-700 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <h3 className="heading-4 text-gray-900">Easy Returns</h3>
+              <h3 className="heading-4 text-gray-900 mb-1">Easy Returns</h3>
               <p className="caption text-gray-600 mt-1">30-day return policy</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Featured Products */}
-      <section className="py-20">
+      {/* Featured Collections - Editorial Style */}
+      <section className="py-20 lg:py-28 bg-gray-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
+          <div className="text-center mb-16 animate-slide-up">
+            <h2 className="heading-2 text-gray-900 mb-4">Our Collections</h2>
+            <p className="body-lg text-gray-600 max-w-2xl mx-auto">
+              Each collection tells a story of craftsmanship, material, and design philosophy — curated for the way you live.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Breda */}
+            <Link href="/collections/breda" className="collection-card group relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-500 animate-slide-up">
+              <div className="relative aspect-[4/3] overflow-hidden">
+                <Image
+                  src="https://mm.hinlim.com/cache/b2bfs/product/335048/335048-550x500.jpg"
+                  alt="Breda Collection - TV cabinets and sideboards in warm walnut and natural finishes"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="card-img w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-tr from-amber-600/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="card-overlay absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                  <a href="/collections/breda" className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg">
+                    Explore Breda
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+              <div className="p-6">
+                <span className="inline-block px-3 py-1 text-xs font-medium text-amber-700 bg-amber-50 rounded-full mb-3">NestHouZ</span>
+                <h3 className="heading-3 text-gray-900 mb-2">Breda</h3>
+                <p className="text-gray-600 mb-4">Working desks, TV cabinets and sideboards in warm Walnut/Natural combinations.</p>
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  <span className="px-2 py-1 text-xs font-medium rounded bg-amber-100 text-amber-700">Cocoa</span>
+                  <span className="px-2 py-1 text-xs font-medium rounded bg-amber-100 text-amber-700">White Marble</span>
+                </div>
+                <a href="/collections/breda" className="text-sm font-medium text-amber-700 hover:text-amber-900 inline-flex items-center gap-1 transition-colors">View 7 products →</a>
+              </div>
+            </Link>
+
+            {/* Dover */}
+            <Link href="/collections/dover" className="collection-card group relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-500 animate-slide-up" style={{ animationDelay: '100ms' }}>
+              <div className="relative aspect-[4/3] overflow-hidden">
+                <Image
+                  src="https://mm.hinlim.com/cache/b2bfs/product/346036/346036-550x500.jpg"
+                  alt="Dover Collection - Complete living room sets with coffee tables, consoles and desks"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="card-img w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-tr from-rose-600/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="card-overlay absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                  <a href="/collections/dover" className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg">
+                    Explore Dover
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+              <div className="p-6">
+                <span className="inline-block px-3 py-1 text-xs font-medium text-rose-700 bg-rose-50 rounded-full mb-3">NestHouZ</span>
+                <h3 className="heading-3 text-gray-900 mb-2">Dover</h3>
+                <p className="text-gray-600 mb-4">Complete living room collections with coffee, console, side tables and desks.</p>
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  <span className="px-2 py-1 text-xs font-medium rounded bg-rose-100 text-rose-700">Walnut</span>
+                  <span className="px-2 py-1 text-xs font-medium rounded bg-rose-100 text-rose-700">Cocoa</span>
+                </div>
+                <a href="/collections/dover" className="text-sm font-medium text-rose-600 hover:text-rose-700 inline-flex items-center gap-1 transition-colors">View 8 products →</a>
+              </div>
+            </Link>
+
+            {/* Castor */}
+            <Link href="/collections/castor" className="collection-card group relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-500 animate-slide-up" style={{ animationDelay: '200ms' }}>
+              <div className="relative aspect-[4/3] overflow-hidden">
+                <Image
+                  src="https://mm.hinlim.com/cache/b2bfs/product/335043/335043-550x500.jpg"
+                  alt="Castor Collection - Minimalist three-tone entertainment centers"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="card-img w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-tr from-purple-600/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="card-overlay absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+                  <a href="/collections/castor" className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg">
+                    Explore Castor
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+              <div className="p-6">
+                <span className="inline-block px-3 py-1 text-xs font-medium text-purple-700 bg-purple-50 rounded-full mb-3">Luooma</span>
+                <h3 className="heading-3 text-gray-900 mb-2">Castor</h3>
+                <p className="text-gray-600 mb-4">Minimalist three-tone finish combinations for modern entertainment centers.</p>
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  <span className="px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-700">Black</span>
+                  <span className="px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-700">Natural</span>
+                  <span className="px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-700">Space Blue</span>
+                </div>
+                <a href="/collections/castor" className="text-sm font-medium text-purple-600 hover:text-purple-700 inline-flex items-center gap-1 transition-colors">View 5 products →</a>
+              </div>
+            </Link>
+          </div>
+
+          <div className="text-center mt-12 animate-slide-up">
+            <Link href="/collections" className="inline-flex items-center gap-2 px-8 py-4 bg-white border-2 border-gray-200 text-gray-900 font-semibold rounded-lg hover:bg-gray-50 hover:border-amber-300 transition-all">
+              View All 19 Collections
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Products */}
+      <section className="py-20 lg:py-28 bg-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 animate-slide-up">
             <div>
               <h2 className="heading-2 text-gray-900 mb-2">Featured Products</h2>
               <p className="body text-gray-600">Handpicked bestsellers and new arrivals</p>
             </div>
-            <Link 
-              href="/products" 
+            <Link
+              href="/products"
               className="btn-ghost mt-4 md:mt-0 text-amber-700 hover:text-amber-900"
             >
               View All Products →
             </Link>
           </div>
 
-          <div className="grid-auto-fit">
-            {featuredProducts.map((product) => (
-              <Link 
-                key={product.id} 
-                href={`/products/${product.slug}`}
-                className="product-card group"
-              >
-                <div className="product-card-image relative overflow-hidden">
-                  <img 
-                    src={product.images && product.images.length > 0 ? product.images[0].url : '/placeholder-product.jpg'} 
-                    alt={product.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy"
-                  />
-                  {product.is_new && (
-                    <span className="absolute top-3 left-3 badge-primary badge-success text-xs px-2 py-1">
-                      New
-                    </span>
-                  )}
-                  {product.is_bestseller && (
-                    <span className="absolute top-3 right-3 badge-primary text-xs px-2 py-1">
-                      Bestseller
-                    </span>
-                  )}
-                </div>
-                <div className="product-card-content">
-                  <p className="caption text-amber-700 font-medium mb-1">
-                    {getCollectionName(product.collection_id)}
-                  </p>
-                  <h3 className="product-card-title mb-2">{product.name}</h3>
-                  <p className="product-card-price">{formatPrice(product.price_usd)}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" role="list">
+            {featuredProducts.map((product) => {
+              const primaryImage = product.images?.find((img) => img.is_primary) || product.images?.[0];
+              return (
+                <Link
+                  key={product.id}
+                  href={`/products/${product.slug}`}
+                  className="product-card group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                  role="listitem"
+                  aria-label={`View ${product.name}`}
+                >
+                  <div className="relative aspect-square overflow-hidden bg-gray-50">
+                    {primaryImage ? (
+                      <Image
+                        src={primaryImage.url}
+                        alt={product.name}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        placeholder="blur"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg className="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
+                    {/* Badges */}
+                    <div className="absolute top-3 left-3 right-3 flex flex-col gap-1.5">
+                      {product.is_new && (
+                        <span className="badge badge-primary badge-success text-xs px-2 py-1">New</span>
+                      )}
+                      {product.is_bestseller && (
+                        <span className="badge badge-primary text-xs px-2 py-1">Bestseller</span>
+                      )}
+                    </div>
+                  </div>
 
-      {/* Collections */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="heading-2 text-gray-900 mb-2">Shop by Collection</h2>
-            <p className="body text-gray-600 max-w-2xl mx-auto">
-              Explore our curated collections, each with their own design philosophy and finish options.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Link href="/collections/breda" className="relative aspect-[4/3] rounded-xl overflow-hidden group">
-              <img 
-                src="https://mm.hinlim.com/cache/b2bfs/product/335048/335048-550x500.jpg" 
-                alt="Breda Collection"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-amber-900/80 via-amber-900/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                <h3 className="heading-3 mb-1">Breda</h3>
-                <p className="body-sm text-amber-100/80">Warm Walnut & White Marble</p>
-              </div>
-            </Link>
-
-            <Link href="/collections/dover" className="relative aspect-[4/3] rounded-xl overflow-hidden group">
-              <img 
-                src="https://mm.hinlim.com/cache/b2bfs/product/346036/346036-550x500.jpg" 
-                alt="Dover Collection"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-amber-900/80 via-amber-900/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                <h3 className="heading-3 mb-1">Dover</h3>
-                <p className="body-sm text-amber-100/80">Complete Living Room Sets</p>
-              </div>
-            </Link>
-
-            <Link href="/collections/ludlow" className="relative aspect-[4/3] rounded-xl overflow-hidden group">
-              <img 
-                src="https://mm.hinlim.com/cache/b2bfs/product/345064/345064-550x500.jpg" 
-                alt="Ludlow Collection"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-amber-900/80 via-amber-900/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                <h3 className="heading-3 mb-1">Ludlow</h3>
-                <p className="body-sm text-amber-100/80">Scandinavian White Wash</p>
-              </div>
-            </Link>
-
-            <Link href="/collections/castor" className="relative aspect-[4/3] rounded-xl overflow-hidden group">
-              <img 
-                src="https://mm.hinlim.com/cache/b2bfs/product/335043/335043-550x500.jpg" 
-                alt="Castor Collection"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-amber-900/80 via-amber-900/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                <h3 className="heading-3 mb-1">Castor</h3>
-                <p className="body-sm text-amber-100/80">Three-Tone Modern</p>
-              </div>
-            </Link>
-
-            <Link href="/collections/neath" className="relative aspect-[4/3] rounded-xl overflow-hidden group">
-              <img 
-                src="https://mm.hinlim.com/cache/b2bfs/product/335059/335059-550x500.jpg" 
-                alt="Neath Collection"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-amber-900/80 via-amber-900/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                <h3 className="heading-3 mb-1">Neath</h3>
-                <p className="body-sm text-amber-100/80">Floating Cabinets & Tables</p>
-              </div>
-            </Link>
-
-            <Link href="/collections/royston" className="relative aspect-[4/3] rounded-xl overflow-hidden group">
-              <img 
-                src="https://mm.hinlim.com/cache/b2bfs/color/808 GOLD-30x30.jpg" 
-                alt="Royston Collection"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-amber-900/80 via-amber-900/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                <h3 className="heading-3 mb-1">Royston</h3>
-                <p className="body-sm text-amber-100/80">Premium Rattan & Gold Accents</p>
-              </div>
-            </Link>
-          </div>
-
-          <div className="text-center mt-10">
-            <Link href="/collections" className="btn-outline btn-lg">
-              View All Collections →
-            </Link>
+                  <div className="p-4">
+                    <p className="caption text-amber-700 font-medium mb-1 uppercase tracking-wider">
+                      {getCollectionName(product.collection_id)}
+                    </p>
+                    <h3 className="product-card-title font-medium text-gray-900 mb-2 line-clamp-1 group-hover:text-amber-700 transition-colors">
+                      {product.name}
+                    </h3>
+                    <p className="product-card-price text-lg font-bold text-gray-900">
+                      {formatPrice(product.price_usd)}
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-amber-900">
+      <section className="py-20 bg-amber-900 text-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="heading-2 text-white mb-4">Ready to Transform Your Space?</h2>
+          <h2 className="heading-2 mb-4">Ready to Transform Your Space?</h2>
           <p className="body-lg text-amber-100/80 mb-8 max-w-2xl mx-auto">
             Join thousands of satisfied customers who've furnished their homes with Lotten's premium Malaysian Oak furniture.
           </p>
@@ -291,7 +339,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-2">
               <h3 className="heading-3 mb-4">Lotten</h3>
-              <p className="body text-gray-400 mb-6 max-w-sm">
+              <p className="body text-gray-400 mb-6 max-w-sm leading-relaxed">
                 Curated Malaysian Oak furniture for modern homes — direct from manufacturer to your door.
               </p>
               <div className="flex gap-4">
@@ -340,7 +388,7 @@ export default function HomePage() {
 
           <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-400 text-sm">
-              © 2024 Lotten. All rights reserved.
+              © 2025 Lotten. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm text-gray-400">
               <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
