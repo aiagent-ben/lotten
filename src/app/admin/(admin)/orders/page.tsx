@@ -54,7 +54,7 @@ export default async function OrdersPage() {
   const typedOrders = (orders || []).map((o) => ({
     ...o,
     customers: o.customers?.[0] ?? null,
-  })) as OrderData[];
+  })) as unknown as OrderData[];
 
   return (
     <div className="space-y-6">

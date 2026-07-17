@@ -17,7 +17,7 @@ interface RecentOrder {
     contact_name: string | null;
     company_name: string | null;
     email: string | null;
-  } | null;
+  }[] | null;
 }
 
 interface TopProduct {
@@ -70,9 +70,8 @@ export default async function DashboardPage() {
     supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('customers').select('*', { count: 'exact', head: true }).eq('is_active', true),
     supabase.from('orders')
-      .select(`
-        id, order_number, status, total_usd, created_at,
-        customers:customer_id (contact_name, company_name, email)
+      .select(`        id, order_number, status, total_usd, created_at,
+        customers:customer_id (id, contact_name, company_name, email)
       `)
       .order('created_at', { ascending: false })
       .limit(5),
@@ -199,7 +198,7 @@ export default async function DashboardPage() {
                       </div>
                       <div>
                         <p className="font-medium text-gray-900 text-sm">{order.order_number}</p>
-                        <p className="text-xs text-gray-500">{order.customers?.contact_name || order.customers?.company_name || order.customers?.email}</p>
+                        <p className="text-xs text-gray-500">{order.customers?.[0]?.contact_name || order.customers?.[0]?.company_name || order.customers?.[0]?.email}</p>
                       </div>
                     </div>
                     <div className="text-right">
