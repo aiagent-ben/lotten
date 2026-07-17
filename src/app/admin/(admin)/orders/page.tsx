@@ -51,7 +51,7 @@ export default async function OrdersPage() {
     .order('created_at', { ascending: false })
     .limit(50);
     
-  const typedOrders = (orders || []).map((o: any) => ({
+  const typedOrders = (orders || []).map((o) => ({
     ...o,
     customers: o.customers?.[0] ?? null,
   })) as OrderData[];

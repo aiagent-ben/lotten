@@ -19,20 +19,6 @@ interface BrandData {
   slug: string;
 }
 
-interface CollectionWithRelations {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  hero_image_url: string | null;
-  color_palette: ColorPaletteItem[] | null;
-  is_active: boolean;
-  sort_order: number;
-  brand_id: string;
-  brands: BrandData | null;
-  _count: { products: number };
-}
-
 export default async function CollectionsPage() {
   const supabase = createServiceClient();
   

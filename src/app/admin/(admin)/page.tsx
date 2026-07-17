@@ -7,6 +7,37 @@ export const metadata: Metadata = {
   title: 'Dashboard | Lotten Admin',
 };
 
+interface RecentOrder {
+  id: string;
+  order_number: string;
+  status: string;
+  total_usd: number;
+  created_at: string;
+  customers: {
+    contact_name: string | null;
+    company_name: string | null;
+    email: string | null;
+  } | null;
+}
+
+interface TopProduct {
+  id: string;
+  name: string;
+  slug: string;
+  price_usd: number;
+  stock_available: number;
+  is_active: boolean;
+}
+
+interface LowStockProduct {
+  id: string;
+  name: string;
+  slug: string;
+  stock_available: number;
+  low_stock_threshold: number;
+  is_active: boolean;
+}
+
 interface StatsData {
   totalProducts: number;
   activeProducts: number;
@@ -14,34 +45,9 @@ interface StatsData {
   pendingOrders: number;
   totalCustomers: number;
   totalRevenue: number;
-  recentOrders: {
-    id: string;
-    order_number: string;
-    status: string;
-    total_usd: number;
-    created_at: string;
-    customers: {
-      contact_name: string | null;
-      company_name: string | null;
-      email: string | null;
-    } | null;
-  }[];
-  topProducts: {
-    id: string;
-    name: string;
-    slug: string;
-    price_usd: number;
-    stock_available: number;
-    is_active: boolean;
-  }[];
-  lowStockProducts: {
-    id: string;
-    name: string;
-    slug: string;
-    price_usd: number;
-    stock_available: number;
-    is_active: boolean;
-  }[];
+  recentOrders: RecentOrder[];
+  topProducts: TopProduct[];
+  lowStockProducts: LowStockProduct[];
 }
 
 export default async function DashboardPage() {
@@ -183,7 +189,7 @@ export default async function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {stats.recentOrders.map((order: any) => (
+                {stats.recentOrders.map((order: RecentOrder) => (
                   <a key={order.id} href={`/admin/orders/${order.id}`} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
@@ -225,7 +231,7 @@ export default async function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {stats.lowStockProducts.map((product: any) => (
+                {stats.lowStockProducts.map((product: LowStockProduct) => (
                   <div key={product.id} className="flex items-center justify-between p-3 rounded-lg bg-amber-50 border border-amber-200">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded bg-amber-100 flex items-center justify-center">

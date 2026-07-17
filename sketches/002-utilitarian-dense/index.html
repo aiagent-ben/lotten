@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lotten — Utilitarian Dense</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      color: #1a1a1a;
+      background: #fafafa;
+      line-height: 1.5;
+    }
+    .product-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+    .collection-card:hover .card-img { transform: scale(1.01); }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- Top Bar -->
+  <div class="bg-gray-900 text-gray-300 text-xs py-1.5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+      <span>Free shipping on orders over RM 2,000 · 30-day returns · KL showroom open daily 10-7</span>
+      <div class="flex items-center gap-3">
+        <select class="bg-transparent text-gray-300 focus:outline-none text-xs" aria-label="Currency">
+          <option value="MYR">MYR</option>
+          <option value="USD">USD</option>
+          <option value="SGD">SGD</option>
+        </select>
+        <span class="px-2 py-0.5 bg-amber-600 text-white rounded">Sign In</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="sticky top-0 z-50 bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-14">
+        <a href="/" class="font-bold text-xl text-gray-900 tracking-tight">Lotten</a>
+        <div class="hidden md:flex items-center gap-6">
+          <a href="/products" class="text-sm font-medium text-gray-600 hover:text-gray-900">Products</a>
+          <a href="/collections" class="text-sm font-medium text-gray-600 hover:text-gray-900">Collections</a>
+          <a href="/brands" class="text-sm font-medium text-gray-600 hover:text-gray-900">Brands</a>
+          <a href="/sale" class="text-sm font-medium text-amber-600 hover:text-amber-700">Sale</a>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="p-2 rounded hover:bg-gray-100" aria-label="Search"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></button>
+          <a href="/account" class="p-2 rounded hover:bg-gray-100" aria-label="Account"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg></a>
+          <a href="/cart" class="relative p-2 rounded hover:bg-gray-100" aria-label="Cart (0 items)">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a2 2 0 00-2-2H6a2 2 0 00-2 2v4m8 0l-3 3m0 0l3 3m-3-3h10"/></svg>
+            <span class="absolute -top-1 -right-1 w-4 h-4 bg-amber-600 text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="hidden md:block border-t border-gray-200 px-4 py-2">
+      <div class="max-w-7xl mx-auto flex items-center gap-4 text-sm text-gray-600">
+        <span class="font-medium text-gray-900">Categories:</span>
+        <a href="/products?category=tv-cabinets" class="hover:text-amber-600">TV Cabinets</a>
+        <a href="/products?category=sideboards" class="hover:text-amber-600">Sideboards</a>
+        <a href="/products?category=dining" class="hover:text-amber-600">Dining Tables</a>
+        <a href="/products?category=desks" class="hover:text-amber-600">Desks</a>
+        <a href="/products?category=coffee-tables" class="hover:text-amber-600">Coffee Tables</a>
+        <a href="/products?category=storage" class="hover:text-amber-600">Storage</a>
+        <a href="/products?category=outdoor" class="hover:text-amber-600">Outdoor</a>
+        <span class="ml-auto text-gray-400">View All →</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero - Compact -->
+  <section class="relative bg-gray-900 text-white py-12 lg:py-16">
+    <div class="absolute inset-0 bg-[url('https://mm.hinlim.com/cache/b2bfs/product/335048/335048-550x500.jpg')] bg-cover bg-center opacity-10"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <div class="grid lg:grid-cols-2 gap-8 items-center">
+        <div>
+          <span class="inline-block px-3 py-1 text-xs font-semibold bg-amber-600 text-white rounded mb-3">Direct from Manufacturer</span>
+          <h1 class="text-3xl sm:text-4xl font-bold leading-tight mb-3">Malaysian Oak Furniture<br>Without the Markup</h1>
+          <p class="text-gray-300 text-base mb-6 max-w-md">107 products across 19 collections. Sustainable Malaysian Oak, factory-direct pricing, delivered nationwide.</p>
+          <div class="flex flex-wrap gap-3">
+            <a href="/products" class="px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-medium rounded-md text-sm transition">Shop All</a>
+            <a href="/collections" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white font-medium rounded-md text-sm transition border border-white/20">Browse Collections</a>
+          </div>
+        </div>
+        <div class="hidden lg:block">
+          <div class="grid grid-cols-4 gap-3">
+            <div class="p-4 bg-white/5 rounded-lg border border-white/10 text-center">
+              <div class="text-2xl font-bold text-amber-400">107</div>
+              <div class="text-xs text-gray-400">Products</div>
+            </div>
+            <div class="p-4 bg-white/5 rounded-lg border border-white/10 text-center">
+              <div class="text-2xl font-bold text-amber-400">19</div>
+              <div class="text-xs text-gray-400">Collections</div>
+            </div>
+            <div class="p-4 bg-white/5 rounded-lg border border-white/10 text-center">
+              <div class="text-2xl font-bold text-amber-400">3</div>
+              <div class="text-xs text-gray-400">Brands</div>
+            </div>
+            <div class="p-4 bg-white/5 rounded-lg border border-white/10 text-center">
+              <div class="text-2xl font-bold text-amber-400">996</div>
+              <div class="text-xs text-gray-400">Images on R2</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Product Grid - Dense -->
+  <section class="py-8 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900">All Products</h2>
+          <p class="text-sm text-gray-500">107 products · Filter by collection, price, or availability</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <select class="text-sm border border-gray-300 rounded px-3 py-2 w-40" aria-label="Sort">
+            <option value="featured">Featured</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="newest">Newest</option>
+            <option value="bestselling">Best Selling</option>
+          </select>
+          <button class="px-3 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50" aria-label="Filters">Filters</button>
+        </div>
+      </div>
+
+      <!-- Product Grid - 4 columns desktop, 2 mobile -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="product-grid">
+        <!-- Products rendered via JS -->
+      </div>
+
+      <!-- Load More -->
+      <div class="text-center mt-8">
+        <button id="load-more" class="px-6 py-3 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 transition">Load 12 More Products</button>
+        <p class="text-sm text-gray-500 mt-3">Showing 12 of 107 products</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Collections Bar -->
+  <section class="py-6 border-y border-gray-100 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center gap-4 overflow-x-auto pb-4 scrollbar-hide">
+        <span class="text-sm font-medium text-gray-500 whitespace-nowrap">Collections:</span>
+        <a href="/collections/breda" class="whitespace-nowrap px-4 py-2 bg-white border border-gray-200 rounded-full text-sm hover:border-amber-300 hover:bg-amber-50 transition">Breda (7)</a>
+        <a href="/collections/dover" class="whitespace-nowrap px-4 py-2 bg-white border border-gray-200 rounded-full text-sm hover:border-amber-300 hover:bg-amber-50 transition">Dover (8)</a>
+        <a href="/collections/malton" class="whitespace-nowrap px-4 py-2 bg-white border border-gray-200 rounded-full text-sm hover:border-amber-300 hover:bg-amber-50 transition">Malton (6)</a>
+        <a href="/collections/lamar" class="whitespace-nowrap px-4 py-2 bg-white border border-gray-200 rounded-full text-sm hover:border-amber-300 hover:bg-amber-50 transition">Lamar (4)</a>
+        <a href="/collections/kyoto" class="whitespace-nowrap px-4 py-2 bg-white border border-gray-200 rounded-full text-sm hover:border-amber-300 hover:bg-amber-50 transition">Kyoto (5)</a>
+        <a href="/collections/castor" class="whitespace-nowrap px-4 py-2 bg-white border border-gray-200 rounded-full text-sm hover:border-amber-300 hover:bg-amber-50 transition">Castor (5)</a>
+        <a href="/collections/hutto" class="whitespace-nowrap px-4 py-2 bg-white border border-gray-200 rounded-full text-sm hover:border-amber-300 hover:bg-amber-50 transition">Hutto (6)</a>
+        <a href="/collections" class="whitespace-nowrap px-4 py-2 bg-amber-600 text-white rounded-full text-sm hover:bg-amber-500">All 19 →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Products - Compact Cards -->
+  <section class="py-8 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-semibold text-gray-900">Bestsellers This Week</h2>
+        <a href="/products?sort=bestselling" class="text-sm text-amber-600 hover:text-amber-700 font-medium">View All →</a>
+      </div>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="bestseller-grid">
+      </div>
+    </div>
+  </section>
+
+  <!-- Value Props -->
+  <section class="py-8 bg-gray-900 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="p-6 bg-white/5 rounded-lg border border-white/10">
+          <svg class="w-6 h-6 text-amber-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          <h3 class="font-semibold mb-1">Quality Guaranteed</h3>
+          <p class="text-sm text-gray-400">Premium Malaysian Oak, sustainably sourced</p>
+        </div>
+        <div class="p-6 bg-white/5 rounded-lg border border-white/10">
+          <svg class="w-6 h-6 text-amber-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <h3 class="font-semibold mb-1">Secure Checkout</h3>
+          <p class="text-sm text-gray-400">SSL encrypted, multiple payment options</p>
+        </div>
+        <div class="p-6 bg-white/5 rounded-lg border border-white/10">
+          <svg class="w-6 h-6 text-amber-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+          <h3 class="font-semibold mb-1">Nationwide Delivery</h3>
+          <p class="text-sm text-gray-400">Free shipping over RM 2,000</p>
+        </div>
+        <div class="p-6 bg-white/5 rounded-lg border border-white/10">
+          <svg class="w-6 h-6 text-amber-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          <h3 class="font-semibold mb-1">30-Day Returns</h3>
+          <p class="text-sm text-gray-400">Hassle-free, no questions asked</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Brands -->
+  <section class="py-8 bg-white border-t border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-semibold text-gray-900">Our Brands</h2>
+        <a href="/brands" class="text-sm text-amber-600 hover:text-amber-700 font-medium">View All →</a>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <a href="/brands/nesthouz" class="group p-4 border border-gray-200 rounded-lg hover:border-amber-300 hover:bg-amber-50 transition">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center group-hover:bg-amber-200 transition">
+              <svg class="w-6 h-6 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a2 2 0 012-2h10a2 2 0 012 2v12a2 2 0 01-2 2h-2.586a1 1 0 01-.707-.293l-2.414-2.414a1 1 0 01-1.414 0L7.414 18.707a1 1 0 01-.707.293H5a2 2 0 01-2-2V4z"/></svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900">NestHouZ</h3>
+              <p class="text-sm text-gray-500">7 collections · 38 products</p>
+            </div>
+          </div>
+          <p class="mt-2 text-sm text-gray-500">Contemporary Malaysian Oak with warm, sophisticated finishes for modern living.</p>
+        </a>
+        <a href="/brands/nestnordic" class="group p-4 border border-gray-200 rounded-lg hover:border-amber-300 hover:bg-amber-50 transition">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-gray-200 transition">
+              <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900">NestNordic</h3>
+              <p class="text-sm text-gray-500">4 collections · 32 products</p>
+            </div>
+          </div>
+          <p class="mt-2 text-sm text-gray-500">Scandinavian-inspired designs featuring clean lines, light washes, and minimalist aesthetics.</p>
+        </a>
+        <a href="/brands/luooma" class="group p-4 border border-gray-200 rounded-lg hover:border-amber-300 hover:bg-amber-50 transition">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center group-hover:bg-amber-200 transition">
+              <svg class="w-6 h-6 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900">Luooma</h3>
+              <p class="text-sm text-gray-500">6 collections · 37 products</p>
+            </div>
+          </div>
+          <p class="mt-2 text-sm text-gray-500">Modern furniture with innovative material combinations and architectural silhouettes.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter - Compact -->
+  <section class="py-10 bg-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-md mx-auto text-center">
+        <h2 class="text-lg font-semibold text-gray-900 mb-2">Get Design Inspiration</h2>
+        <p class="text-sm text-gray-600 mb-4">New collections, exclusive offers, and design tips. No spam.</p>
+        <form class="flex gap-2" onsubmit="event.preventDefault(); alert('Thanks for subscribing!'); this.reset();">
+          <input type="email" placeholder="Email address" required class="flex-1 px-4 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+          <button type="submit" class="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-md hover:bg-gray-800 transition">Subscribe</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer - Compact -->
+  <footer class="bg-gray-900 text-gray-400 py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        <div class="md:col-span-2">
+          <a href="/" class="font-bold text-xl text-white mb-3 block">Lotten</a>
+          <p class="text-sm text-gray-500 max-w-sm leading-relaxed">Curated Malaysian Oak furniture for modern homes. Direct from manufacturer to your door.</p>
+        </div>
+        <div>
+          <h4 class="font-medium text-white mb-3">Shop</h4>
+          <nav class="space-y-2 text-sm">
+            <a href="/products" class="hover:text-white">All Products</a>
+            <a href="/collections" class="hover:text-white">Collections</a>
+            <a href="/products?category=new" class="hover:text-white">New Arrivals</a>
+            <a href="/products?category=bestseller" class="hover:text-white">Bestsellers</a>
+          </nav>
+        </div>
+        <div>
+          <h4 class="font-medium text-white mb-3">Support</h4>
+          <nav class="space-y-2 text-sm">
+            <a href="/contact" class="hover:text-white">Contact Us</a>
+            <a href="/faq" class="hover:text-white">FAQ</a>
+            <a href="/shipping" class="hover:text-white">Shipping</a>
+            <a href="/returns" class="hover:text-white">Returns</a>
+          </nav>
+        </div>
+        <div>
+          <h4 class="font-medium text-white mb-3">Company</h4>
+          <nav class="space-y-2 text-sm">
+            <a href="/about" class="hover:text-white">About Us</a>
+            <a href="/sustainability" class="hover:text-white">Sustainability</a>
+            <a href="/careers" class="hover:text-white">Careers</a>
+          </nav>
+        </div>
+      </div>
+      <div class="border-t border-gray-800 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <p class="text-sm text-gray-500">© 2025 Lotten. All rights reserved.</p>
+        <div class="flex items-center gap-4">
+          <a href="#" class="text-gray-400 hover:text-white" aria-label="Instagram"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.163-6.162-6.163zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+          <a href="#" class="text-gray-400 hover:text-white" aria-label="Facebook"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+          <a href="#" class="text-gray-400 hover:text-white" aria-label="Pinterest"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-3.193 0-5.523-2.248-5.523-5.273 0-1.233.602-2.17 1.392-2.687.097-.065.134-.13.112-.215l-.268-1.071c-.066-.271.01-.538.278-.456 1.672.479 3.532.985 4.532.985 5.52 0 9.007-4.035 9.007-8.969 0-4.949-3.694-9.264-8.507-9.264z"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Product data
+    const products = [
+      { id: 'breda-15m-tv-cabinet', name: 'Breda 1.5M TV Cabinet', brand: 'NestHouZ', collection: 'Breda', price: 3999, originalPrice: 4599, image: 'https://mm.hinlim.com/cache/b2bfs/color/109%20COCOA-30x30.jpg', tags: ['New', 'Bestseller'], colors: 'Cocoa / White Marble' },
+      { id: 'dover-18m-sideboard', name: 'Dover 1.8M Sideboard', brand: 'NestHouZ', collection: 'Dover', price: 6299, image: 'https://mm.hinlim.com/cache/b2bfs/color/113%20WALNUT-30x30.jpg', tags: ['Bestseller'], colors: 'Cocoa / Walnut' },
+      { id: 'castor-15m-tv-cabinet', name: 'Castor 1.5M TV Cabinet', brand: 'Luooma', collection: 'Castor', price: 3999, image: 'https://mm.hinlim.com/cache/b2bfs/color/114%20BLACK-30x30.jpg', tags: ['New'], colors: 'Black / Natural / Space Blue' },
+      { id: 'hutto-dining', name: 'Hutto Extendable Dining', brand: 'NestNordic', collection: 'Hutto', price: 5499, image: 'https://mm.hinlim.com/cache/b2bfs/product/336069/336069-550x500.jpg', tags: ['Bestseller'], colors: 'Walnut / Natural' },
+      { id: 'breda-16m-sideboard', name: 'Breda 1.6M Sideboard', brand: 'NestHouZ', collection: 'Breda', price: 5199, originalPrice: 5899, image: 'https://mm.hinlim.com/cache/b2bfs/color/109%20COCOA-30x30.jpg', tags: ['Bestseller'], colors: 'Cocoa / White Marble' },
+      { id: 'lamar-coffee-table', name: 'Lamar Coffee Table', brand: 'NestHouZ', collection: 'Lamar', price: 1899, image: 'https://mm.hinlim.com/cache/b2bfs/product/335027/335027-550x500.jpg', tags: [], colors: 'Natural / Cocoa' },
+      { id: 'kyoto-tv-cabinet', name: 'Kyoto TV Cabinet', brand: 'NestHouZ', collection: 'Kyoto', price: 3299, image: 'https://mm.hinlim.com/cache/b2bfs/product/336075/336075-550x500.jpg', tags: [], colors: 'Natural / Cocoa' },
+      { id: 'dudley-sideboard', name: 'Dudley Sideboard', brand: 'NestHouZ', collection: 'Dudley', price: 4599, image: 'https://mm.hinlim.com/cache/b2bfs/product/345066/345066-550x500.jpg', tags: ['New'], colors: 'Natural/Dark' },
+      { id: 'ludlow-sideboard', name: 'Ludlow Sideboard', brand: 'NestNordic', collection: 'Ludlow', price: 4299, image: 'https://mm.hinlim.com/cache/b2bfs/product/345064/345064-550x500.jpg', tags: ['Bestseller'], colors: 'White Wash' },
+      { id: 'loftus-dining', name: 'Loftus Dining Table', brand: 'NestNordic', collection: 'Loftus', price: 4799, image: 'https://mm.hinlim.com/cache/b2bfs/product/134107/134107-550x500.jpg', tags: [], colors: 'Natural/White' },
+      { id: 'royston-cabinet', name: 'Royston Cabinet', brand: 'NestNordic', collection: 'Royston', price: 5899, image: 'https://mm.hinlim.com/cache/b2bfs/color/808%20GOLD-30x30.jpg', tags: ['New'], colors: 'Gold / Walnut' },
+      { id: 'oruro-cabinet', name: 'Oruro Cabinet', brand: 'Luooma', collection: 'Oruro', price: 3899, image: 'https://mm.hinlim.com/cache/b2bfs/product/336109/336109-550x500.jpg', tags: [], colors: 'Cocoa' },
+    ];
+
+    let displayedCount = 12;
+    const grid = document.getElementById('product-grid');
+    const bestsellerGrid = document.getElementById('bestseller-grid');
+    const loadMoreBtn = document.getElementById('load-more');
+
+    function formatPrice(price) {
+      return new Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(price);
+    }
+
+    function renderProductCard(product, isBestseller = false) {
+      const hasOriginalPrice = product.originalPrice && product.originalPrice > product.price;
+      const tag = product.tags[0] || '';
+      return `
+        <article class="group relative bg-white rounded-md border border-gray-200 overflow-hidden hover:border-amber-300 hover:shadow-md transition-all duration-200 product-card">
+          <div class="relative aspect-square overflow-hidden bg-gray-50">
+            <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover card-img transition-transform duration-200" loading="lazy">
+            ${tag ? `<div class="absolute top-2 left-2"><span class="px-2 py-0.5 text-xs font-semibold ${tag === 'New' ? 'text-white bg-amber-600' : 'text-white bg-black/70'} rounded">${tag}</span></div>` : ''}
+          </div>
+          <div class="p-3">
+            <p class="text-xs font-medium text-amber-700 uppercase tracking-wider mb-1">${product.brand} / ${product.collection}</p>
+            <h3 class="font-medium text-gray-900 mb-1 line-clamp-1 text-sm">${product.name}</h3>
+            <p class="text-xs text-gray-500 mb-2">${product.colors}</p>
+            <div class="flex items-baseline gap-2">
+              <span class="font-bold text-gray-900">${formatPrice(product.price)}</span>
+              ${hasOriginalPrice ? `<span class="text-xs text-gray-400 line-through">${formatPrice(product.originalPrice)}</span>` : ''}
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderProducts() {
+      const productsToShow = products.slice(0, displayedCount);
+      grid.innerHTML = productsToShow.map(p => renderProductCard(p)).join('');
+      bestsellerGrid.innerHTML = products.filter(p => p.tags.includes('Bestseller')).slice(0, 4).map(p => renderProductCard(p, true)).join('');
+      
+      if (displayedCount >= products.length) {
+        loadMoreBtn.style.display = 'none';
+      }
+    }
+
+    loadMoreBtn.addEventListener('click', () => {
+      displayedCount += 12;
+      renderProducts();
+      loadMoreBtn.textContent = `Load More (${Math.min(displayedCount, products.length)} of ${products.length})`;
+    });
+
+    // Cart count
+    let cartCount = 0;
+    const cartBadge = document.querySelector('header span[aria-label^="Cart"] span') || document.createElement('span');
+    
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.product-card')) {
+        // Simulate add to cart
+      }
+    });
+
+    // Initial render
+    renderProducts();
+  </script>
+</body>
+</html>

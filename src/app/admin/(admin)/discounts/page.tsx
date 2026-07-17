@@ -61,21 +61,17 @@ export default function DiscountsPage() {
   });
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    fetchDiscounts();
-  }, [page, search, statusFilter, typeFilter]);
-
   const fetchDiscounts = async () => {
     try {
       const params = new URLSearchParams({
         page: page.toString(),
         perPage: perPage.toString(),
       });
-      
+     
       if (search) params.set('search', search);
       if (statusFilter) params.set('status', statusFilter);
       if (typeFilter) params.set('type', typeFilter);
-      
+     
       const response = await fetch(`/api/admin/discounts?${params.toString()}`);
       if (response.ok) {
         const data = await response.json();
@@ -89,6 +85,12 @@ export default function DiscountsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // Data fetching in useEffect is a standard React pattern
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchDiscounts();
+  }, [page, search, statusFilter, typeFilter]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;

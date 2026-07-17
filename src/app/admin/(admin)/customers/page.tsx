@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { Plus, Search, ChevronLeft, ChevronRight, Edit, Trash2, Mail, User, Loader2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -33,10 +32,15 @@ interface CustomerFormData {
   is_active: boolean;
 }
 
+interface CustomersApiResponse {
+  data: Customer[];
+  count: number;
+  totalPages: number;
+}
+
 export default function CustomersPage() {
-  const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [customers, setCustomers] = useState<any[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [count, setCount] = useState(0);
@@ -44,10 +48,10 @@ export default function CustomersPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [editingCustomer, setEditingCustomer] = useState<any | null>(null);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CustomerFormData>({
     email: '',
     company_name: '',
     contact_name: '',
@@ -59,34 +63,36 @@ export default function CustomersPage() {
     is_active: true,
   });
 
-  const fetchCustomers = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        perPage: perPage.toString(),
-      });
-      
-      if (search) params.set('search', search);
-      if (statusFilter) params.set('status', statusFilter);
-      
-      const response = await fetch(`/api/admin/customers?${params.toString()}`);
-      if (response.ok) {
-        const data = await response.json();
-        setCustomers(data.data || []);
-        setCount(data.count || 0);
-        setTotalPages(data.totalPages || 1);
+  const fetchCustomers = useCallback(async () => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams({
+          page: page.toString(),
+          perPage: perPage.toString(),
+        });
+     
+        if (search) params.set('search', search);
+        if (statusFilter) params.set('status', statusFilter);
+     
+        const response = await fetch(`/api/admin/customers?${params.toString()}`);
+        if (response.ok) {
+          const data: CustomersApiResponse = await response.json();
+          setCustomers(data.data || []);
+          setCount(data.count || 0);
+          setTotalPages(data.totalPages || 1);
+        }
+      } catch (error) {
+        console.error('Failed to fetch customers:', error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Failed to fetch customers:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    }, [page, search, statusFilter, perPage]);
 
-  useEffect(() => {
+    useEffect(() => {
+    // Data fetching in useEffect is a standard React pattern
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCustomers();
-  }, [page, search, statusFilter]);
+  }, [fetchCustomers]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -128,7 +134,7 @@ export default function CustomersPage() {
     }
   };
 
-  const handleEdit = (customer: any) => {
+  const handleEdit = (customer: Customer) => {
     setEditingCustomer(customer);
     setFormData({
       email: customer.email,
@@ -136,7 +142,7 @@ export default function CustomersPage() {
       contact_name: customer.contact_name || '',
       phone: customer.phone || '',
       tax_id: customer.tax_id || '',
-      address: customer.address || '',
+      address: customer.address ? JSON.stringify(customer.address) : '',
       credit_limit_usd: customer.credit_limit_usd?.toString() || '',
       payment_terms_days: customer.payment_terms_days?.toString() || '',
       is_active: customer.is_active,
