@@ -1,18 +1,239 @@
-</svg>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lotten — Playful Split</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      color: #1a1a1a;
+      background: #fafafa;
+      line-height: 1.6;
+    }
+    .font-display { font-family: 'Space Grotesk', sans-serif; }
+    .gradient-text { background: linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #ec4899 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .product-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+    .collection-card:hover .card-img { transform: scale(1.03); }
+    .scroll-reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; }
+    .scroll-reveal.visible { opacity: 1; transform: translateY(0); }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="/" class="font-display text-2xl font-bold gradient-text tracking-tight">Lotten</a>
+        <div class="hidden md:flex items-center gap-8">
+          <a href="/products" class="text-sm font-medium text-gray-600 hover:text-amber-600 transition-colors">Shop</a>
+          <a href="/collections" class="text-sm font-medium text-gray-600 hover:text-amber-600 transition-colors">Collections</a>
+          <a href="/quiz" class="text-sm font-medium text-gray-600 hover:text-amber-600 transition-colors">Style Quiz</a>
+          <a href="/about" class="text-sm font-medium text-gray-600 hover:text-amber-600 transition-colors">Our Story</a>
+          <a href="/contact" class="text-sm font-medium text-gray-600 hover:text-amber-600 transition-colors">Contact</a>
+        </div>
+        <div class="flex items-center gap-4">
+          <button class="p-2 rounded-full hover:bg-gray-100 transition-colors" aria-label="Search">
+            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </button>
+          <button class="relative p-2 rounded-full hover:bg-gray-100 transition-colors" aria-label="Cart (0 items)">
+            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a2 2 0 00-2-2H6a2 2 0 00-2 2v4m8 0l-3 3m0 0l3 3m-3-3h10"/></svg>
+            <span class="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section - Split Layout -->
+  <section class="relative min-h-screen flex items-center pt-16">
+    <div class="absolute inset-0 bg-gradient-to-br from-amber-50 via-white to-rose-50"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
+      <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <!-- Left: Copy -->
+        <div class="max-w-xl scroll-reveal">
+          <span class="inline-block px-4 py-1.5 rounded-full bg-amber-100 text-amber-700 text-sm font-medium mb-8 tracking-wide">New Season · Direct from Workshop</span>
+          <h1 class="font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight mb-6">
+            Furniture That <span class="gradient-text">Sparks Joy</span>
+          </h1>
+          <p class="text-lg text-gray-600 mb-10 max-w-xl leading-relaxed">
+            Why choose boring? Discover Malaysian Oak pieces with personality — bold colors, unexpected silhouettes, and finishes that make you smile. Direct from our workshop, priced for real homes.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4">
+            <a href="/quiz" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl">
+              Take the Style Quiz
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </a>
+            <a href="/collections" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-xl border-2 border-gray-200 transition-all duration-200">
+              Browse Collections
+            </a>
+          </div>
+        </div>
+
+        <!-- Right: Interactive Product Showcase -->
+        <div class="relative scroll-reveal" style="transition-delay: 200ms;">
+          <div class="relative aspect-square max-w-md mx-auto lg:max-w-lg">
+            <!-- Hero Product Image -->
+            <div class="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-amber-100 via-rose-100 to-purple-100 shadow-2xl">
+              <img id="hero-product-img" 
+                   src="https://mm.hinlim.com/cache/b2bfs/color/114%20BLACK-30x30.jpg" 
+                   alt="Castor 1.5M TV Cabinet - Black / Natural / Space Blue" 
+                   class="w-full h-full object-cover transition-opacity duration-300">
+              <!-- Floating Color Pills -->
+              <div class="absolute bottom-6 left-6 right-6 flex flex-wrap gap-2 justify-center" id="color-swatches">
+                <button onclick="changeHero('https://mm.hinlim.com/cache/b2bfs/color/114%20BLACK-30x30.jpg', 'Castor 1.5M TV Cabinet', 3999, this)" class="w-8 h-8 rounded-full border-2 border-white shadow-lg transition-all hover:scale-110" style="background:#1A1A1A" aria-label="Black" title="Black"></button>
+                <button onclick="changeHero('https://mm.hinlim.com/cache/b2bfs/color/102%20NATURAL-30x30.jpg', 'Castor 1.5M TV Cabinet', 3999, this)" class="w-8 h-8 rounded-full border-2 border-white shadow-lg transition-all hover:scale-110" style="background:#8B7355" aria-label="Natural" title="Natural"></button>
+                <button onclick="changeHero('https://mm.hinlim.com/cache/b2bfs/color/1325%20SPACE%20BLUE-30x30.jpg', 'Castor 1.5M TV Cabinet', 3999, this)" class="w-8 h-8 rounded-full border-2 border-white shadow-lg transition-all hover:scale-110" style="background:#2A3B4D" aria-label="Space Blue" title="Space Blue"></button>
+              </div>
+            </div>
+
+            <!-- Product Thumbnails -->
+            <div class="flex justify-center gap-2 mt-6" id="product-thumbs">
+              <button onclick="changeHero('https://mm.hinlim.com/cache/b2bfs/color/114%20BLACK-30x30.jpg', 'Castor 1.5M TV Cabinet', 3999, this)" class="w-16 h-16 rounded-xl overflow-hidden border-2 border-amber-400 transition-all" aria-label="Black finish"><img src="https://mm.hinlim.com/cache/b2bfs/color/114%20BLACK-30x30.jpg" alt="" class="w-full h-full object-cover"></button>
+              <button onclick="changeHero('https://mm.hinlim.com/cache/b2bfs/color/102%20NATURAL-30x30.jpg', 'Castor 1.5M TV Cabinet', 3999, this)" class="w-16 h-16 rounded-xl overflow-hidden border-2 border-transparent hover:border-amber-300 transition-all" aria-label="Natural finish"><img src="https://mm.hinlim.com/cache/b2bfs/color/102%20NATURAL-30x30.jpg" alt="" class="w-full h-full object-cover"></button>
+              <button onclick="changeHero('https://mm.hinlim.com/cache/b2bfs/color/1325%20SPACE%20BLUE-30x30.jpg', 'Castor 1.5M TV Cabinet', 3999, this)" class="w-16 h-16 rounded-xl overflow-hidden border-2 border-transparent hover:border-amber-300 transition-all" aria-label="Space Blue finish"><img src="https://mm.hinlim.com/cache/b2bfs/color/1325%20SPACE%20BLUE-30x30.jpg" alt="" class="w-full h-full object-cover"></button>
+              <button onclick="changeHero('https://mm.hinlim.com/cache/b2bfs/color/109%20COCOA-30x30.jpg', 'Breda 1.5M TV Cabinet', 3999, this)" class="w-16 h-16 rounded-xl overflow-hidden border-2 border-transparent hover:border-amber-300 transition-all" aria-label="Breda Cocoa"><img src="https://mm.hinlim.com/cache/b2bfs/color/109%20COCOA-30x30.jpg" alt="" class="w-full h-full object-cover"></button>
+              <button onclick="changeHero('https://mm.hinlim.com/cache/b2bfs/color/113%20WALNUT-30x30.jpg', 'Dover 1.8M Sideboard', 6299, this)" class="w-16 h-16 rounded-xl overflow-hidden border-2 border-transparent hover:border-amber-300 transition-all" aria-label="Dover Walnut"><img src="https://mm.hinlim.com/cache/b2bfs/color/113%20WALNUT-30x30.jpg" alt="" class="w-full h-full object-cover"></button>
+            </div>
+
+            <!-- Product Info -->
+            <div class="mt-6 text-center" id="hero-product-info">
+              <p class="text-xs font-medium text-amber-600 uppercase tracking-wider mb-1">Luooma / Castor</p>
+              <h3 class="font-display text-2xl font-bold text-gray-900 mb-1">Castor 1.5M TV Cabinet</h3>
+              <p class="text-sm text-gray-500 mb-3">Black / Natural / Space Blue</p>
+              <div class="flex items-baseline justify-center gap-2">
+                <span class="font-display text-3xl font-bold text-gray-900">RM 3,999</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Collections - Split Cards -->
+  <section class="py-20 lg:py-28 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16 scroll-reveal">
+        <h2 class="font-display text-4xl sm:text-5xl font-bold text-gray-900 mb-4">Collections with Character</h2>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">Each collection has its own personality. Find yours.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Breda - Warm Split -->
+        <article class="collection-card group relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-2xl transition-all duration-500 scroll-reveal">
+          <div class="relative aspect-[4/3] overflow-hidden">
+            <img class="card-img w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="https://mm.hinlim.com/cache/b2bfs/product/335048/335048-550x500.jpg" alt="Breda Collection" loading="lazy">
+            <div class="absolute inset-0 bg-gradient-to-tr from-amber-600/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="card-overlay absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+              <a href="/collections/breda" class="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors shadow-lg">
+                Explore Breda
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+              </a>
+            </div>
+          </div>
+          <div class="p-6">
+            <span class="inline-block px-3 py-1 text-xs font-medium text-amber-700 bg-amber-50 rounded-full mb-3">NestHouZ</span>
+            <h3 class="font-display text-2xl font-bold text-gray-900 mb-2">Breda</h3>
+            <p class="text-gray-600 mb-4">Working desks, TV cabinets & sideboards in warm Walnut/Natural.</p>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              <span class="px-3 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-700">Cocoa</span>
+              <span class="px-3 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-700">White Marble</span>
+            </div>
+            <a href="/collections/breda" class="text-sm font-semibold text-amber-600 hover:text-amber-700 inline-flex items-center gap-1 transition-colors">View 7 products →</a>
+          </div>
+        </article>
+
+        <!-- Dover - Cool Split -->
+        <article class="collection-card group relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-2xl transition-all duration-500 scroll-reveal" style="transition-delay: 100ms;">
+          <div class="relative aspect-[4/3] overflow-hidden">
+            <img class="card-img w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="https://mm.hinlim.com/cache/b2bfs/product/346036/346036-550x500.jpg" alt="Dover Collection" loading="lazy">
+            <div class="absolute inset-0 bg-gradient-to-tr from-rose-600/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="card-overlay absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+              <a href="/collections/dover" class="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors shadow-lg">Explore Dover <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a>
+            </div>
+          </div>
+          <div class="p-6">
+            <span class="inline-block px-3 py-1 text-xs font-medium text-rose-700 bg-rose-50 rounded-full mb-3">NestHouZ</span>
+            <h3 class="font-display text-2xl font-bold text-gray-900 mb-2">Dover</h3>
+            <p class="text-gray-600 mb-4">Complete living room sets — coffee tables, consoles, desks.</p>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              <span class="px-3 py-1 text-xs font-medium rounded-full bg-rose-100 text-rose-700">Walnut</span>
+              <span class="px-3 py-1 text-xs font-medium rounded-full bg-rose-100 text-rose-700">Cocoa</span>
+            </div>
+            <a href="/collections/dover" class="text-sm font-semibold text-rose-600 hover:text-rose-700 inline-flex items-center gap-1 transition-colors">View 8 products →</a>
+          </div>
+        </article>
+
+        <!-- Castor - Bold Split -->
+        <article class="collection-card group relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-2xl transition-all duration-500 scroll-reveal" style="transition-delay: 200ms;">
+          <div class="relative aspect-[4/3] overflow-hidden">
+            <img class="card-img w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="https://mm.hinlim.com/cache/b2bfs/product/335043/335043-550x500.jpg" alt="Castor Collection" loading="lazy">
+            <div class="absolute inset-0 bg-gradient-to-tr from-purple-600/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="card-overlay absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+              <a href="/collections/castor" class="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors shadow-lg">Explore Castor <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a>
+            </div>
+          </div>
+          <div class="p-6">
+            <span class="inline-block px-3 py-1 text-xs font-medium text-purple-700 bg-purple-50 rounded-full mb-3">Luooma</span>
+            <h3 class="font-display text-2xl font-bold text-gray-900 mb-2">Castor</h3>
+            <p class="text-gray-600 mb-4">Minimalist three-tone entertainment centers with attitude.</p>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              <span class="px-3 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700">Black</span>
+              <span class="px-3 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700">Natural</span>
+              <span class="px-3 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700">Space Blue</span>
+            </div>
+            <a href="/collections/castor" class="text-sm font-semibold text-purple-600 hover:text-purple-700 inline-flex items-center gap-1 transition-colors">View 5 products →</a>
+          </div>
+        </article>
+      </div>
+
+      <div class="text-center mt-12 scroll-reveal">
+        <a href="/collections" class="inline-flex items-center gap-2 px-8 py-4 bg-white border-2 border-gray-200 text-gray-900 font-semibold rounded-xl hover:bg-gray-50 hover:border-amber-300 transition-all">
+          View All 19 Collections
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
         </a>
       </div>
     </div>
   </section>
 
-  <!-- CTA Section -->
-  <section class="py-20 bg-gradient-to-br from-amber-900 via-orange-900 to-red-900 text-white relative overflow-hidden">
+  <!-- Trending Carousel -->
+  <section class="py-20 bg-gray-50 scroll-reveal">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="font-display text-3xl font-bold text-gray-900">Trending This Week</h2>
+        <div class="flex items-center gap-2">
+          <button onclick="scrollCarousel(-1)" class="p-2 rounded-full hover:bg-gray-200 transition" aria-label="Previous"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
+          <button onclick="scrollCarousel(1)" class="p-2 rounded-full hover:bg-gray-200 transition" aria-label="Next"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
+        </div>
+      </div>
+      <div class="relative">
+        <div id="trending-carousel" class="flex gap-4 overflow-x-auto scrollbar-hide pb-4" style="scroll-snap-type: x mandatory;">
+          <div id="trending-track" class="flex gap-4"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Style Quiz CTA -->
+  <section class="py-20 bg-gradient-to-br from-amber-900 via-orange-900 to-red-900 text-white relative overflow-hidden scroll-reveal">
     <div class="absolute inset-0 opacity-10" aria-hidden="true">
       <div class="absolute top-20 left-10 w-72 h-72 bg-amber-400 rounded-full blur-3xl"></div>
       <div class="absolute bottom-20 right-10 w-96 h-96 bg-orange-400 rounded-full blur-3xl"></div>
     </div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center scroll-reveal">
-      <h2 class="font-display text-4xl sm:text-5xl font-bold mb-4">Ready to Transform Your Space?</h2>
-      <p class="text-lg sm:text-xl text-amber-100/80 mb-10 max-w-2xl mx-auto">Join thousands of Malaysian homes that chose Lotten for honest craftsmanship and timeless design.</p>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+      <h2 class="font-display text-4xl sm:text-5xl font-bold mb-4">Not Sure Where to Start?</h2>
+      <p class="text-lg sm:text-xl text-amber-100/80 mb-10 max-w-2xl mx-auto">Take our 2-minute style quiz and we'll match you with the perfect pieces for your space and personality.</p>
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
         <a href="/quiz" class="px-8 py-4 bg-white text-amber-900 font-semibold rounded-xl hover:bg-amber-50 transition-all shadow-xl">Take the Style Quiz</a>
         <a href="/collections" class="px-8 py-4 border-2 border-white/30 text-white font-semibold rounded-xl hover:bg-white/10 hover:border-white/50 transition-all">Browse Collections</a>
@@ -129,7 +350,7 @@
         const hasOriginalPrice = p.originalPrice && p.originalPrice > p.price;
         const tag = p.tags[0] || '';
         return `
-          <article class="flex-shrink-0 w-64 bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg hover:border-amber-300 transition-all duration-300 group">
+          <article class="flex-shrink-0 w-64 bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg hover:border-amber-300 transition-all duration-300 group" style="scroll-snap-align: start;">
             <div class="relative aspect-square overflow-hidden bg-gray-50">
               <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy">
               ${tag ? `<div class="absolute top-2 left-2"><span class="px-2 py-1 text-xs font-semibold ${tag === 'New' ? 'text-white bg-amber-500' : 'text-white bg-black/70'} rounded">${tag}</span></div>` : ''}
