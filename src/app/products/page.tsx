@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getAllActiveProducts, getCollectionBySlug, formatPrice } from '@/lib/data/products';
 import { cn } from '@/lib/utils';
+import ProductsPageClient from './ProductsPageClient';
 
 export const metadata: Metadata = {
   title: 'All Products',
@@ -353,6 +354,9 @@ export default async function ProductsPage({ searchParams }: Props) {
           </Link>
         </div>
       </section>
+
+      {/* Recently Viewed */}
+      <ProductsPageClient />
     </main>
   );
 }

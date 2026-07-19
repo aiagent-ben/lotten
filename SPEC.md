@@ -108,26 +108,29 @@ interface Product {
 - [ ] **Analytics dashboard** (view→order funnel, top products, revenue, conversion rate, AOV, repeat customer rate, cart abandonment)
 
 #### **Phase B: Public Catalog + Cart/Checkout (Week 3-5)**
-- [ ] **Server-rendered catalog** with ISR (SEO, performance)
-- [ ] **Product detail pages** with structured specs (dimensions, materials, finishes)
-- [ ] **Collection browsing** with brand storytelling
+- [x] **Server-rendered catalog** with ISR (SEO, performance)
+- [x] **Product detail pages** with structured specs (dimensions, materials, finishes)
+- [x] **Collection browsing** with brand storytelling
+- [x] **Image optimization** (Next.js Image, WebP/AVIF, blur placeholders)
+- [x] **Recently viewed products** (cookie-based, 20 items, carousel on home/product page)
+
+#### **Phase X: Cart, Checkout & Customer Features (Deferred)**
 - [ ] **Cart + Checkout** (displayed price, discount code field, guest checkout, save for later)
+- [ ] **Mini cart drawer** (not full page redirect)
 - [ ] **Installment payments** (Atome, GrabPayLater, FPX)
 - [ ] **Customer authentication** (email/password, magic link, social login: Google, Apple)
 - [ ] **Guest checkout** (email + phone, optional account creation post-purchase)
 - [ ] **Customer dashboard** (order history, wishlist, recently viewed, loyalty points, profile, easy reorder)
-- [ ] **Image optimization** (Next.js Image, WebP/AVIF, blur placeholders)
 - [ ] **Wishlist / Save for later** (persistent, shareable, price drop alerts)
 - [ ] **Product reviews display** (stars, photos, verified purchase badge)
-- [ ] **Recently viewed products** (cookie-based, 20 items, carousel on home/product page)
-- [ ] **Mini cart drawer** (not full page redirect)
+- [ ] **Discount codes** (validation API, checkout UI, admin UI exists)
+- [ ] **Reviews & Q&A** (verified purchase, photos, helpful votes, seller response)
+- [ ] **Wishlist + save for later + alerts** (persistent, shareable, price drop/back-in-stock emails)
 
 #### **Phase C: Discovery & Inspiration (Week 5-7)**
 - [ ] **Search & filter** (Meilisearch: collection, category, material, finish, dimensions, price, room type, style)
 - [ ] **Product compare** (side-by-side specs, max 4, shareable URL)
 - [ ] **Lookbooks / room inspiration** (curated sets, shoppable hotspots, "shop the room")
-- [ ] **Reviews & Q&A** (verified purchase, photos, helpful votes, seller response)
-- [ ] **Wishlist + save for later + alerts** (persistent, shareable, price drop/back-in-stock emails)
 - [ ] **Smart recommendations** ("Complete the look", "Customers also bought", recently viewed)
 - [ ] **Content hub** (care guides, styling tips, trend articles, lookbooks; MDX-based)
 - [ ] **360° viewer + AR "view in room"** (deferred to Phase D+)
