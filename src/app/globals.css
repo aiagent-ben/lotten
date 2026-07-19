@@ -1010,7 +1010,7 @@ body {
 
 .dark .admin-badge-warning {
   background-color: #713f12;
-  color: #fef9c3.
+  color: #fef9c3;
 }
 
 .admin-badge-danger {
@@ -1020,7 +1020,7 @@ body {
 
 .dark .admin-badge-danger {
   background-color: #7f1d1d;
-  color: #fee2e2.
+  color: #fee2e2;
 }
 
 .admin-badge-info {
@@ -1030,17 +1030,17 @@ body {
 
 .dark .admin-badge-info {
   background-color: #1e3a5f;
-  color: #dbeafe.
+  color: #dbeafe;
 }
 
 .admin-badge-gray {
   background-color: #f3f4f6;
-  color: #374151.
+  color: #374151;
 }
 
 .dark .admin-badge-gray {
-  background-color: #374151.
-  color: #f3f4f6.
+  background-color: #374151;
+  color: #f3f4f6;
 }
 
 /* Form sections */
