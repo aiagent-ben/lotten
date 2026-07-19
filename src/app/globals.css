@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@source "../**/*.{ts,tsx,js,jsx}";
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -569,85 +571,189 @@ body {
   color: var(--foreground);
 }
 
-/* Product card styles */
+/* =============================================
+   Product card styles
+   ============================================= */
 .product-card {
-  @apply group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  transition: box-shadow 0.3s;
+}
+.product-card:hover {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 .product-card-image {
-  @apply relative aspect-square overflow-hidden bg-gray-50;
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background-color: #f9fafb;
 }
-
 .product-card-image img {
-  @apply w-full h-full object-cover transition-transform duration-500 group-hover:scale-105;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s;
+}
+.group:hover .product-card-image img {
+  transform: scale(1.05);
 }
 
 .product-card-content {
-  @apply p-4;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1rem;
 }
 
 .product-card-brand {
-  @apply caption text-amber-700 font-medium mb-1 uppercase tracking-wider;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: var(--primary);
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .product-card-title {
-  @apply font-medium text-gray-900 mb-1 line-clamp-1 group-hover:text-amber-700 transition-colors;
+  font-weight: 500;
+  color: #111827;
+  margin-bottom: 0.25rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.2s;
+}
+.group:hover .product-card-title {
+  color: var(--primary);
+}
+.dark .product-card-title {
+  color: #f9fafb;
 }
 
 .product-card-price {
-  @apply text-lg font-bold text-gray-900;
+  margin-top: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--primary);
 }
 
-/* Collection card styles */
+/* =============================================
+   Collection card styles
+   ============================================= */
 .collection-card {
-  @apply relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-500;
+  position: relative;
+  border-radius: 1rem;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  transition: box-shadow 0.5s;
+}
+.collection-card:hover {
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 }
 
 .collection-card-image {
-  @apply relative aspect-[4/3] overflow-hidden;
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
 }
-
 .collection-card-image img {
-  @apply w-full h-full object-cover transition-transform duration-700 group-hover:scale-105;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s;
+}
+.collection-card:hover .collection-card-image img {
+  transform: scale(1.05);
 }
 
 .collection-overlay {
-  @apply absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.7), rgb(0 0 0 / 0.2), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+  display: flex;
+  align-items: flex-end;
+  padding: 1.5rem;
+}
+.collection-card:hover .collection-overlay {
+  opacity: 1;
 }
 
-/* Trust badge styles */
+/* =============================================
+   Trust badge styles
+   ============================================= */
 .trust-badge {
-  @apply py-4;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
 }
-
 .trust-badge svg {
-  @apply mx-auto h-10 w-10 text-amber-700 mb-3;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 0.75rem;
+  height: 2.5rem;
+  width: 2.5rem;
+  color: var(--primary);
 }
 
-/* Form section title */
-.form-section-title {
-  @apply text-sm font-semibold uppercase tracking-wider text-gray-900;
-}
-
-/* Utility classes for design system */
+/* =============================================
+   Utility classes for design system
+   ============================================= */
 .gradient-text {
-  @apply bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 bg-clip-text text-transparent;
+  background: linear-gradient(to right, #d97706, #b45309, #92400e);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .section-container {
-  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+@media (min-width: 640px) {
+  .section-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .section-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
 }
 
 .page-section {
-  @apply py-12 lg:py-20;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+@media (min-width: 1024px) {
+  .page-section {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
 }
 
 .scroll-reveal {
-  @apply opacity-0 translate-y-10 transition-all duration-700 ease-out;
+  opacity: 0;
+  transform: translateY(2.5rem);
+  transition: all 0.7s ease-out;
 }
-
 .scroll-reveal.visible {
-  @apply opacity-100 translate-y-0;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 @media (min-width: 1024px) {
@@ -777,59 +883,6 @@ body {
   font-size: 0.75rem;
   line-height: 1rem;
   color: var(--muted-foreground);
-}
-
-/* Product card specific */
-.product-card {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border-radius: 0.75rem;
-  border: 1px solid var(--border);
-  background-color: var(--card);
-  transition: all 0.3s;
-}
-
-.product-card:hover {
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-}
-
-.product-card-image {
-  position: relative;
-  aspect-ratio: 4/3;
-  overflow: hidden;
-  background-color: var(--muted);
-}
-
-.product-card-content {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  padding: 1rem;
-}
-
-.product-card-title {
-  font-weight: 500;
-  color: #111827;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.dark .product-card-title {
-  color: #f9fafb;
-}
-
-.product-card-title:hover {
-  color: var(--primary);
-}
-
-.product-card-price {
-  margin-top: 0.5rem;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--primary);
 }
 
 /* Cart drawer */
