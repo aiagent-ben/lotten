@@ -1,6 +1,5 @@
-import { redirect } from "next/navigation";
-import { defaultLocale } from "@/i18n/request";
+import type { ReactNode } from "react";
 
-export default function RootLayout() {
-  redirect(`/${defaultLocale}`);
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return children;
 }
