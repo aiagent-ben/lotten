@@ -1052,6 +1052,14 @@ export function getCollectionBySlug(slug: string): Collection | undefined {
   return collections.find(c => c.slug === slug && c.is_active);
 }
 
+export function getCollectionById(id: string): Collection | undefined {
+  return collections.find(c => c.id === id && c.is_active);
+}
+
+export function getAllCollections(): Collection[] {
+  return collections.filter(c => c.is_active).sort((a, b) => a.sort_order - b.sort_order);
+}
+
 export function getBrandBySlug(slug: string): Brand | undefined {
   return brands.find(b => b.slug === slug);
 }
