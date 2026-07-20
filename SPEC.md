@@ -92,20 +92,21 @@ interface Product {
 ### 3.2 Core Features (Revised Priority Order)
 
 #### **Phase A: Admin Panel + Foundation (Week 1-3)** — *Build First*
-- [ ] **Admin authentication** (Supabase Auth, role: admin)
-- [ ] **Product CRUD** (all fields, rich text, structured specs, images → R2)
-- [ ] **Product variants** (fabric/finish = separate SKU)
-- [ ] **Site-wide settings** (pricing display, stock visibility, maintenance mode, SEO, currency, free shipping threshold)
-- [ ] **Promotion engine** (coupons, bundles, flash sales, first-order discount, buy X get Y)
-- [ ] **Discount codes** (percentage/fixed, min order, usage limits, expiry, auto-apply)
-- [ ] **Customer management** (view, edit, activate/deactivate, loyalty points, birthday)
-- [ ] **Order management** (Kanban: pending → paid → shipped → delivered → cancelled)
-- [ ] **Inventory tracking** (single pool: available, reserved, incoming)
+- [x] **Admin authentication** (Supabase Auth, role: admin) — *middleware auth + layout check*
+- [x] **Product CRUD** (all fields, rich text, structured specs, images → R2) — *Products list, edit page with RichTextEditor, MaterialSpecEditor, ColorOptionEditor, ImageUploader, ProductVariantEditor*
+- [x] **Product variants** (fabric/finish = separate SKU) — *ProductVariantEditor component + API*
+- [x] **Site-wide settings** (pricing display, stock visibility, maintenance mode, SEO, currency, free shipping threshold) — *Settings page with all fields*
+- [x] **Promotion engine** (coupons, bundles, flash sales, first-order discount, buy X get Y) — *Admin UI + API for rule-based promotions*
+- [x] **Discount codes** (percentage/fixed, min order, usage limits, expiry, auto-apply) — *Admin UI + API complete*
+- [x] **Customer management** (view, edit, activate/deactivate, loyalty points, birthday) — *Customer page with CRUD*
+- [x] **Order management** (Kanban: pending → paid → shipped → delivered → cancelled) — *Orders page*
+- [x] **Inventory tracking** (single pool: available, reserved, incoming) — *Product edit form + dashboard low stock*
+- [x] **Content management** (blog posts, care guides, lookbooks — MDX) — *MDX pipeline + admin editor + public pages*
+
+#### **Phase X: Deferred Admin & Customer Features**
 - [ ] **Review moderation** (approve/reject, feature review)
-- [ ] **Content management** (blog posts, care guides, lookbooks — MDX)
 - [ ] **Shipping rules** (free shipping threshold, zones, flat rate)
 - [ ] **Loyalty program admin** (points rules, tiers, expiry)
-- [ ] **Analytics dashboard** (view→order funnel, top products, revenue, conversion rate, AOV, repeat customer rate, cart abandonment)
 
 #### **Phase B: Public Catalog + Cart/Checkout (Week 3-5)**
 - [x] **Server-rendered catalog** with ISR (SEO, performance)
@@ -128,7 +129,7 @@ interface Product {
 - [ ] **Wishlist + save for later + alerts** (persistent, shareable, price drop/back-in-stock emails)
 
 #### **Phase C: Discovery & Inspiration (Week 5-7)**
-- [ ] **Search & filter** (Meilisearch: collection, category, material, finish, dimensions, price, room type, style)
+- [x] **Search & filter** (Meilisearch: collection, category, material, finish, dimensions, price, room type, style)
 - [ ] **Product compare** (side-by-side specs, max 4, shareable URL)
 - [ ] **Lookbooks / room inspiration** (curated sets, shoppable hotspots, "shop the room")
 - [ ] **Smart recommendations** ("Complete the look", "Customers also bought", recently viewed)

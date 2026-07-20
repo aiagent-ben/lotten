@@ -17,6 +17,9 @@ import {
   X,
   ChevronDown,
   ChevronRight,
+  FileText,
+  Gift,
+  Percent,
 } from 'lucide-react';
 
 const navigation = [
@@ -25,6 +28,8 @@ const navigation = [
   { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
   { name: 'Customers', href: '/admin/customers', icon: Users },
   { name: 'Discounts', href: '/admin/discounts', icon: ShoppingCart },
+  { name: 'Promotions', href: '/admin/promotions', icon: Percent },
+  { name: 'Content', href: '/admin/content', icon: FileText },
   { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
