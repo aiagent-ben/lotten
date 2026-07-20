@@ -133,19 +133,14 @@ interface Product {
 - [x] **Search & filter** (Meilisearch: collection, category, material, finish, dimensions, price, room type, style)
 - [x] **Lookbooks / room inspiration** (curated sets, shoppable hotspots, "shop the room")
 - [x] **Content hub** (care guides, styling tips, trend articles, lookbooks; MDX-based)
-- [ ] **Smart recommendations** ("Complete the look", "Customers also bought", recently viewed)
+- [x] **Smart recommendations** ("Complete the look", "Customers also bought", recently viewed)
 - [ ] **360° viewer + AR "view in room"** (deferred to Phase D+)
 
-#### **Phase X: Deferred Discovery Features**
-- [ ] **Product compare** (side-by-side specs, max 4, shareable URL)
-- [ ] **Reviews & Q&A** (verified purchase, photos, helpful votes, seller response)
-- [ ] **Wishlist + save for later + alerts** (persistent, shareable, price drop/back-in-stock emails)
-
 #### **Phase D: Operations, Loyalty & Scale (Week 7-10)**
-- [ ] **Multi-language** (next-intl: EN, ZH, MY)
-- [ ] **Headless API** (REST: products, orders, customers)
-- [ ] **Analytics & personalization** (conversion funnels, cohort analysis, product recommendations API)
-- [ ] **Inventory availability** (real-time stock badges, lead times)
+- [x] **Multi-language** (next-intl: EN, ZH, MY)
+- [x] **Headless API** (REST: products, orders, customers)
+- [x] **Analytics & personalization** (conversion funnels, cohort analysis, product recommendations API)
+- [x] **Inventory availability** (real-time stock badges, lead times)
 - [ ] **Logistics calculator** (shipping estimates, flat rate + free shipping threshold)
 - [ ] **Returns & exchanges flow** (self-service, labels, tracking)
 
