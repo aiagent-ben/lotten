@@ -1,4 +1,0 @@
-build:
-  builder: dockerfile
-  dockerfile: Dockerfile
-  dockerfile_path: Dockerfile
