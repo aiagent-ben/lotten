@@ -1,25 +1,8 @@
 import type { Metadata } from "next";
-import { Inter, Cormorant_Garamond } from "next/font/google";
-import "./globals.css";
-import { cn } from "@/lib/utils";
 import { CartProvider } from "@/components/CartProvider";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { notFound } from "next/navigation";
-import { getRequestConfig } from "next-intl/server";
-import { locales, defaultLocale } from "@/i18n/request";
-
-const interSans = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const cormorantDisplay = Cormorant_Garamond({
-  variable: "--font-cormorant",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
+import { locales } from "@/i18n/request";
 
 export const metadata: Metadata = {
   title: {
@@ -77,21 +60,17 @@ interface LayoutProps {
   params: Promise<{ locale: string }>;
 }
 
-export default async function RootLayout({ children, params }: LayoutProps) {
+export default async function LocaleLayout({ children, params }: LayoutProps) {
   const { locale } = await params;
-  
+
   if (!locales.includes(locale as any)) {
     notFound();
   }
 
   return (
-    <html lang={locale} className={cn("h-full antialiased")}>
-      <body className="min-h-full flex flex-col bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
-        <CartProvider>
-          <LocaleSwitcher />
-          {children}
-        </CartProvider>
-      </body>
-    </html>
+    <CartProvider>
+      <LocaleSwitcher />
+      {children}
+    </CartProvider>
   );
 }
