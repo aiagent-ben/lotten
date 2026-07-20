@@ -49,9 +49,6 @@ Desktop.ini
 .git
 .gitignore
 
-# Coolify
-.coolify
-
 # Logs
 logs
 *.log
