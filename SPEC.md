@@ -107,6 +107,7 @@ interface Product {
 - [ ] **Review moderation** (approve/reject, feature review)
 - [ ] **Shipping rules** (free shipping threshold, zones, flat rate)
 - [ ] **Loyalty program admin** (points rules, tiers, expiry)
+- [ ] **Loyalty program** (points earning/redemption, tiers, referral program)
 
 #### **Phase B: Public Catalog + Cart/Checkout (Week 3-5)**
 - [x] **Server-rendered catalog** with ISR (SEO, performance)
@@ -130,20 +131,23 @@ interface Product {
 
 #### **Phase C: Discovery & Inspiration (Week 5-7)**
 - [x] **Search & filter** (Meilisearch: collection, category, material, finish, dimensions, price, room type, style)
-- [ ] **Product compare** (side-by-side specs, max 4, shareable URL)
-- [ ] **Lookbooks / room inspiration** (curated sets, shoppable hotspots, "shop the room")
+- [x] **Lookbooks / room inspiration** (curated sets, shoppable hotspots, "shop the room")
+- [x] **Content hub** (care guides, styling tips, trend articles, lookbooks; MDX-based)
 - [ ] **Smart recommendations** ("Complete the look", "Customers also bought", recently viewed)
-- [ ] **Content hub** (care guides, styling tips, trend articles, lookbooks; MDX-based)
 - [ ] **360° viewer + AR "view in room"** (deferred to Phase D+)
 
+#### **Phase X: Deferred Discovery Features**
+- [ ] **Product compare** (side-by-side specs, max 4, shareable URL)
+- [ ] **Reviews & Q&A** (verified purchase, photos, helpful votes, seller response)
+- [ ] **Wishlist + save for later + alerts** (persistent, shareable, price drop/back-in-stock emails)
+
 #### **Phase D: Operations, Loyalty & Scale (Week 7-10)**
+- [ ] **Multi-language** (next-intl: EN, ZH, MY)
+- [ ] **Headless API** (REST: products, orders, customers)
+- [ ] **Analytics & personalization** (conversion funnels, cohort analysis, product recommendations API)
 - [ ] **Inventory availability** (real-time stock badges, lead times)
 - [ ] **Logistics calculator** (shipping estimates, flat rate + free shipping threshold)
 - [ ] **Returns & exchanges flow** (self-service, labels, tracking)
-- [ ] **Loyalty program** (points earning/redemption, tiers, referral program)
-- [ ] **Multi-language** (EN, ZH, MY)
-- [ ] **Headless API** (mobile app, future integrations)
-- [ ] **Analytics & personalization** (conversion funnels, cohort analysis, product recommendations API)
 
 ### 3.3 Non-Functional Requirements
 
