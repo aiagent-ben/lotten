@@ -662,8 +662,9 @@ export interface Address {
 | **A18** Discount codes CRUD | `app/(admin)/discounts/page.tsx` | Percentage/fixed, min order, expiry, usage limits |
 | **A19** Customer management (list, edit, activate/deactivate) | `app/(admin)/customers/page.tsx` | View tier, credit limit, status |
 | **A20** Order Kanban (pending → confirmed → production → shipped → delivered) | `app/(admin)/orders/page.tsx` | Drag-drop status changes |
-| **A21** Inventory tracking (available/reserved/incoming, low stock alerts) | `lib/inventory/stock.ts` | Real-time availability badges |
-| **A22** Analytics dashboard (view→order funnel, top products, revenue) | `app/(admin)/analytics/page.tsx` | Charts from `order_analytics` |
+|| **A21** Inventory tracking (available/reserved/incoming, low stock alerts) | `lib/inventory/stock.ts` | Real-time availability badges |
+|| **A22** Analytics dashboard (view→order funnel, top products, revenue) | `app/(admin)/analytics/page.tsx` | Charts from `order_analytics` |
+|| **A23** Content management (blog posts, care guides, lookbooks — MDX) | `app/(admin)/content/page.tsx`, `components/admin/RichTextEditor.tsx` | Full CRUD with MDX editor, SEO fields, scheduling |
 
 #### A.2 Key Decisions (Resolve Before Starting)
 
@@ -723,6 +724,7 @@ A1 (Supabase) → A2 (Clients) → A3 (Seed) → A4 (Auth)
 - [ ] Inventory: available/reserved/incoming per product/variant; low-stock threshold alerts
 - [ ] Analytics dashboard: funnel (view→cart→checkout→order), top products by revenue/views, revenue trend chart
 - [ ] No `'use client'` in admin pages except interactive components (drag-drop Kanban, TipTap editor, image upload)
+- [ ] Content management: create/edit/delete blog posts, care guides, lookbooks, static pages with MDX editor, SEO fields, featured images, scheduling (draft/published/scheduled)
 
 #### A.5 Technical Approach Notes
 
@@ -884,16 +886,20 @@ B13 (Dashboard) ← B12 (Auth)
 | **C1** Search & faceted filters (Meilisearch) | `app/api/search/route.ts`, `components/SearchFilters.tsx`, `lib/search/meilisearch.ts` | Search < 100ms; facets: collection, material, finish, price, dimensions, room type |
 | **C7** Smart recommendations | `lib/recommendations/engine.ts`, `components/Recommendations.tsx` | "Complete the look", "Customers also bought", recently viewed |
 
-#### C.2 Task Table — **Deferred to Future Phases**
+|#### C.2 Task Table — **Deferred to Future Phases**|
 
 | Task | Status | Target Phase |
 |------|--------|--------------|
 | **C2** Product compare (max 4) | Deferred | Phase D+ |
 | **C3** 360° product viewer + AR | Deferred | Phase D+ |
-| **C4** Lookbooks / room sets | Deferred | Phase D+ |
 | **C5** Reviews & Q&A | Deferred | Phase D+ |
 | **C6** Wishlist + save for later + alerts | Deferred | Phase D+ |
-| **C8** Content hub (care guides, styling tips, SEO) | Deferred | Phase D+ |
+
+**Implemented in Phase C (Content Management):**
+| Task | Status | Files |
+|------|--------|-------|
+| **C4** Lookbooks / room sets | ✅ Implemented | `app/lookbooks/`, `app/lookbooks/[slug]/page.tsx`, `components/content/HotspotsOverlay.tsx` |
+| **C8** Content hub (blog, care guides, styling tips, SEO) | ✅ Implemented | `app/blog/`, `app/blog/[slug]/page.tsx`, `app/guides/`, `app/guides/[slug]/page.tsx`, `app/[slug]/page.tsx`, `lib/data/content.ts`, `lib/mdx.ts` |
 
 #### C.2 Key Decisions (C1 + C7 Scope)
 
