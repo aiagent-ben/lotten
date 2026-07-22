@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { getAllActiveProducts, getCollectionBySlug, formatPrice } from '@/lib/data/products';
 import { cn } from '@/lib/utils';
 import ProductsPageClient from './ProductsPageClient';
+import { ProductFilters } from './ProductFilters';
 
 export const metadata: Metadata = {
   title: 'All Products',
@@ -102,95 +103,31 @@ export default async function ProductsPage({ searchParams }: Props) {
       {/* Filters & Toolbar */}
       <section className="py-8 border-b border-gray-100">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-4">
-              {/* Collection Filter */}
-              <select
-                value={collectionFilter}
-                onChange={(e) => {
-                  const url = new URL(window.location.href);
-                  if (e.target.value) {
-                    url.searchParams.set('collection', e.target.value);
-                  } else {
-                    url.searchParams.delete('collection');
-                  }
-                  url.searchParams.delete('page');
-                  window.location.href = url.toString();
-                }}
-                className="input w-full sm:w-64"
-              >
-                <option value="">All Collections</option>
-                {[
-                  { id: 'col-breda', name: 'Breda (NestHouZ)' },
-                  { id: 'col-dover', name: 'Dover (NestHouZ)' },
-                  { id: 'col-malton', name: 'Malton (NestHouZ)' },
-                  { id: 'col-lamar', name: 'Lamar (NestHouZ)' },
-                  { id: 'col-kyoto', name: 'Kyoto (NestHouZ)' },
-                  { id: 'col-dudley', name: 'Dudley (NestHouZ)' },
-                  { id: 'col-ludlow', name: 'Ludlow (NestNordic)' },
-                  { id: 'col-loftus', name: 'Loftus (NestNordic)' },
-                  { id: 'col-hutto', name: 'Hutto (NestNordic)' },
-                  { id: 'col-royston', name: 'Royston (NestNordic)' },
-                  { id: 'col-oruro', name: 'Oruro (Luooma)' },
-                  { id: 'col-waldo', name: 'Waldo (Luooma)' },
-                  { id: 'col-castor', name: 'Castor (Luooma)' },
-                  { id: 'col-hayton', name: 'Hayton (Luooma)' },
-                  { id: 'col-neath', name: 'Neath (Luooma)' },
-                  { id: 'col-hampton', name: 'Hampton (Luooma)' },
-                  { id: 'col-noud', name: 'Noud (Luooma)' },
-                  { id: 'col-nakula', name: 'Nakula (Luooma)' },
-                ].map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-
-              {/* Category Filter */}
-              <select
-                value={categoryFilter}
-                onChange={(e) => {
-                  const url = new URL(window.location.href);
-                  if (e.target.value) {
-                    url.searchParams.set('category', e.target.value);
-                  } else {
-                    url.searchParams.delete('category');
-                  }
-                  url.searchParams.delete('page');
-                  window.location.href = url.toString();
-                }}
-                className="input w-full sm:w-48"
-              >
-                <option value="">All</option>
-                <option value="new">New Arrivals</option>
-                <option value="bestseller">Bestsellers</option>
-              </select>
-            </div>
-
-            {/* Sort Filter */}
-            <div className="flex items-center gap-2">
-              <label htmlFor="sort" className="text-sm text-gray-600">Sort by:</label>
-              <select
-                id="sort"
-                value={sortFilter}
-                onChange={(e) => {
-                  const url = new URL(window.location.href);
-                  if (e.target.value !== 'featured') {
-                    url.searchParams.set('sort', e.target.value);
-                  } else {
-                    url.searchParams.delete('sort');
-                  }
-                  url.searchParams.delete('page');
-                  window.location.href = url.toString();
-                }}
-                className="input w-full sm:w-48"
-              >
-                <option value="featured">Featured</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="newest">Newest First</option>
-                <option value="name-asc">Name: A-Z</option>
-              </select>
-            </div>
-          </div>
+          <ProductFilters
+            collectionFilter={collectionFilter}
+            categoryFilter={categoryFilter}
+            sortFilter={sortFilter}
+            collections={[
+              { id: 'col-breda', name: 'Breda (NestHouZ)' },
+              { id: 'col-dover', name: 'Dover (NestHouZ)' },
+              { id: 'col-malton', name: 'Malton (NestHouZ)' },
+              { id: 'col-lamar', name: 'Lamar (NestHouZ)' },
+              { id: 'col-kyoto', name: 'Kyoto (NestHouZ)' },
+              { id: 'col-dudley', name: 'Dudley (NestHouZ)' },
+              { id: 'col-ludlow', name: 'Ludlow (NestNordic)' },
+              { id: 'col-loftus', name: 'Loftus (NestNordic)' },
+              { id: 'col-hutto', name: 'Hutto (NestNordic)' },
+              { id: 'col-royston', name: 'Royston (NestNordic)' },
+              { id: 'col-oruro', name: 'Oruro (Luooma)' },
+              { id: 'col-waldo', name: 'Waldo (Luooma)' },
+              { id: 'col-castor', name: 'Castor (Luooma)' },
+              { id: 'col-hayton', name: 'Hayton (Luooma)' },
+              { id: 'col-neath', name: 'Neath (Luooma)' },
+              { id: 'col-hampton', name: 'Hampton (Luooma)' },
+              { id: 'col-noud', name: 'Noud (Luooma)' },
+              { id: 'col-nakula', name: 'Nakula (Luooma)' },
+            ]}
+          />
         </div>
       </section>
 

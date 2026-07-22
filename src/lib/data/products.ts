@@ -191,7 +191,7 @@ export const collections: Collection[] = [
     name: 'Royston',
     slug: 'royston',
     description: 'Premium rattan-accented cabinets with gold and cocoa metal-wood frames.',
-    hero_image_url: 'https://mm.hinlim.com/cache/b2bfs/color/808 GOLD-30x30.jpg',
+    hero_image_url: 'https://mm.hinlim.com/cache/b2bfs/product/345064/345064-550x500.jpg',
     color_palette: [
       { part: 'legs', name: 'Gold', code: '808', hex: '#C5A050' },
       { part: 'body', name: 'Walnut', code: '113', hex: '#3D2B1F' },
@@ -473,8 +473,8 @@ export const products: Product[] = [
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     images: [
-      { id: 'img-1', product_id: 'prod-1', url: 'https://mm.hinlim.com/cache/b2bfs/color/109 COCOA-30x30.jpg', alt_text: 'Breda 1.5M TV Cabinet - Cocoa finish', sort_order: 0, is_primary: true, width: 300, height: 300, created_at: new Date().toISOString() },
-      { id: 'img-2', product_id: 'prod-1', url: 'https://mm.hinlim.com/cache/b2bfs/color/167 WHITE MARBLE-30x30.jpg', alt_text: 'Breda 1.5M TV Cabinet - White Marble top', sort_order: 1, is_primary: false, width: 300, height: 300, created_at: new Date().toISOString() },
+      { id: 'img-1', product_id: 'prod-1', url: 'https://mm.hinlim.com/cache/b2bfs/product/335048/335048-550x500.jpg', alt_text: 'Breda 1.5M TV Cabinet - Cocoa finish', sort_order: 0, is_primary: true, width: 550, height: 500, created_at: new Date().toISOString() },
+      { id: 'img-2', product_id: 'prod-1', url: 'https://mm.hinlim.com/cache/b2bfs/product/335048/335048-550x500.jpg', alt_text: 'Breda 1.5M TV Cabinet - White Marble top', sort_order: 1, is_primary: false, width: 550, height: 500, created_at: new Date().toISOString() },
       { id: 'img-3', product_id: 'prod-1', url: 'https://mm.hinlim.com/cache/b2bfs/product/336057/336057-550x500.jpg', alt_text: 'Breda 1.5M TV Cabinet - Front view', sort_order: 2, is_primary: false, width: 550, height: 500, created_at: new Date().toISOString() },
     ],
   },
@@ -798,6 +798,7 @@ export const products: Product[] = [
     moq: 1,
     lead_time_weeks: 8,
     stock_available: 8,
+
     stock_reserved: 0,
     stock_incoming: 0,
     low_stock_threshold: 3,
@@ -929,48 +930,48 @@ export const productVariants: ProductVariant[] = [
 // ============================================================
 export const productImages: ProductImage[] = [
   // Breda 1.5M TV Cabinet images
-  { id: 'img-1', product_id: 'prod-1', url: 'https://mm.hinlim.com/cache/b2bfs/color/109 COCOA-30x30.jpg', alt_text: 'Breda 1.5M TV Cabinet - Cocoa finish', sort_order: 0, is_primary: true, width: 300, height: 300, created_at: new Date().toISOString() },
-  { id: 'img-2', product_id: 'prod-1', url: 'https://mm.hinlim.com/cache/b2bfs/color/167 WHITE MARBLE-30x30.jpg', alt_text: 'Breda 1.5M TV Cabinet - White Marble top', sort_order: 1, is_primary: false, width: 300, height: 300, created_at: new Date().toISOString() },
+  { id: 'img-1', product_id: 'prod-1', url: 'https://mm.hinlim.com/cache/b2bfs/product/335048/335048-550x500.jpg', alt_text: 'Breda 1.5M TV Cabinet - Cocoa finish', sort_order: 0, is_primary: true, width: 550, height: 500, created_at: new Date().toISOString() },
+  { id: 'img-2', product_id: 'prod-1', url: 'https://mm.hinlim.com/cache/b2bfs/product/335048/335048-550x500.jpg', alt_text: 'Breda 1.5M TV Cabinet - White Marble top', sort_order: 1, is_primary: false, width: 550, height: 500, created_at: new Date().toISOString() },
   { id: 'img-3', product_id: 'prod-1', url: 'https://mm.hinlim.com/cache/b2bfs/product/336057/336057-550x500.jpg', alt_text: 'Breda 1.5M TV Cabinet - Front view', sort_order: 2, is_primary: false, width: 550, height: 500, created_at: new Date().toISOString() },
   { id: 'img-4', product_id: 'prod-1', url: 'https://mm.hinlim.com/cache/b2bfs/product/335072/335072-550x500.jpg', alt_text: 'Breda 1.5M TV Cabinet - Side view', sort_order: 3, is_primary: false, width: 550, height: 500, created_at: new Date().toISOString() },
   
   // Breda 1.6M Sideboard images
-  { id: 'img-5', product_id: 'prod-2', url: 'https://mm.hinlim.com/cache/b2bfs/color/109 COCOA-30x30.jpg', alt_text: 'Breda 1.6M Sideboard - Cocoa finish', sort_order: 0, is_primary: true, width: 300, height: 300, created_at: new Date().toISOString() },
-  { id: 'img-6', product_id: 'prod-2', url: 'https://mm.hinlim.com/cache/b2bfs/color/167 WHITE MARBLE-30x30.jpg', alt_text: 'Breda 1.6M Sideboard - White Marble top', sort_order: 1, is_primary: false, width: 300, height: 300, created_at: new Date().toISOString() },
+  { id: 'img-5', product_id: 'prod-2', url: 'https://mm.hinlim.com/cache/b2bfs/product/345049/345049-550x500.jpg', alt_text: 'Breda 1.6M Sideboard - Cocoa finish', sort_order: 0, is_primary: true, width: 550, height: 500, created_at: new Date().toISOString() },
+  { id: 'img-6', product_id: 'prod-2', url: 'https://mm.hinlim.com/cache/b2bfs/product/345049/345049-550x500.jpg', alt_text: 'Breda 1.6M Sideboard - White Marble top', sort_order: 1, is_primary: false, width: 550, height: 500, created_at: new Date().toISOString() },
   { id: 'img-7', product_id: 'prod-2', url: 'https://mm.hinlim.com/cache/b2bfs/product/346036/346036-550x500.jpg', alt_text: 'Breda 1.6M Sideboard - Front view', sort_order: 2, is_primary: false, width: 550, height: 500, created_at: new Date().toISOString() },
   
   // Breda 1.8M TV Cabinet images
-  { id: 'img-8', product_id: 'prod-3', url: 'https://mm.hinlim.com/cache/b2bfs/color/109 COCOA-30x30.jpg', alt_text: 'Breda 1.8M TV Cabinet - Cocoa finish', sort_order: 0, is_primary: true, width: 300, height: 300, created_at: new Date().toISOString() },
-  { id: 'img-9', product_id: 'prod-3', url: 'https://mm.hinlim.com/cache/b2bfs/color/167 WHITE MARBLE-30x30.jpg', alt_text: 'Breda 1.8M TV Cabinet - White Marble top', sort_order: 1, is_primary: false, width: 300, height: 300, created_at: new Date().toISOString() },
+  { id: 'img-8', product_id: 'prod-3', url: 'https://mm.hinlim.com/cache/b2bfs/product/336057/336057-550x500.jpg', alt_text: 'Breda 1.8M TV Cabinet - Cocoa finish', sort_order: 0, is_primary: true, width: 550, height: 500, created_at: new Date().toISOString() },
+  { id: 'img-9', product_id: 'prod-3', url: 'https://mm.hinlim.com/cache/b2bfs/product/336057/336057-550x500.jpg', alt_text: 'Breda 1.8M TV Cabinet - White Marble top', sort_order: 1, is_primary: false, width: 550, height: 500, created_at: new Date().toISOString() },
   
   // Breda Dining Table images
-  { id: 'img-10', product_id: 'prod-4', url: 'https://mm.hinlim.com/cache/b2bfs/color/109 COCOA-30x30.jpg', alt_text: 'Breda Dining Table - Cocoa legs', sort_order: 0, is_primary: true, width: 300, height: 300, created_at: new Date().toISOString() },
-  { id: 'img-11', product_id: 'prod-4', url: 'https://mm.hinlim.com/cache/b2bfs/color/167 WHITE MARBLE-30x30.jpg', alt_text: 'Breda Dining Table - White Marble top', sort_order: 1, is_primary: false, width: 300, height: 300, created_at: new Date().toISOString() },
+  { id: 'img-10', product_id: 'prod-4', url: 'https://mm.hinlim.com/cache/b2bfs/product/144071/144071-550x500.jpg', alt_text: 'Breda Dining Table - Cocoa legs', sort_order: 0, is_primary: true, width: 550, height: 500, created_at: new Date().toISOString() },
+  { id: 'img-11', product_id: 'prod-4', url: 'https://mm.hinlim.com/cache/b2bfs/product/144071/144071-550x500.jpg', alt_text: 'Breda Dining Table - White Marble top', sort_order: 1, is_primary: false, width: 550, height: 500, created_at: new Date().toISOString() },
   
   // Breda Working Desk images
-  { id: 'img-12', product_id: 'prod-5', url: 'https://mm.hinlim.com/cache/b2bfs/color/109 COCOA-30x30.jpg', alt_text: 'Breda Working Desk - Cocoa finish', sort_order: 0, is_primary: true, width: 300, height: 300, created_at: new Date().toISOString() },
-  { id: 'img-13', product_id: 'prod-5', url: 'https://mm.hinlim.com/cache/b2bfs/color/167 WHITE MARBLE-30x30.jpg', alt_text: 'Breda Working Desk - White Marble top', sort_order: 1, is_primary: false, width: 300, height: 300, created_at: new Date().toISOString() },
+  { id: 'img-12', product_id: 'prod-5', url: 'https://mm.hinlim.com/cache/b2bfs/product/123036/123036-550x500.jpg', alt_text: 'Breda Working Desk - Cocoa finish', sort_order: 0, is_primary: true, width: 550, height: 500, created_at: new Date().toISOString() },
+  { id: 'img-13', product_id: 'prod-5', url: 'https://mm.hinlim.com/cache/b2bfs/product/123036/123036-550x500.jpg', alt_text: 'Breda Working Desk - White Marble top', sort_order: 1, is_primary: false, width: 550, height: 500, created_at: new Date().toISOString() },
   
   // Castor TV Cabinet images
-  { id: 'img-14', product_id: 'prod-6', url: 'https://mm.hinlim.com/cache/b2bfs/color/114 BLACK-30x30.jpg', alt_text: 'Castor TV Cabinet - Black legs', sort_order: 0, is_primary: true, width: 300, height: 300, created_at: new Date().toISOString() },
-  { id: 'img-15', product_id: 'prod-6', url: 'https://mm.hinlim.com/cache/b2bfs/color/102 NATURAL-30x30.jpg', alt_text: 'Castor TV Cabinet - Natural frame', sort_order: 1, is_primary: false, width: 300, height: 300, created_at: new Date().toISOString() },
-  { id: 'img-16', product_id: 'prod-6', url: 'https://mm.hinlim.com/cache/b2bfs/color/1325 SPACE BLUE-30x30.jpg', alt_text: 'Castor TV Cabinet - Space Blue doors', sort_order: 2, is_primary: false, width: 300, height: 300, created_at: new Date().toISOString() },
+  { id: 'img-14', product_id: 'prod-6', url: 'https://mm.hinlim.com/cache/b2bfs/product/335043/335043-550x500.jpg', alt_text: 'Castor TV Cabinet - Black legs', sort_order: 0, is_primary: true, width: 550, height: 500, created_at: new Date().toISOString() },
+  { id: 'img-15', product_id: 'prod-6', url: 'https://mm.hinlim.com/cache/b2bfs/product/335043/335043-550x500.jpg', alt_text: 'Castor TV Cabinet - Natural frame', sort_order: 1, is_primary: false, width: 550, height: 500, created_at: new Date().toISOString() },
+  { id: 'img-16', product_id: 'prod-6', url: 'https://mm.hinlim.com/cache/b2bfs/product/335043/335043-550x500.jpg', alt_text: 'Castor TV Cabinet - Space Blue doors', sort_order: 2, is_primary: false, width: 550, height: 500, created_at: new Date().toISOString() },
   
   // Castor Coffee Table images
-  { id: 'img-17', product_id: 'prod-7', url: 'https://mm.hinlim.com/cache/b2bfs/color/114 BLACK-30x30.jpg', alt_text: 'Castor Coffee Table - Black legs', sort_order: 0, is_primary: true, width: 300, height: 300, created_at: new Date().toISOString() },
-  { id: 'img-18', product_id: 'prod-7', url: 'https://mm.hinlim.com/cache/b2bfs/color/102 NATURAL-30x30.jpg', alt_text: 'Castor Coffee Table - Natural frame', sort_order: 1, is_primary: false, width: 300, height: 300, created_at: new Date().toISOString() },
+  { id: 'img-17', product_id: 'prod-7', url: 'https://mm.hinlim.com/cache/b2bfs/product/133091/133091-550x500.jpg', alt_text: 'Castor Coffee Table - Black legs', sort_order: 0, is_primary: true, width: 550, height: 500, created_at: new Date().toISOString() },
+  { id: 'img-18', product_id: 'prod-7', url: 'https://mm.hinlim.com/cache/b2bfs/product/133091/133091-550x500.jpg', alt_text: 'Castor Coffee Table - Natural frame', sort_order: 1, is_primary: false, width: 550, height: 500, created_at: new Date().toISOString() },
   
   // Dover Sideboard images
-  { id: 'img-19', product_id: 'prod-8', url: 'https://mm.hinlim.com/cache/b2bfs/color/109 COCOA-30x30.jpg', alt_text: 'Dover Sideboard - Cocoa legs', sort_order: 0, is_primary: true, width: 300, height: 300, created_at: new Date().toISOString() },
-  { id: 'img-20', product_id: 'prod-8', url: 'https://mm.hinlim.com/cache/b2bfs/color/113 WALNUT-30x30.jpg', alt_text: 'Dover Sideboard - Walnut body', sort_order: 1, is_primary: false, width: 300, height: 300, created_at: new Date().toISOString() },
+  { id: 'img-19', product_id: 'prod-8', url: 'https://mm.hinlim.com/cache/b2bfs/product/346036/346036-550x500.jpg', alt_text: 'Dover Sideboard - Cocoa legs', sort_order: 0, is_primary: true, width: 550, height: 500, created_at: new Date().toISOString() },
+  { id: 'img-20', product_id: 'prod-8', url: 'https://mm.hinlim.com/cache/b2bfs/product/346036/346036-550x500.jpg', alt_text: 'Dover Sideboard - Walnut body', sort_order: 1, is_primary: false, width: 550, height: 500, created_at: new Date().toISOString() },
   
   // Dover TV Cabinet images
-  { id: 'img-21', product_id: 'prod-9', url: 'https://mm.hinlim.com/cache/b2bfs/color/109 COCOA-30x30.jpg', alt_text: 'Dover TV Cabinet - Cocoa legs', sort_order: 0, is_primary: true, width: 300, height: 300, created_at: new Date().toISOString() },
-  { id: 'img-22', product_id: 'prod-9', url: 'https://mm.hinlim.com/cache/b2bfs/color/113 WALNUT-30x30.jpg', alt_text: 'Dover TV Cabinet - Walnut body', sort_order: 1, is_primary: false, width: 300, height: 300, created_at: new Date().toISOString() },
+  { id: 'img-21', product_id: 'prod-9', url: 'https://mm.hinlim.com/cache/b2bfs/product/336081/336081-550x500.jpg', alt_text: 'Dover TV Cabinet - Cocoa legs', sort_order: 0, is_primary: true, width: 550, height: 500, created_at: new Date().toISOString() },
+  { id: 'img-22', product_id: 'prod-9', url: 'https://mm.hinlim.com/cache/b2bfs/product/336081/336081-550x500.jpg', alt_text: 'Dover TV Cabinet - Walnut body', sort_order: 1, is_primary: false, width: 550, height: 500, created_at: new Date().toISOString() },
   
   // Dover Dining Table images
-  { id: 'img-23', product_id: 'prod-10', url: 'https://mm.hinlim.com/cache/b2bfs/color/109 COCOA-30x30.jpg', alt_text: 'Dover Dining Table - Cocoa legs', sort_order: 0, is_primary: true, width: 300, height: 300, created_at: new Date().toISOString() },
-  { id: 'img-24', product_id: 'prod-10', url: 'https://mm.hinlim.com/cache/b2bfs/color/113 WALNUT-30x30.jpg', alt_text: 'Dover Dining Table - Walnut top', sort_order: 1, is_primary: false, width: 300, height: 300, created_at: new Date().toISOString() },
+  { id: 'img-23', product_id: 'prod-10', url: 'https://mm.hinlim.com/cache/b2bfs/product/146139/146139-550x500.jpg', alt_text: 'Dover Dining Table - Cocoa legs', sort_order: 0, is_primary: true, width: 550, height: 500, created_at: new Date().toISOString() },
+  { id: 'img-24', product_id: 'prod-10', url: 'https://mm.hinlim.com/cache/b2bfs/product/146139/146139-550x500.jpg', alt_text: 'Dover Dining Table - Walnut top', sort_order: 1, is_primary: false, width: 550, height: 500, created_at: new Date().toISOString() },
 ];
 
 // ============================================================

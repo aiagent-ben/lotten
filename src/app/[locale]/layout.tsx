@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { CartProvider } from "@/components/CartProvider";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+import { Footer } from "@/components/Footer";
 import { notFound } from "next/navigation";
 import { locales } from "@/i18n/request";
 
@@ -68,9 +68,10 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   }
 
   return (
-    <CartProvider>
+    <>
       <LocaleSwitcher />
       {children}
-    </CartProvider>
+      <Footer />
+    </>
   );
 }

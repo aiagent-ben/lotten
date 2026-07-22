@@ -1,19 +1,25 @@
 # Direct-to-Consumer Furniture Marketplace — Architecture & Product Requirements
+|| **C6** Wishlist + save for later + alerts | Cookie→DB sync, shareable, price drop/back-in-stock emails | `components/Wishlist.tsx`, `lib/actions/wishlist.ts`, `lib/notifications/alerts.ts` | B12 (auth), B8 (cart) ||
+|| **C8** Content hub (care guides, styling tips, SEO) | MDX-based blog, categories, tags, related products | `app/blog/`, `lib/cms/`, `components/BlogPost.tsx` | Independent (can start anytime) ||
+|| **Phase X** Locale-prefixed internal links | Eliminate middleware 307 redirects by generating locale-aware hrefs in all Link components (`/products` → `/en/products`, etc.) | All `Link` components, new `lib/utils/localePath.ts` helper | Middleware locale detection, i18n routing ||
 
-> **Status:** Draft v0.3 | **Last Updated:** 2026-07-14 | **Owner:** [Team]
+> 🧭 **Audit note (2026-07-21):** Per critical path review, locale-prefix redundancy is **deferred** — all links currently resolve via middleware 307 redirect (functional, just sub-optimal). Global link migration mid-bugfix would inflate diff and risk new broken links. Revisit when performance budget demands it.
 
 ---
 
-## 1. Executive Summary
+## 6. Scraper v2 (Parallel Track)
 
 **Product:** Direct-to-consumer furniture marketplace for Malaysian Oak furniture  
 **Target Users:** Homeowners, renters, small offices, interior enthusiasts  
-**Core Value:** Curated catalog, transparent specs, displayed pricing with cart/checkout, flexible delivery  
-**Current State:** Next.js 14 static site with 107 products, 20 collections, 5 brands — all client-rendered
+|| **C6** Wishlist + save for later + alerts | Cookie→DB sync, shareable, price drop/back-in-stock emails | `components/Wishlist.tsx`, `lib/actions/wishlist.ts`, `lib/notifications/alerts.ts` | B12 (auth), B8 (cart) ||
+|| **C8** Content hub (care guides, styling tips, SEO) | MDX-based blog, categories, tags, related products | `app/blog/`, `lib/cms/`, `components/BlogPost.tsx` | Independent (can start anytime) ||
+|| **Phase X** Locale-prefixed internal links | Eliminate middleware 307 redirects by generating locale-aware hrefs in all Link components (`/products` → `/en/products`, etc.) | All `Link` components, new `lib/utils/localePath.ts` helper | Middleware locale detection, i18n routing ||
+
+> 🧭 **Audit note (2026-07-21):** Per critical path review, locale-prefix redundancy is **deferred** — all links currently resolve via middleware 307 redirect (functional, just sub-optimal). Global link migration mid-bugfix would inflate diff and risk new broken links. Revisit when performance budget demands it.
 
 ---
 
-## 2. Current Architecture Analysis
+## 6. Scraper v2 (Parallel Track)
 
 ### 2.1 Tech Stack
 
@@ -73,12 +79,15 @@ interface Product {
   weight?: string;         // "33.30 kg"
   cartonDimensions?: string;
   articleNo?: string;      // Same as id
-}
-```
+|| **C6** Wishlist + save for later + alerts | Cookie→DB sync, shareable, price drop/back-in-stock emails | `components/Wishlist.tsx`, `lib/actions/wishlist.ts`, `lib/notifications/alerts.ts` | B12 (auth), B8 (cart) ||
+|| **C8** Content hub (care guides, styling tips, SEO) | MDX-based blog, categories, tags, related products | `app/blog/`, `lib/cms/`, `components/BlogPost.tsx` | Independent (can start anytime) ||
+|| **Phase X** Locale-prefixed internal links | Eliminate middleware 307 redirects by generating locale-aware hrefs in all Link components (`/products` → `/en/products`, etc.) | All `Link` components, new `lib/utils/localePath.ts` helper | Middleware locale detection, i18n routing ||
+
+> 🧭 **Audit note (2026-07-21):** Per critical path review, locale-prefix redundancy is **deferred** — all links currently resolve via middleware 307 redirect (functional, just sub-optimal). Global link migration mid-bugfix would inflate diff and risk new broken links. Revisit when performance budget demands it.
 
 ---
 
-## 3. Product Requirements (PRD) — Revised
+## 6. Scraper v2 (Parallel Track)
 
 ### 3.1 User Personas
 
@@ -156,12 +165,15 @@ interface Product {
 | **Accessibility** | WCAG 2.1 AA | Pass |
 | **Reliability** | Uptime | 99.9% |
 | | Build time | < 10 min |
-| **Security** | CSP headers | Strict |
-| | Rate limiting (checkout API) | 10/min/IP |
+|| **C6** Wishlist + save for later + alerts | Cookie→DB sync, shareable, price drop/back-in-stock emails | `components/Wishlist.tsx`, `lib/actions/wishlist.ts`, `lib/notifications/alerts.ts` | B12 (auth), B8 (cart) ||
+|| **C8** Content hub (care guides, styling tips, SEO) | MDX-based blog, categories, tags, related products | `app/blog/`, `lib/cms/`, `components/BlogPost.tsx` | Independent (can start anytime) ||
+|| **Phase X** Locale-prefixed internal links | Eliminate middleware 307 redirects by generating locale-aware hrefs in all Link components (`/products` → `/en/products`, etc.) | All `Link` components, new `lib/utils/localePath.ts` helper | Middleware locale detection, i18n routing ||
+
+> 🧭 **Audit note (2026-07-21):** Per critical path review, locale-prefix redundancy is **deferred** — all links currently resolve via middleware 307 redirect (functional, just sub-optimal). Global link migration mid-bugfix would inflate diff and risk new broken links. Revisit when performance budget demands it.
 
 ---
 
-## 4. Target Architecture (Post-Refactor)
+## 6. Scraper v2 (Parallel Track)
 
 ### 4.1 High-Level Diagram
 
@@ -628,12 +640,15 @@ export interface Address {
   state?: string;
   postal_code: string;
   country: string;
-}
-```
+|| **C6** Wishlist + save for later + alerts | Cookie→DB sync, shareable, price drop/back-in-stock emails | `components/Wishlist.tsx`, `lib/actions/wishlist.ts`, `lib/notifications/alerts.ts` | B12 (auth), B8 (cart) ||
+|| **C8** Content hub (care guides, styling tips, SEO) | MDX-based blog, categories, tags, related products | `app/blog/`, `lib/cms/`, `components/BlogPost.tsx` | Independent (can start anytime) ||
+|| **Phase X** Locale-prefixed internal links | Eliminate middleware 307 redirects by generating locale-aware hrefs in all Link components (`/products` → `/en/products`, etc.) | All `Link` components, new `lib/utils/localePath.ts` helper | Middleware locale detection, i18n routing ||
+
+> 🧭 **Audit note (2026-07-21):** Per critical path review, locale-prefix redundancy is **deferred** — all links currently resolve via middleware 307 redirect (functional, just sub-optimal). Global link migration mid-bugfix would inflate diff and risk new broken links. Revisit when performance budget demands it.
 
 ---
 
-## 5. Migration Strategy (Phased — Admin First)
+## 6. Scraper v2 (Parallel Track)
 
 ### **Phase A: Admin Panel + Foundation (Week 1-3)** — *Detailed Breakdown*
 
@@ -748,22 +763,28 @@ A1 (Supabase) → A2 (Clients) → A3 (Seed) → A4 (Auth)
 | 2 | **Contact for Price** — When `show_pricing=false`, link to `/contact` page or `mailto:sales@...`? | Affects A14 | **Link to `/contact` page** | ✅ Resolved |
 | 3 | **Status Transitions** — Allow skip? (e.g., pending → shipped)? Current: enforced linear only. | Affects A20 | **Enforced linear** (pending → paid → shipped → delivered) | ✅ Resolved |
 | 4 | **Inventory Reservation** — Auto-reserve on order create? Release on cancel? | Affects A21 | **Auto-reserve on order create; release on cancel/refund** | ✅ Resolved |
-| 5 | **Analytics Retention** — How long keep `order_analytics` events? (Default: 1 year) | Affects A22 | **13 months** (GDPR/PDPA compliant) | ✅ Resolved |
-| 6 | **Export Formats** — CSV only, or also XLSX/JSON for bulk export? | Affects A12 | **CSV only** (simpler, sufficient for B2C) | ✅ Resolved |
+|| **C6** Wishlist + save for later + alerts | Cookie→DB sync, shareable, price drop/back-in-stock emails | `components/Wishlist.tsx`, `lib/actions/wishlist.ts`, `lib/notifications/alerts.ts` | B12 (auth), B8 (cart) ||
+|| **C8** Content hub (care guides, styling tips, SEO) | MDX-based blog, categories, tags, related products | `app/blog/`, `lib/cms/`, `components/BlogPost.tsx` | Independent (can start anytime) ||
+|| **Phase X** Locale-prefixed internal links | Eliminate middleware 307 redirects by generating locale-aware hrefs in all Link components (`/products` → `/en/products`, etc.) | All `Link` components, new `lib/utils/localePath.ts` helper | Middleware locale detection, i18n routing ||
+
+> 🧭 **Audit note (2026-07-21):** Per critical path review, locale-prefix redundancy is **deferred** — all links currently resolve via middleware 307 redirect (functional, just sub-optimal). Global link migration mid-bugfix would inflate diff and risk new broken links. Revisit when performance budget demands it.
 
 ---
 
-**Acceptance Criteria (Summary):**
+## 6. Scraper v2 (Parallel Track)
 - Admin can manage entire catalog without code changes
 - Site settings toggles immediately affect public site
 - Discount codes work at checkout
 - Orders flow through Kanban with enforced transitions
-- Inventory shows available/reserved/incoming; low-stock alerts fire
-- Analytics show funnel metrics + top products + revenue trend
+|| **C6** Wishlist + save for later + alerts | Cookie→DB sync, shareable, price drop/back-in-stock emails | `components/Wishlist.tsx`, `lib/actions/wishlist.ts`, `lib/notifications/alerts.ts` | B12 (auth), B8 (cart) ||
+|| **C8** Content hub (care guides, styling tips, SEO) | MDX-based blog, categories, tags, related products | `app/blog/`, `lib/cms/`, `components/BlogPost.tsx` | Independent (can start anytime) ||
+|| **Phase X** Locale-prefixed internal links | Eliminate middleware 307 redirects by generating locale-aware hrefs in all Link components (`/products` → `/en/products`, etc.) | All `Link` components, new `lib/utils/localePath.ts` helper | Middleware locale detection, i18n routing ||
+
+> 🧭 **Audit note (2026-07-21):** Per critical path review, locale-prefix redundancy is **deferred** — all links currently resolve via middleware 307 redirect (functional, just sub-optimal). Global link migration mid-bugfix would inflate diff and risk new broken links. Revisit when performance budget demands it.
 
 ---
 
-### **Phase B: Public Catalog + Cart/Checkout (Week 3-5)** — *Detailed Breakdown*
+## 6. Scraper v2 (Parallel Track)
 
 #### B.1 Task Table
 
@@ -860,23 +881,29 @@ B13 (Dashboard) ← B12 (Auth)
 | 3 | **Shipping regions** — Which countries/regions ship to? Flat rate table per region? | Affects B9 shipping calc | ✅ **Decided** — **Peninsular Malaysia + East Malaysia** only; flat rate per state |
 | 4 | **Tax display** — Show tax-inclusive or exclusive prices? (B2C typically inclusive) | Affects B9, pricing display | ✅ **Decided** — Tax-inclusive (MYR) |
 | 5 | **Order confirmation PDF** — Attach to email? (React-PDF) | Affects B11 | ✅ **Decided** — **No** (HTML email only) |
-| 6 | **Wishlist/Save for later** — Separate from cart? | Affects B13 dashboard | ✅ **Decided** — **Yes**, separate wishlist (cookie + DB sync) |
-| 7 | **Product reviews/Q&A** — Phase B or Phase C? | Affects B3 | ✅ **Decided** — Phase C (active) |
+|| **C6** Wishlist + save for later + alerts | Cookie→DB sync, shareable, price drop/back-in-stock emails | `components/Wishlist.tsx`, `lib/actions/wishlist.ts`, `lib/notifications/alerts.ts` | B12 (auth), B8 (cart) ||
+|| **C8** Content hub (care guides, styling tips, SEO) | MDX-based blog, categories, tags, related products | `app/blog/`, `lib/cms/`, `components/BlogPost.tsx` | Independent (can start anytime) ||
+|| **Phase X** Locale-prefixed internal links | Eliminate middleware 307 redirects by generating locale-aware hrefs in all Link components (`/products` → `/en/products`, etc.) | All `Link` components, new `lib/utils/localePath.ts` helper | Middleware locale detection, i18n routing ||
+
+> 🧭 **Audit note (2026-07-21):** Per critical path review, locale-prefix redundancy is **deferred** — all links currently resolve via middleware 307 redirect (functional, just sub-optimal). Global link migration mid-bugfix would inflate diff and risk new broken links. Revisit when performance budget demands it.
 
 ---
 
-**Acceptance Criteria (Summary):**
+## 6. Scraper v2 (Parallel Track)
 - All public pages Server Components + ISR (revalidate: 3600)
 - Cart → Checkout → Order flow works end-to-end
 - Discount codes (percentage/fixed) apply correctly
 - Customer auth + dashboard with order history
 - Lighthouse > 90
-- Structured data on product pages
-- MYR currency only
+|| **C6** Wishlist + save for later + alerts | Cookie→DB sync, shareable, price drop/back-in-stock emails | `components/Wishlist.tsx`, `lib/actions/wishlist.ts`, `lib/notifications/alerts.ts` | B12 (auth), B8 (cart) ||
+|| **C8** Content hub (care guides, styling tips, SEO) | MDX-based blog, categories, tags, related products | `app/blog/`, `lib/cms/`, `components/BlogPost.tsx` | Independent (can start anytime) ||
+|| **Phase X** Locale-prefixed internal links | Eliminate middleware 307 redirects by generating locale-aware hrefs in all Link components (`/products` → `/en/products`, etc.) | All `Link` components, new `lib/utils/localePath.ts` helper | Middleware locale detection, i18n routing ||
+
+> 🧭 **Audit note (2026-07-21):** Per critical path review, locale-prefix redundancy is **deferred** — all links currently resolve via middleware 307 redirect (functional, just sub-optimal). Global link migration mid-bugfix would inflate diff and risk new broken links. Revisit when performance budget demands it.
 
 ---
 
-### **Phase C: Discovery & Recommendations (Week 5-6)** — *Core Search + Recommendations Only*
+## 6. Scraper v2 (Parallel Track)
 
 #### C.1 Task Table — **Current Scope (C1, C7 Only)**
 
@@ -993,12 +1020,15 @@ B12 (Auth) → D3 (Analytics needs user context)
 | **i18n** | `lib/i18n/request.ts` — `getRequestConfig`; `middleware.ts` — locale detection (header → cookie → default); messages in `messages/en.json`, `messages/zh.json`, `messages/my.json` |
 | **API v1** | `app/api/v1/` — Route handlers; `lib/api/validation.ts` — Zod schemas; `lib/api/auth.ts` — verify API key / JWT; rate limiter via `upstash/ratelimit` |
 | **Analytics** | `lib/analytics/events.ts` — `trackEvent(event, properties)`; `lib/analytics/funnels.ts` — conversion funnels; `lib/recommendations/engine.ts` — product recommendations API |
+|| **C6** Wishlist + save for later + alerts | Cookie→DB sync, shareable, price drop/back-in-stock emails | `components/Wishlist.tsx`, `lib/actions/wishlist.ts`, `lib/notifications/alerts.ts` | B12 (auth), B8 (cart) ||
+|| **C8** Content hub (care guides, styling tips, SEO) | MDX-based blog, categories, tags, related products | `app/blog/`, `lib/cms/`, `components/BlogPost.tsx` | Independent (can start anytime) ||
+|| **Phase X** Locale-prefixed internal links | Eliminate middleware 307 redirects by generating locale-aware hrefs in all Link components (`/products` → `/en/products`, etc.) | All `Link` components, new `lib/utils/localePath.ts` helper | Middleware locale detection, i18n routing ||
 
-#### D.6 Open Questions — **None** (all deferred tasks shelved)
+> 🧭 **Audit note (2026-07-21):** Per critical path review, locale-prefix redundancy is **deferred** — all links currently resolve via middleware 307 redirect (functional, just sub-optimal). Global link migration mid-bugfix would inflate diff and risk new broken links. Revisit when performance budget demands it.
 
 ---
 
-## 📋 Future Implementation Queue (Deferred from Phase C & D)
+## 6. Scraper v2 (Parallel Track)
 *These tasks are explicitly deferred and will be prioritized in future planning sessions.*
 
 | Task | Description | Files (Estimated) | Dependencies |
@@ -1007,8 +1037,11 @@ B12 (Auth) → D3 (Analytics needs user context)
 | **C3** 360° product viewer + AR | 360° spin (Three.js), WebXR AR "view in room" | `components/viewer/ProductViewer360.tsx`, `components/viewer/ARViewer.tsx` | B3 (360° frames), R2 |
 | **C4** Lookbooks / room sets | Curated room sets, shoppable hotspots, "add all to cart" | `app/lookbooks/`, `components/LookbookCard.tsx`, `lib/data/lookbooks.ts` | B1, B3 |
 | **C5** Reviews & Q&A (verified purchase) | Star rating, photos, helpful votes, seller replies | `components/reviews/Reviews.tsx`, `lib/actions/reviews.ts`, `app/api/reviews/route.ts` | B9 (orders), B12 (auth) |
-| **C6** Wishlist + save for later + alerts | Cookie→DB sync, shareable, price drop/back-in-stock emails | `components/Wishlist.tsx`, `lib/actions/wishlist.ts`, `lib/notifications/alerts.ts` | B12 (auth), B8 (cart) |
-| **C8** Content hub (care guides, styling tips, SEO) | MDX-based blog, categories, tags, related products | `app/blog/`, `lib/cms/`, `components/BlogPost.tsx` | Independent (can start anytime) |
+|| **C6** Wishlist + save for later + alerts | Cookie→DB sync, shareable, price drop/back-in-stock emails | `components/Wishlist.tsx`, `lib/actions/wishlist.ts`, `lib/notifications/alerts.ts` | B12 (auth), B8 (cart) ||
+|| **C8** Content hub (care guides, styling tips, SEO) | MDX-based blog, categories, tags, related products | `app/blog/`, `lib/cms/`, `components/BlogPost.tsx` | Independent (can start anytime) ||
+|| **Phase X** Locale-prefixed internal links | Eliminate middleware 307 redirects by generating locale-aware hrefs in all Link components (`/products` → `/en/products`, etc.) | All `Link` components, new `lib/utils/localePath.ts` helper | Middleware locale detection, i18n routing ||
+
+> 🧭 **Audit note (2026-07-21):** Per critical path review, locale-prefix redundancy is **deferred** — all links currently resolve via middleware 307 redirect (functional, just sub-optimal). Global link migration mid-bugfix would inflate diff and risk new broken links. Revisit when performance budget demands it.
 
 ---
 
@@ -1068,12 +1101,15 @@ scripts/scraper_v2/
 | **Pagination** | Detect "Load More"/pagination; follow all pages |
 | **Resilience** | Retry with exponential backoff; checkpoint every N products |
 | **Validation** | Pydantic models match DB schema; fail fast on drift |
-| **Monitoring** | Structured JSON logs; Prometheus metrics; alert on >5% failure |
-| **Type generation** | `pydantic2ts` → `types/database.ts` (single source of truth) |
+|| **C6** Wishlist + save for later + alerts | Cookie→DB sync, shareable, price drop/back-in-stock emails | `components/Wishlist.tsx`, `lib/actions/wishlist.ts`, `lib/notifications/alerts.ts` | B12 (auth), B8 (cart) ||
+|| **C8** Content hub (care guides, styling tips, SEO) | MDX-based blog, categories, tags, related products | `app/blog/`, `lib/cms/`, `components/BlogPost.tsx` | Independent (can start anytime) ||
+|| **Phase X** Locale-prefixed internal links | Eliminate middleware 307 redirects by generating locale-aware hrefs in all Link components (`/products` → `/en/products`, etc.) | All `Link` components, new `lib/utils/localePath.ts` helper | Middleware locale detection, i18n routing ||
+
+> 🧭 **Audit note (2026-07-21):** Per critical path review, locale-prefix redundancy is **deferred** — all links currently resolve via middleware 307 redirect (functional, just sub-optimal). Global link migration mid-bugfix would inflate diff and risk new broken links. Revisit when performance budget demands it.
 
 ---
 
-## 7. API Design (Future Headless)
+## 6. Scraper v2 (Parallel Track)
 
 ### 7.1 REST Endpoints
 
@@ -1093,12 +1129,15 @@ GET    /api/v1/orders/:id                # Order detail + tracking (auth)
 
 ### 7.2 Authentication
 - **API Keys** for server-to-server (partners, ERP)
-- **JWT** (Supabase) for customer sessions
-- **Rate limiting:** 100 req/min (API keys), 60 req/min (customer)
+|| **C6** Wishlist + save for later + alerts | Cookie→DB sync, shareable, price drop/back-in-stock emails | `components/Wishlist.tsx`, `lib/actions/wishlist.ts`, `lib/notifications/alerts.ts` | B12 (auth), B8 (cart) ||
+|| **C8** Content hub (care guides, styling tips, SEO) | MDX-based blog, categories, tags, related products | `app/blog/`, `lib/cms/`, `components/BlogPost.tsx` | Independent (can start anytime) ||
+|| **Phase X** Locale-prefixed internal links | Eliminate middleware 307 redirects by generating locale-aware hrefs in all Link components (`/products` → `/en/products`, etc.) | All `Link` components, new `lib/utils/localePath.ts` helper | Middleware locale detection, i18n routing ||
+
+> 🧭 **Audit note (2026-07-21):** Per critical path review, locale-prefix redundancy is **deferred** — all links currently resolve via middleware 307 redirect (functional, just sub-optimal). Global link migration mid-bugfix would inflate diff and risk new broken links. Revisit when performance budget demands it.
 
 ---
 
-## 8. Deployment & Operations
+## 6. Scraper v2 (Parallel Track)
 
 ### 8.1 Environments
 
@@ -1170,12 +1209,15 @@ jobs:
 | **Vercel Analytics** | Core Web Vitals, page views |
 | **Sentry** | Error tracking (frontend + API) |
 | **Supabase Logs** | Database queries, auth events |
-| **Meilisearch Dashboard** | Search performance |
-| **Custom Cron** | Scraper health, data freshness |
+|| **C6** Wishlist + save for later + alerts | Cookie→DB sync, shareable, price drop/back-in-stock emails | `components/Wishlist.tsx`, `lib/actions/wishlist.ts`, `lib/notifications/alerts.ts` | B12 (auth), B8 (cart) ||
+|| **C8** Content hub (care guides, styling tips, SEO) | MDX-based blog, categories, tags, related products | `app/blog/`, `lib/cms/`, `components/BlogPost.tsx` | Independent (can start anytime) ||
+|| **Phase X** Locale-prefixed internal links | Eliminate middleware 307 redirects by generating locale-aware hrefs in all Link components (`/products` → `/en/products`, etc.) | All `Link` components, new `lib/utils/localePath.ts` helper | Middleware locale detection, i18n routing ||
+
+> 🧭 **Audit note (2026-07-21):** Per critical path review, locale-prefix redundancy is **deferred** — all links currently resolve via middleware 307 redirect (functional, just sub-optimal). Global link migration mid-bugfix would inflate diff and risk new broken links. Revisit when performance budget demands it.
 
 ---
 
-## 9. Open Questions & Decisions Made
+## 6. Scraper v2 (Parallel Track)
 
 | # | Decision | Options | Chosen | Notes |
 |---|----------|---------|--------|-------|
@@ -1187,12 +1229,15 @@ jobs:
 | 6 | **Inventory** | Multi-warehouse / **Single pool** | **Single pool** | `stock_available/reserved/incoming` |
 | 7 | **Quote approval** | Required / **Not needed (no quotes)** | **N/A** | Removed quotes entirely |
 | 8 | **Analytics** | Full funnel / **View→Order, Top Products** | **View→Order, Top Products** | `order_analytics` table |
-| 9 | **Image hosting** | Keep hinlim.com / **Cloudflare R2** | **Cloudflare R2** | Cost, control, Next.js optimization |
-| 10 | **Scraper schedule** | Daily / **Weekly + webhook** | **Weekly + webhook** | Incremental + on-demand |
+|| **C6** Wishlist + save for later + alerts | Cookie→DB sync, shareable, price drop/back-in-stock emails | `components/Wishlist.tsx`, `lib/actions/wishlist.ts`, `lib/notifications/alerts.ts` | B12 (auth), B8 (cart) ||
+|| **C8** Content hub (care guides, styling tips, SEO) | MDX-based blog, categories, tags, related products | `app/blog/`, `lib/cms/`, `components/BlogPost.tsx` | Independent (can start anytime) ||
+|| **Phase X** Locale-prefixed internal links | Eliminate middleware 307 redirects by generating locale-aware hrefs in all Link components (`/products` → `/en/products`, etc.) | All `Link` components, new `lib/utils/localePath.ts` helper | Middleware locale detection, i18n routing ||
+
+> 🧭 **Audit note (2026-07-21):** Per critical path review, locale-prefix redundancy is **deferred** — all links currently resolve via middleware 307 redirect (functional, just sub-optimal). Global link migration mid-bugfix would inflate diff and risk new broken links. Revisit when performance budget demands it.
 
 ---
 
-## 10. Appendix: Current File Map
+## 6. Scraper v2 (Parallel Track)
 
 ```
 /opt/data/workspace/projects/b2b-furniture-ecommerce/
@@ -1229,19 +1274,25 @@ jobs:
 ├── tsconfig.json
 ├── package.json
 ├── Dockerfile
-└── nixpacks.toml
-```
+|| **C6** Wishlist + save for later + alerts | Cookie→DB sync, shareable, price drop/back-in-stock emails | `components/Wishlist.tsx`, `lib/actions/wishlist.ts`, `lib/notifications/alerts.ts` | B12 (auth), B8 (cart) ||
+|| **C8** Content hub (care guides, styling tips, SEO) | MDX-based blog, categories, tags, related products | `app/blog/`, `lib/cms/`, `components/BlogPost.tsx` | Independent (can start anytime) ||
+|| **Phase X** Locale-prefixed internal links | Eliminate middleware 307 redirects by generating locale-aware hrefs in all Link components (`/products` → `/en/products`, etc.) | All `Link` components, new `lib/utils/localePath.ts` helper | Middleware locale detection, i18n routing ||
+
+> 🧭 **Audit note (2026-07-21):** Per critical path review, locale-prefix redundancy is **deferred** — all links currently resolve via middleware 307 redirect (functional, just sub-optimal). Global link migration mid-bugfix would inflate diff and risk new broken links. Revisit when performance budget demands it.
 
 ---
 
-## 11. Next Actions
+## 6. Scraper v2 (Parallel Track)
 
 1. **Confirm Phase A scope** (admin panel tasks A1-A22)
 2. **Set up Supabase project** + run initial migration
 3. **Generate migration SQL** from schema in §4.2
-4. **Create detailed Phase A task plan** (using `plan` skill)
-5. **Begin Phase A1-A4** (Supabase, auth, admin layout)
+|| **C6** Wishlist + save for later + alerts | Cookie→DB sync, shareable, price drop/back-in-stock emails | `components/Wishlist.tsx`, `lib/actions/wishlist.ts`, `lib/notifications/alerts.ts` | B12 (auth), B8 (cart) ||
+|| **C8** Content hub (care guides, styling tips, SEO) | MDX-based blog, categories, tags, related products | `app/blog/`, `lib/cms/`, `components/BlogPost.tsx` | Independent (can start anytime) ||
+|| **Phase X** Locale-prefixed internal links | Eliminate middleware 307 redirects by generating locale-aware hrefs in all Link components (`/products` → `/en/products`, etc.) | All `Link` components, new `lib/utils/localePath.ts` helper | Middleware locale detection, i18n routing ||
+
+> 🧭 **Audit note (2026-07-21):** Per critical path review, locale-prefix redundancy is **deferred** — all links currently resolve via middleware 307 redirect (functional, just sub-optimal). Global link migration mid-bugfix would inflate diff and risk new broken links. Revisit when performance budget demands it.
 
 ---
 
-*Document version: 0.2 | Updated per stakeholder decisions on 2026-07-14*
+## 6. Scraper v2 (Parallel Track)

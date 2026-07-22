@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect } from 'react';
-import { getAllActiveProducts, getCollectionBySlug, formatPrice, getCollectionBySlug as getCollection, getColorHex } from '@/lib/data/products';
+import { getAllActiveProducts, getCollectionBySlug, formatPrice, getCollectionById as getCollection, getColorHex } from '@/lib/data/products';
 import { cn } from '@/lib/utils';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { RecentlyViewedCarousel } from '@/components/RecentlyViewedCarousel';
