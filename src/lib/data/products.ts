@@ -958,10 +958,19 @@ export const productImages: ProductImage[] = [
   { id: 'img-16', product_id: 'prod-6', url: 'https://mm.hinlim.com/cache/b2bfs/product/335043/335043-550x500.jpg', alt_text: 'Castor TV Cabinet - Space Blue doors', sort_order: 2, is_primary: false, width: 550, height: 500, created_at: new Date().toISOString() },
   
   // Castor Coffee Table images
-  { id: 'img-17', product_id: 'prod-7', url: 'https://mm.hinlim.com/cache/b2bfs/product/133091/133091-550x500.jpg', alt_text: 'Castor Coffee Table - Black legs', sort_order: 0, is_primary: true, width: 550, height: 500, created_at: new Date().toISOString() },
-  { id: 'img-18', product_id: 'prod-7', url: 'https://mm.hinlim.com/cache/b2bfs/product/133091/133091-550x500.jpg', alt_text: 'Castor Coffee Table - Natural frame', sort_order: 1, is_primary: false, width: 550, height: 500, created_at: new Date().toISOString() },
-  
-  // Dover Sideboard images
+    { id: 'img-17', product_id: 'prod-7', url: 'https://mm.hinlim.com/cache/b2bfs/product/133091/133091-1500x1500.jpg', alt_text: 'Castor Coffee Table - Main view', sort_order: 0, is_primary: true, width: 1500, height: 1500, created_at: new Date().toISOString() },
+    { id: 'img-18', product_id: 'prod-7', url: 'https://mm.hinlim.com/cache/b2bfs/product/133091/133091_3-1500x1500.jpg', alt_text: 'Castor Coffee Table - Angle view', sort_order: 1, is_primary: false, width: 1500, height: 1500, created_at: new Date().toISOString() },
+    { id: 'img-19', product_id: 'prod-7', url: 'https://mm.hinlim.com/cache/b2bfs/product/133091/133091_5-1500x1500.jpg', alt_text: 'Castor Coffee Table - Side view', sort_order: 2, is_primary: false, width: 1500, height: 1500, created_at: new Date().toISOString() },
+    { id: 'img-20', product_id: 'prod-7', url: 'https://mm.hinlim.com/cache/b2bfs/product/133091/133091_6-1500x1500.jpg', alt_text: 'Castor Coffee Table - Detail view', sort_order: 3, is_primary: false, width: 1500, height: 1500, created_at: new Date().toISOString() },
+    { id: 'img-21', product_id: 'prod-7', url: 'https://mm.hinlim.com/cache/b2bfs/product/133091/133091_s1-1500x1500.jpg', alt_text: 'Castor Coffee Table - Shelf view', sort_order: 4, is_primary: false, width: 1500, height: 1500, created_at: new Date().toISOString() },
+    // Castor Coffee Table thumbnails (130x110)
+    { id: 'img-22', product_id: 'prod-7', url: 'https://mm.hinlim.com/cache/b2bfs/product/133091/133091-130x110.jpg', alt_text: 'Castor Coffee Table - Thumbnail 1', sort_order: 5, is_primary: false, width: 130, height: 110, created_at: new Date().toISOString() },
+    { id: 'img-23', product_id: 'prod-7', url: 'https://mm.hinlim.com/cache/b2bfs/product/133091/133091_3-130x110.jpg', alt_text: 'Castor Coffee Table - Thumbnail 2', sort_order: 6, is_primary: false, width: 130, height: 110, created_at: new Date().toISOString() },
+    { id: 'img-24', product_id: 'prod-7', url: 'https://mm.hinlim.com/cache/b2bfs/product/133091/133091_5-130x110.jpg', alt_text: 'Castor Coffee Table - Thumbnail 3', sort_order: 7, is_primary: false, width: 130, height: 110, created_at: new Date().toISOString() },
+    { id: 'img-25', product_id: 'prod-7', url: 'https://mm.hinlim.com/cache/b2bfs/product/133091/133091_6-130x110.jpg', alt_text: 'Castor Coffee Table - Thumbnail 4', sort_order: 8, is_primary: false, width: 130, height: 110, created_at: new Date().toISOString() },
+    { id: 'img-26', product_id: 'prod-7', url: 'https://mm.hinlim.com/cache/b2bfs/product/133091/133091_s1-130x110.jpg', alt_text: 'Castor Coffee Table - Thumbnail 5', sort_order: 9, is_primary: false, width: 130, height: 110, created_at: new Date().toISOString() },
+
+    // Dover Sideboard images
   { id: 'img-19', product_id: 'prod-8', url: 'https://mm.hinlim.com/cache/b2bfs/product/346036/346036-550x500.jpg', alt_text: 'Dover Sideboard - Cocoa legs', sort_order: 0, is_primary: true, width: 550, height: 500, created_at: new Date().toISOString() },
   { id: 'img-20', product_id: 'prod-8', url: 'https://mm.hinlim.com/cache/b2bfs/product/346036/346036-550x500.jpg', alt_text: 'Dover Sideboard - Walnut body', sort_order: 1, is_primary: false, width: 550, height: 500, created_at: new Date().toISOString() },
   
