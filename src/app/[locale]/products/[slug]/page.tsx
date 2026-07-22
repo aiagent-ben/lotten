@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getProductBySlug, getAllActiveProducts, getCollectionBySlug, formatPrice, getCollectionBySlug as getCollection, getColorHex } from '@/lib/data/products';
+import { getProductBySlug, getAllActiveProducts, getCollectionBySlug, formatPrice, getCollectionBySlug as getCollection, getColorHex, getProductImages } from '@/lib/data/products';
 import { cn } from '@/lib/utils';
 import ProductDetailClient from './ProductDetailClient';
 
@@ -67,5 +67,8 @@ export default async function ProductDetailPage({ params }: Props) {
     notFound();
   }
 
-  return <ProductDetailClient product={product} />;
+  // Fetch product images from the productImages array
+  const productImages = getProductImages(product.id);
+
+  return <ProductDetailClient product={product} images={productImages} />;
 }

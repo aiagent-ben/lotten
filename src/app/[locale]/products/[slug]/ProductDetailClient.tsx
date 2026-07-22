@@ -44,22 +44,22 @@ interface ProductDetailClientProps {
     created_at: string;
     updated_at: string;
     collection?: any;
-    images?: {
-      id: string;
-      product_id: string;
-      url: string;
-      alt_text: string | null;
-      sort_order: number;
-      is_primary: boolean;
-      width: number | null;
-      height: number | null;
-      created_at: string;
-    }[];
     variants?: any[];
   };
+  images?: {
+    id: string;
+    product_id: string;
+    url: string;
+    alt_text: string | null;
+    sort_order: number;
+    is_primary: boolean;
+    width: number | null;
+    height: number | null;
+    created_at: string;
+  }[];
 }
 
-export default function ProductDetailClient({ product }: ProductDetailClientProps) {
+export default function ProductDetailClient({ product, images = [] }: ProductDetailClientProps) {
   const { addToRecentlyViewed, recentlyViewed } = useRecentlyViewed();
 
   // Track recently viewed
@@ -69,7 +69,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       name: product.name,
       slug: product.slug,
       price_usd: product.price_usd,
-      images: product.images?.map(img => ({
+      images: images.map(img => ({
         url: img.url,
         alt_text: img.alt_text ?? undefined,
         is_primary: img.is_primary,
@@ -81,8 +81,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   }, [product.id, addToRecentlyViewed]);
 
   const collection = getCollection(product.collection_id);
-  const primaryImage = product.images?.find(img => img.is_primary) || product.images?.[0];
-  const galleryImages = product.images?.filter(img => !img.is_primary) || [];
+  const primaryImage = images.find(img => img.is_primary) || images[0];
+  const galleryImages = images.filter(img => !img.is_primary) || [];
   const allImages = primaryImage ? [primaryImage, ...galleryImages] : galleryImages;
 
   // Parse specifications
