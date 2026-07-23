@@ -21,6 +21,9 @@ interface RawProduct {
   weight: string;
   cartonDimensions: string;
   articleNo: string;
+  // R2 fields from cleaned data
+  r2_images?: string[];
+  r2_primary_image?: string;
 }
 
 function parseCollectionName(fullName: string): { name: string; brand: string } {
@@ -268,10 +271,10 @@ async function seedDatabase() {
       continue;
     }
     
-    // Seed product images
-    if (productData && rawProduct.images.length > 0) {
-      for (let i = 0; i < rawProduct.images.length; i++) {
-        const imgUrl = rawProduct.images[i];
+    // Seed product images - use R2 images from cleaned data
+    if (productData && rawProduct.r2_images && rawProduct.r2_images.length > 0) {
+      for (let i = 0; i < rawProduct.r2_images.length; i++) {
+        const imgUrl = rawProduct.r2_images[i];
         const { error: imgError } = await supabase
           .from('product_images')
           .insert({
@@ -282,7 +285,6 @@ async function seedDatabase() {
             is_primary: i === 0,
           });
         if (imgError) {
-          // Ignore duplicate key errors (same image for multiple products)
           if (!imgError.message.includes('duplicate')) {
             console.error('Image error:', imgUrl, imgError);
           }
