@@ -1,5 +1,5 @@
 // Auto-generated from scraped data - DO NOT EDIT MANUALLY
-// Generated: 2026-07-23T14:59:43.322735
+// Generated: 2026-07-23T15:05:04.641578
 // Source: data/clean/products.json (107 products)
 
 export interface Product {
