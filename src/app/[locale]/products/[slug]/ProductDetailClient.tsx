@@ -187,9 +187,9 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
               <div className="space-y-4">
                 {/* Main Image */}
                 <div className="relative aspect-square rounded-xl overflow-hidden bg-gray-50">
-                  {primaryImage ? (
+                  {selectedImage ? (
                     <Image
-                      src={primaryImage.url}
+                      src={selectedImage.url}
                       alt={product.name}
                       fill
                       sizes="(max-width: 1024px) 100vw, 50vw"
