@@ -26,7 +26,10 @@ interface RawProduct {
   r2_primary_image?: string;
 }
 
-function parseCollectionName(fullName: string): { name: string; brand: string } {
+function parseCollectionName(fullName: string | null | undefined): { name: string; brand: string } {
+  if (!fullName) {
+    return { name: 'Unknown', brand: '' };
+  }
   const match = fullName.match(/^(.+?)\s*\((.+)\)$/);
   if (match) {
     return { name: match[1].trim(), brand: match[2].trim() };
