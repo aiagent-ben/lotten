@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getProductBySlug, getAllActiveProducts, getCollectionBySlug, formatPrice, getCollectionBySlug as getCollection, getColorHex, getProductImages } from '@/lib/data/products';
-import { cn } from '@/lib/utils';
+import { createServiceClient } from '@/lib/db/client';
 import ProductDetailClient from './ProductDetailClient';
 
 interface Props {
@@ -10,7 +9,14 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const supabase = createServiceClient();
+  
+  const { data: product } = await supabase
+    .from('products')
+    .select('*, collections(name, slug)')
+    .eq('slug', slug)
+    .eq('is_active', true)
+    .single();
   
   if (!product) {
     return {
@@ -18,8 +24,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const collection = getCollection(product.collection_id);
-  
+  const { data: images } = await supabase
+    .from('product_images')
+    .select('*')
+    .eq('product_id', product.id)
+    .order('sort_order');
+
+  const collection = product.collections;
+
   return {
     title: product.name,
     description: product.short_description || product.description?.slice(0, 160),
@@ -28,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: product.name,
       description: product.short_description || product.description?.slice(0, 160) || '',
       type: 'website',
-      images: product.images?.map(img => ({
+      images: images?.map(img => ({
         url: img.url,
         width: img.width || 1200,
         height: img.height || 630,
@@ -39,7 +51,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: 'summary_large_image',
       title: product.name,
       description: product.short_description || product.description?.slice(0, 160) || '',
-      images: product.images?.map(img => img.url) || [],
+      images: images?.map(img => img.url) || [],
     },
     other: {
       'product:price:amount': product.price_usd.toString(),
@@ -51,24 +63,52 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export async function generateStaticParams() {
-  const products = getAllActiveProducts();
-  return products.map((product) => ({
+  const supabase = createServiceClient();
+  const { data: products } = await supabase
+    .from('products')
+    .select('slug')
+    .eq('is_active', true);
+  
+  return products?.map((product) => ({
     slug: product.slug,
-  }));
+  })) || [];
 }
 
 export const revalidate = 3600; // ISR: revalidate every hour
 
 export default async function ProductDetailPage({ params }: Props) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const supabase = createServiceClient();
+  
+  const { data: product } = await supabase
+    .from('products')
+    .select('*, collections(name, slug)')
+    .eq('slug', slug)
+    .eq('is_active', true)
+    .single();
 
   if (!product) {
     notFound();
   }
 
-  // Fetch product images from the productImages array
-  const productImages = getProductImages(product.id);
+  const { data: productImages } = await supabase
+    .from('product_images')
+    .select('*')
+    .eq('product_id', product.id)
+    .order('sort_order');
 
-  return <ProductDetailClient product={product} images={productImages} />;
+  // Transform product images to match expected type
+  const images = productImages?.map(img => ({
+    id: img.id,
+    product_id: img.product_id,
+    url: img.url,
+    alt_text: img.alt_text,
+    sort_order: img.sort_order,
+    is_primary: img.is_primary,
+    width: img.width,
+    height: img.height,
+    created_at: img.created_at,
+  })) || [];
+
+  return <ProductDetailClient product={product} images={images} />;
 }
