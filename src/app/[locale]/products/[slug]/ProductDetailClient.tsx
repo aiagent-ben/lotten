@@ -62,6 +62,7 @@ interface ProductDetailClientProps {
 export default function ProductDetailClient({ product, images = [] }: ProductDetailClientProps) {
   const { addToRecentlyViewed, recentlyViewed } = useRecentlyViewed();
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedFinish, setSelectedFinish] = useState<{ code: string; name: string; hex: string; part: string } | null>(product.colors?.[0] || null);
   const thumbnailRef = useRef<HTMLDivElement>(null);
 
   // Track recently viewed
@@ -84,10 +85,23 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
 
   const collection = getCollection(product.collection_id);
 
-  // Filter primary image and gallery images
-  const primaryImage = images.find(img => img.is_primary) || images[0];
-  const galleryImages = images.filter(img => !img.is_primary) || [];
+  // Filter primary image and gallery images - exclude color swatches (small 30x30 hinlim URLs)
+  const isColorSwatch = (img: typeof images[0]) => {
+    if (!img.url) return false;
+    // Color swatches are small hinlim images with /color/ in URL
+    return img.url.includes('/color/') && (img.width && img.width <= 100 || img.height && img.height <= 100);
+  };
+ 
+  const productImages = images.filter(img => !isColorSwatch(img));
+  const primaryImage = productImages.find(img => img.is_primary) || productImages[0];
+  const galleryImages = productImages.filter(img => !img.is_primary) || [];
   const allImages = primaryImage ? [primaryImage, ...galleryImages] : galleryImages;
+
+  // Handle finish selection
+  const handleFinishSelect = useCallback((finish: { code: string; name: string; hex: string; part: string }) => {
+    setSelectedFinish(finish);
+    // Could filter images by finish here in the future
+  }, []);
 
   // Update selected index if it goes out of bounds
   useEffect(() => {
@@ -337,12 +351,14 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                       {product.colors.map((color, index) => (
                         <button
                           key={`${color.part}-${color.code}`}
+                          onClick={() => handleFinishSelect(color)}
                           className={cn(
                             'inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all',
-                            index === 0
-                              ? 'border-amber-600 bg-amber-50 text-amber-900'
+                            selectedFinish?.code === color.code
+                              ? 'border-amber-600 bg-amber-50 text-amber-900 ring-2 ring-amber-600/50'
                               : 'border-gray-200 text-gray-700 hover:border-amber-300'
                           )}
+                          aria-pressed={selectedFinish?.code === color.code}
                         >
                           <span
                             className="w-6 h-6 rounded border border-gray-300"
@@ -351,6 +367,11 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                           />
                           <span className="text-sm font-medium">{color.name}</span>
                           <span className="text-xs text-gray-500 font-mono">#{color.code}</span>
+                          {selectedFinish?.code === color.code && (
+                            <svg className="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
                         </button>
                       ))}
                     </div>
