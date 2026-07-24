@@ -63,6 +63,7 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
   const { addToRecentlyViewed, recentlyViewed } = useRecentlyViewed();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [selectedFinish, setSelectedFinish] = useState<{ code: string; name: string; hex: string; part: string } | null>(product.colors?.[0] || null);
+  const [activeTab, setActiveTab] = useState<'description' | 'specifications' | 'materials' | 'dimensions'>('description');
   const thumbnailRef = useRef<HTMLDivElement>(null);
 
   // Track recently viewed
@@ -291,7 +292,28 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                 )}
 
                 {/* Product Name */}
-                <h1 className="heading-1 text-gray-900">{product.name}</h1>
+                <div className="flex items-center gap-4 mb-4 flex-wrap">
+                  <h1 className="heading-1 text-gray-900">{product.name}</h1>
+                  {product.colors && product.colors.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-500">Finish:</span>
+                      {product.colors.map((color, index) => (
+                        <span
+                          key={`${color.part}-${color.code}`}
+                          className="inline-flex items-center gap-1 px-3 py-1 rounded-lg border border-gray-200 bg-white text-sm"
+                        >
+                          <span
+                            className="w-5 h-5 rounded border border-gray-300 flex-shrink-0"
+                            style={{ backgroundColor: color.hex || getColorHex(color.code) }}
+                            title={`${color.name} (${color.code})`}
+                          />
+                          <span className="font-medium text-gray-900">{color.name}</span>
+                          <span className="text-xs text-gray-500 font-mono">#{color.code}</span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
                 {/* Article Number */}
                 <p className="text-sm text-gray-500 font-mono">Article No: {product.article_no}</p>
@@ -430,12 +452,18 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <nav className="mb-8" aria-label="Product details tabs">
-              <ul className="flex gap-6 border-b border-gray-200" role="tablist">
+              <ul className="flex flex-wrap gap-4 border-b border-gray-200" role="tablist">
                 <li>
                   <button 
                     role="tab" 
-                    aria-selected={true}
-                    className="font-medium text-amber-700 border-b-2 border-amber-700 pb-4"
+                    aria-selected={activeTab === 'description'}
+                    onClick={() => setActiveTab('description')}
+                    className={cn(
+                      'font-medium pb-4 border-b-2 transition-colors',
+                      activeTab === 'description'
+                        ? 'text-amber-700 border-amber-700'
+                        : 'text-gray-500 hover:text-gray-900 border-transparent hover:border-gray-300'
+                    )}
                   >
                     Description
                   </button>
@@ -443,8 +471,14 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                 <li>
                   <button 
                     role="tab" 
-                    aria-selected={false}
-                    className="font-medium text-gray-500 hover:text-gray-900 pb-4 border-b-2 border-transparent hover:border-gray-300"
+                    aria-selected={activeTab === 'specifications'}
+                    onClick={() => setActiveTab('specifications')}
+                    className={cn(
+                      'font-medium pb-4 border-b-2 transition-colors',
+                      activeTab === 'specifications'
+                        ? 'text-amber-700 border-amber-700'
+                        : 'text-gray-500 hover:text-gray-900 border-transparent hover:border-gray-300'
+                    )}
                   >
                     Specifications
                   </button>
@@ -452,8 +486,14 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                 <li>
                   <button 
                     role="tab" 
-                    aria-selected={false}
-                    className="font-medium text-gray-500 hover:text-gray-900 pb-4 border-b-2 border-transparent hover:border-gray-300"
+                    aria-selected={activeTab === 'materials'}
+                    onClick={() => setActiveTab('materials')}
+                    className={cn(
+                      'font-medium pb-4 border-b-2 transition-colors',
+                      activeTab === 'materials'
+                        ? 'text-amber-700 border-amber-700'
+                        : 'text-gray-500 hover:text-gray-900 border-transparent hover:border-gray-300'
+                    )}
                   >
                     Materials & Finishes
                   </button>
@@ -461,8 +501,14 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                 <li>
                   <button 
                     role="tab" 
-                    aria-selected={false}
-                    className="font-medium text-gray-500 hover:text-gray-900 pb-4 border-b-2 border-transparent hover:border-gray-300"
+                    aria-selected={activeTab === 'dimensions'}
+                    onClick={() => setActiveTab('dimensions')}
+                    className={cn(
+                      'font-medium pb-4 border-b-2 transition-colors',
+                      activeTab === 'dimensions'
+                        ? 'text-amber-700 border-amber-700'
+                        : 'text-gray-500 hover:text-gray-900 border-transparent hover:border-gray-300'
+                    )}
                   >
                     Dimensions
                   </button>
@@ -470,10 +516,175 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
               </ul>
             </nav>
 
-            <div className="prose prose-lg prose-gray max-w-none dark:prose-invert">
-              <h2 className="heading-2 text-gray-900 mb-4">About This Product</h2>
-              <div dangerouslySetInnerHTML={{ __html: product.description || '' }} />
-            </div>
+            {activeTab === 'description' && (
+              <div className="prose prose-lg prose-gray max-w-none dark:prose-invert">
+                <h2 className="heading-2 text-gray-900 mb-4">About This Product</h2>
+                <div dangerouslySetInnerHTML={{ __html: product.description || '' }} />
+              </div>
+            )}
+
+            {activeTab === 'specifications' && (
+              <div className="space-y-8">
+                <h2 className="heading-2 text-gray-900">Specifications</h2>
+                <dl className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {specs.dimensions && (
+                    <>
+                      <dt className="text-gray-500">Dimensions</dt>
+                      <dd className="font-medium text-gray-900">{specs.dimensions}</dd>
+                    </>
+                  )}
+                  {specs.weight && (
+                    <>
+                      <dt className="text-gray-500">Weight</dt>
+                      <dd className="font-medium text-gray-900">{specs.weight} kg</dd>
+                    </>
+                  )}
+                  {specs.volume && (
+                    <>
+                      <dt className="text-gray-500">Volume</dt>
+                      <dd className="font-medium text-gray-900">{specs.volume} m³</dd>
+                    </>
+                  )}
+                  {specs.packType && (
+                    <>
+                      <dt className="text-gray-500">Packaging</dt>
+                      <dd className="font-medium text-gray-900">{specs.packType}</dd>
+                    </>
+                  )}
+                  {product.lead_time_weeks && (
+                    <>
+                      <dt className="text-gray-500">Lead Time</dt>
+                      <dd className="font-medium text-gray-900">{product.lead_time_weeks} weeks</dd>
+                    </>
+                  )}
+                  {product.moq && (
+                    <>
+                      <dt className="text-gray-500">MOQ</dt>
+                      <dd className="font-medium text-gray-900">{product.moq}</dd>
+                    </>
+                  )}
+                </dl>
+              </div>
+            )}
+
+            {activeTab === 'materials' && (
+              <div className="space-y-8">
+                <h2 className="heading-2 text-gray-900">Materials & Finishes</h2>
+                
+                {product.materials && product.materials.length > 0 && (
+                  <div>
+                    <h3 className="heading-3 text-gray-900 mb-4">Materials</h3>
+                    <ul className="space-y-3">
+                      {product.materials.map((material: any, index: number) => (
+                        <li key={index} className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-100">
+                          <span className="text-gray-600 capitalize">{material.part?.replace(/_/g, ' ') || 'Material'}</span>
+                          <div className="flex items-center gap-4 text-gray-900">
+                            <span className="font-medium">{material.material || 'Malaysian Oak'}</span>
+                            {material.finish && (
+                              <span className="text-sm text-gray-500">({material.finish})</span>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {product.colors && product.colors.length > 0 && (
+                  <div>
+                    <h3 className="heading-3 text-gray-900 mb-4">Available Finishes</h3>
+                    <div className="flex flex-wrap gap-3">
+                      {product.colors.map((color: any) => (
+                        <div 
+                          key={`${color.part}-${color.code}`}
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white text-sm"
+                        >
+                          <span
+                            className="w-5 h-5 rounded border border-gray-300 flex-shrink-0"
+                            style={{ backgroundColor: color.hex || getColorHex(color.code) }}
+                            title={`${color.name} (${color.code})`}
+                          />
+                          <span className="font-medium text-gray-900">{color.name}</span>
+                          <span className="text-xs text-gray-500 font-mono">#{color.code}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'dimensions' && (
+              <div className="space-y-8">
+                <h2 className="heading-2 text-gray-900">Dimensions</h2>
+                
+                {product.width_mm || product.depth_mm || product.height_mm ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-white p-6 rounded-xl border border-gray-100 text-center">
+                      <p className="caption text-gray-500">Width</p>
+                      <p className="heading-2 font-bold text-gray-900">{product.width_mm} mm</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-xl border border-gray-100 text-center">
+                      <p className="caption text-gray-500">Depth</p>
+                      <p className="heading-2 font-bold text-gray-900">{product.depth_mm} mm</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-xl border border-gray-100 text-center">
+                      <p className="caption text-gray-500">Height</p>
+                      <p className="heading-2 font-bold text-gray-900">{product.height_mm} mm</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-gray-500">Dimension data not available</p>
+                )}
+
+                {product.weight_kg && (
+                  <div className="bg-white p-6 rounded-xl border border-gray-100">
+                    <p className="caption text-gray-500">Weight</p>
+                    <p className="heading-2 font-bold text-gray-900">{product.weight_kg} kg</p>
+                  </div>
+                )}
+
+                {product.volume_m3 && (
+                  <div className="bg-white p-6 rounded-xl border border-gray-100">
+                    <p className="caption text-gray-500">Volume</p>
+                    <p className="heading-2 font-bold text-gray-900">{product.volume_m3} m³</p>
+                  </div>
+                )}
+
+                {product.carton_length_mm || product.carton_width_mm || product.carton_height_mm ? (
+                  <div className="bg-gray-50 p-6 rounded-xl">
+                    <h3 className="heading-3 text-gray-900 mb-4">Carton Dimensions</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {product.carton_length_mm && (
+                        <div className="bg-white p-4 rounded-lg border border-gray-100 text-center">
+                          <p className="caption text-gray-500">Length</p>
+                          <p className="font-bold text-gray-900">{product.carton_length_mm} mm</p>
+                        </div>
+                      )}
+                      {product.carton_width_mm && (
+                        <div className="bg-white p-4 rounded-lg border border-gray-100 text-center">
+                          <p className="caption text-gray-500">Width</p>
+                          <p className="font-bold text-gray-900">{product.carton_width_mm} mm</p>
+                        </div>
+                      )}
+                      {product.carton_height_mm && (
+                        <div className="bg-white p-4 rounded-lg border border-gray-100 text-center">
+                          <p className="caption text-gray-500">Height</p>
+                          <p className="font-bold text-gray-900">{product.carton_height_mm} mm</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+
+                {product.pack_type && (
+                  <div className="bg-white p-6 rounded-xl border border-gray-100">
+                    <p className="caption text-gray-500">Packaging</p>
+                    <p className="font-bold text-gray-900">{product.pack_type}</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </section>
 
