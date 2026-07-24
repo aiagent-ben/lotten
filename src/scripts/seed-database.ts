@@ -273,28 +273,34 @@ async function seedDatabase() {
       console.error('Product error:', rawProduct.name, productError);
       continue;
     }
-    
-    // Seed product images - use R2 images from cleaned data
-    if (productData && rawProduct.r2_images && rawProduct.r2_images.length > 0) {
-      for (let i = 0; i < rawProduct.r2_images.length; i++) {
-        const imgUrl = rawProduct.r2_images[i];
-        const { error: imgError } = await supabase
-          .from('product_images')
-          .insert({
-            product_id: productData.id,
-            url: imgUrl,
-            alt_text: `${rawProduct.name} - Image ${i + 1}`,
-            sort_order: i,
-            is_primary: i === 0,
-          });
-        if (imgError) {
-          if (!imgError.message.includes('duplicate')) {
-            console.error('Image error:', imgUrl, imgError);
+
+        // Seed product images - use R2 images from cleaned data
+        if (productData && rawProduct.r2_images && rawProduct.r2_images.length > 0) {
+          // First, clean up any existing images for this product to avoid duplicates
+          await supabase
+            .from('product_images')
+            .delete()
+            .eq('product_id', productData.id);
+
+          for (let i = 0; i < rawProduct.r2_images.length; i++) {
+            const imgUrl = rawProduct.r2_images[i];
+            const { error: imgError } = await supabase
+              .from('product_images')
+              .insert({
+                product_id: productData.id,
+                url: imgUrl,
+                alt_text: `${rawProduct.name} - Image ${i + 1}`,
+                sort_order: i,
+                is_primary: i === 0,
+              });
+            if (imgError) {
+              if (!imgError.message.includes('duplicate')) {
+                console.error('Image error:', imgUrl, imgError);
+              }
+            }
           }
         }
       }
-    }
-  }
   console.log('Products seeded.');
   
   console.log('Database seeding complete!');
