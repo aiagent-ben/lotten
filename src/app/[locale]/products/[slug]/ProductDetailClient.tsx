@@ -311,11 +311,6 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                               (e.target as HTMLImageElement).style.display = 'none';
                             }}
                           />
-                          <span
-                            className="w-5 h-5 rounded border border-gray-300 flex-shrink-0"
-                            style={{ backgroundColor: color.hex || getColorHex(color.code) }}
-                            title={`${color.name} (${color.code})`}
-                          />
                           <span className="font-medium text-gray-900">{color.name}</span>
                           <span className="text-xs text-gray-500 font-mono">#{color.code}</span>
                         </div>
@@ -380,9 +375,9 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                   <div className="border-t border-b border-gray-100 py-6">
                     <h3 className="heading-4 text-gray-900 mb-4">Available Finishes</h3>
                     <div className="flex flex-wrap gap-3">
-                      {product.colors.map((color, index) => (
+                      {Array.from(new Map(product.colors.map(c => [c.code, c])).values()).map((color, index) => (
                         <button
-                          key={`${color.part}-${color.code}`}
+                          key={`${color.code}-${index}`}
                           onClick={() => handleFinishSelect(color)}
                           className={cn(
                             'inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all',
