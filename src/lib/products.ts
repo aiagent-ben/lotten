@@ -1,5 +1,5 @@
 // Auto-generated from scraped data - DO NOT EDIT MANUALLY
-// Generated: 2026-07-24T16:13:13.425271
+// Generated: 2026-07-24T20:00:41.422700
 // Source: data/clean/products.json (379 products)
 
 export interface Product {
@@ -21,19 +21,6 @@ export interface Product {
 }
 
 export const products: Product[] = [
-  {
-    id: "131185",
-    name: "LIGHT TENNESSEE WALNUT",
-    slug: "131185-toronto-side-table-with-3-drawer-1802",
-    image: "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/0.webp",
-    images: ["https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/0.webp", "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/1.webp", "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/2.webp", "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/3.webp", "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/4.webp", "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/5.webp", "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/6.webp", "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/7.webp", "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/8.webp", "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/9.webp"],
-    price: "Contact for Price",
-    collection: "",
-    description: "Toronto Side Table with 3 drawers in Light Tennessee Walnut colour. Toronto Side Table with 3 Drawers in Light Tennessee Walnut is a masterfully crafted storage solution that blends mid-century modern aesthetics with daily functional utility. Featuring a robust cabinet body constructed from MDF and premium acacia veneer, the piece showcases a rich, multi-tonal wood grain that adds organic warmth to any bedroom or living space. three spacious drawers are equipped with sleek, dark minimalist handles, providing ample room for organizing personal essentials while maintaining a clean, uncluttered look. Supporting the unit are tapered legs made from solid Malaysian Oak, which offer exceptional structural stability and a light, elevated silhouette. Its Light Tennessee Walnut finish provides a versatile, timeless appeal, making it an ideal companion for both contemporary and classic interior decors.",
-    materials: "CABINET LEG: MALAYSIAN OAK\nCABINET BODY: MDF+ACACIA VENEER",
-    specifications: "Dimension (mm): L560 W450 H780\n                      Gross Weight (kg): 31.80\n                      m³: 0.2240\n                      Pack Type: 1PC/CTN",
-    articleNo: "131185",
-  },
   {
     id: "132095",
     name: "LIGHT TENNESSEE WALNUT",
@@ -4401,6 +4388,19 @@ export const products: Product[] = [
     materials: "SHELF FRAME: MALAYSIAN OAK\nSHELF DRAWER: MDF+ACACIA VENEER",
     specifications: "Dimension (mm): W560 D380 H1800\n                      Gross Weight (kg): 35.80\n                      m³: 0.2323\n                      Pack Type: 1PC/2CTNS",
     articleNo: "521005",
+  },
+  {
+    id: "131185",
+    name: "LIGHT TENNESSEE WALNUT",
+    slug: "131185-toronto-side-table-with-3-drawer-1802",
+    image: "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/0.webp",
+    images: ["https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/0.webp", "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/1.webp", "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/2.webp", "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/3.webp", "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/4.webp", "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/5.webp", "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/6.webp", "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/7.webp", "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/8.webp", "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/131185/131185-toronto-side-table-with-3-drawer-1802/9.webp"],
+    price: "Contact for Price",
+    collection: "Toronto",
+    description: "Toronto Side Table with 3 drawers in Light Tennessee Walnut colour. Toronto Side Table with 3 Drawers in Light Tennessee Walnut is a masterfully crafted storage solution that blends mid-century modern aesthetics with daily functional utility. Featuring a robust cabinet body constructed from MDF and premium acacia veneer, the piece showcases a rich, multi-tonal wood grain that adds organic warmth to any bedroom or living space. three spacious drawers are equipped with sleek, dark minimalist handles, providing ample room for organizing personal essentials while maintaining a clean, uncluttered look. Supporting the unit are tapered legs made from solid Malaysian Oak, which offer exceptional structural stability and a light, elevated silhouette. Its Light Tennessee Walnut finish provides a versatile, timeless appeal, making it an ideal companion for both contemporary and classic interior decors.",
+    materials: "CABINET LEG: MALAYSIAN OAK\nCABINET BODY: MDF+ACACIA VENEER",
+    specifications: "Dimension (mm): L560 W450 H780\n                      Gross Weight (kg): 31.80\n                      m³: 0.2240\n                      Pack Type: 1PC/CTN",
+    articleNo: "131185",
   },
   {
     id: "343048",
