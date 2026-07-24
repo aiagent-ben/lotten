@@ -818,4 +818,4 @@ function parseSpecifications(product: any) {
   }
   
   return specs;
-}
+} 
