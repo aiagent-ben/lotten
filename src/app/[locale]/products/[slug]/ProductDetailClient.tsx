@@ -296,9 +296,10 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                   <h1 className="heading-1 text-gray-900">{product.name}</h1>
                   {product.colors && product.colors.length > 0 && (
                     <div className="flex items-center gap-2">
-                      {product.colors.map((color, index) => (
+                      {/* Deduplicate colors by code */}
+                      {Array.from(new Map(product.colors.map(c => [c.code, c])).values()).map((color, index) => (
                         <div
-                          key={`${color.part}-${color.code}`}
+                          key={`${color.code}-${index}`}
                           className="flex items-center gap-2 px-3 py-1 rounded-lg border border-gray-200 bg-white text-sm"
                         >
                           {/* Color swatch image from source */}
