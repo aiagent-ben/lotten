@@ -5,25 +5,44 @@ import * as fs from 'fs';
 
 dotenv.config({ path: resolve(process.cwd(), '.env.local') });
 
-interface RawProduct {
+// Clean product format from data/clean/products_r2.json
+interface CleanProduct {
   id: string;
+  article_no: string;
+  collection_id: string;  // e.g., "col-alford"
   name: string;
   slug: string;
-  image: string;
-  images: string[];
-  price: string;
-  collection: string;
-  description: string;
-  materials: string;
-  colors: string;
-  specifications: string;
-  dimensions: string;
-  weight: string;
-  cartonDimensions: string;
-  articleNo: string;
-  // R2 fields from cleaned data
-  r2_images?: string[];
-  r2_primary_image?: string;
+  description: string | null;
+  short_description: string | null;
+  width_mm: number | null;
+  depth_mm: number | null;
+  height_mm: number | null;
+  weight_kg: number | null;
+  volume_m3: number | null;
+  pack_type: string | null;
+  carton_length_mm: number | null;
+  carton_width_mm: number | null;
+  carton_height_mm: number | null;
+  materials: Array<{part: string; material: string; finish: string; code: string}> | null;
+  colors: Array<{part: string; name: string; code: string; hex: string}> | null;
+  price_usd: number;
+  cost_usd: number | null;
+  moq: number;
+  lead_time_weeks: number;
+  stock_available: number;
+  stock_reserved: number;
+  stock_incoming: number;
+  low_stock_threshold: number;
+  is_active: boolean;
+  is_new: boolean;
+  is_bestseller: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+  images: Array<{id: string; product_id: string; url: string; alt_text: string | null; sort_order: number; is_primary: boolean; width: number | null; height: number | null; created_at: string}>;
+  r2_images: string[];
+  r2_primary_image: string;
+  processed: boolean;
 }
 
 function parseCollectionName(fullName: string | null | undefined): { name: string; brand: string } {
@@ -37,112 +56,32 @@ function parseCollectionName(fullName: string | null | undefined): { name: strin
   return { name: fullName.trim(), brand: '' };
 }
 
-function parseSpecifications(specs: string): {
-  width?: number;
-  depth?: number;
-  height?: number;
-  weight?: number;
-  volume?: number;
-  packType?: string;
-} {
-  const result: any = {};
-  
-  const dimMatch = specs.match(/Dimension\s*\(mm\):\s*W(\d+)\s*D(\d+)\s*H(\d+)/i);
-  if (dimMatch) {
-    result.width = parseInt(dimMatch[1]);
-    result.depth = parseInt(dimMatch[2]);
-    result.height = parseInt(dimMatch[3]);
-  }
-  
-  const weightMatch = specs.match(/Gross Weight\s*\(kg\):\s*([\d.]+)/i);
-  if (weightMatch) {
-    result.weight = parseFloat(weightMatch[1]);
-  }
-  
-  const volumeMatch = specs.match(/m³?\s*:\s*([\d.]+)/i);
-  if (volumeMatch) {
-    result.volume = parseFloat(volumeMatch[1]);
-  }
-  
-  const packMatch = specs.match(/Pack Type:\s*(.+)/i);
-  if (packMatch) {
-    result.packType = packMatch[1].trim();
-  }
-  
-  return result;
-}
-
-function parseCartonDimensions(cartonStr: string): {
-  length?: number;
-  width?: number;
-  height?: number;
-} {
-  const result: any = {};
-  const match = cartonStr.match(/L(\d+)\s*W(\d+)\s*H(\d+)/i);
-  if (match) {
-    result.length = parseInt(match[1]);
-    result.width = parseInt(match[2]);
-    result.height = parseInt(match[3]);
-  }
-  return result;
-}
-
-function parseMaterials(materialsStr: string): Array<{part: string; material: string; finish: string; code: string}> {
-  const lines = materialsStr.split('\n').filter(l => l.trim() && !l.includes('Article No'));
-  const result = [];
-  
-  for (const line of lines) {
-    const match = line.match(/^(.+?):\s*(.+)$/);
-    if (match) {
-      const part = match[1].trim();
-      const value = match[2].trim();
-      // Try to extract material and finish
-      const parts = value.split('+').map(p => p.trim());
-      const material = parts[0] || '';
-      const finish = parts[1] || '';
-      result.push({ part, material, finish, code: '' });
-    }
-  }
-  return result;
-}
-
-function parseColors(colorsStr: string): Array<{part: string; name: string; code: string; hex: string}> {
-  const lines = colorsStr.split('\n').filter(l => l.trim());
-  const result = [];
-  
-  for (const line of lines) {
-    const match = line.match(/^(.+?):\s*(.+)$/);
-    if (match) {
-      const part = match[1].trim();
-      const value = match[2].trim();
-      // Extract code (first word) and name (rest)
-      const parts = value.split(' ');
-      const code = parts[0] || '';
-      const name = parts.slice(1).join(' ') || value;
-      result.push({ part, name, code, hex: '#FFFFFF' });
-    }
-  }
-  return result;
-}
-
 async function seedDatabase() {
   const supabase = createServiceClient();
   
-  // Load products from JSON
-  const rawProducts: RawProduct[] = JSON.parse(
-    fs.readFileSync(resolve(process.cwd(), 'src/scripts/products.json'), 'utf-8')
+  // Load products from clean JSON
+  const cleanData = JSON.parse(
+    fs.readFileSync(resolve(process.cwd(), 'data/clean/products_r2.json'), 'utf-8')
   );
   
-  console.log(`Loaded ${rawProducts.length} products from JSON`);
+  const cleanProducts: CleanProduct[] = cleanData.products || [];
   
-  // Extract unique brands and collections
+  console.log(`Loaded ${cleanProducts.length} products from clean JSON`);
+  
+  // Extract unique brands and collections from collection_id
+  // collection_id format: "col-alford", "col-brinhill", etc.
+  // We need to derive brand from collection name or find another way
   const brandMap = new Map<string, {name: string; slug: string; description: string}>();
   const collectionMap = new Map<string, {name: string; slug: string; brand: string; description: string}>();
   
-  for (const product of rawProducts) {
-    const { name: collectionName, brand: brandName } = parseCollectionName(product.collection);
-    const brandSlug = brandName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const collectionSlug = collectionName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  for (const product of cleanProducts) {
+    // collection_id is like "col-alford" - extract collection name
+    const collectionSlug = product.collection_id.replace('col-', '');
+    // We need to get the full collection name from somewhere
+    // For now, use the slug as name and derive brand from product data
+    const collectionName = collectionSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    const brandSlug = 'b2bfurniture'; // Default brand
+    const brandName = 'B2B Furniture Supply';
     
     if (!brandMap.has(brandSlug)) {
       brandMap.set(brandSlug, {
@@ -210,9 +149,11 @@ async function seedDatabase() {
   
   // 3. Seed products
   console.log('Seeding products...');
-  for (const rawProduct of rawProducts) {
-    const { name: collectionName, brand: brandName } = parseCollectionName(rawProduct.collection);
-    const collectionSlug = collectionName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  let successCount = 0;
+  let errorCount = 0;
+  
+  for (const cleanProduct of cleanProducts) {
+    const collectionSlug = cleanProduct.collection_id.replace('col-', '');
     
     const { data: collectionData } = await supabase
       .from('collections')
@@ -222,87 +163,84 @@ async function seedDatabase() {
     
     if (!collectionData) {
       console.error('Collection not found:', collectionSlug);
+      errorCount++;
       continue;
     }
     
-    const specs = parseSpecifications(rawProduct.specifications);
-    const carton = parseCartonDimensions(rawProduct.cartonDimensions);
-    const materials = parseMaterials(rawProduct.materials);
-    const colors = parseColors(rawProduct.colors);
-    
-    // Use articleNo as price fallback (since price is "Contact for Price")
-    const price = 0; // Will be set manually later
-    
+    // Use already-structured data from clean format
     const { data: productData, error: productError } = await supabase
       .from('products')
       .upsert({
-        article_no: rawProduct.articleNo,
+        article_no: cleanProduct.article_no,
         collection_id: collectionData.id,
-        name: rawProduct.name,
-        slug: rawProduct.slug,
-        short_description: rawProduct.description.substring(0, 200),
-        description: rawProduct.description,
-        width_mm: specs.width,
-        depth_mm: specs.depth,
-        height_mm: specs.height,
-        weight_kg: specs.weight,
-        volume_m3: specs.volume,
-        pack_type: specs.packType,
-        carton_length_mm: carton.length,
-        carton_width_mm: carton.width,
-        carton_height_mm: carton.height,
-        materials: materials,
-        colors: colors,
-        price_usd: price,
-        cost_usd: null,
-        moq: 1,
-        lead_time_weeks: 8,
-        stock_available: 10,
-        stock_reserved: 0,
-        stock_incoming: 0,
-        low_stock_threshold: 5,
-        is_active: true,
-        is_new: false,
-        is_bestseller: false,
-        sort_order: 0,
+        name: cleanProduct.name,
+        slug: cleanProduct.slug,
+        short_description: cleanProduct.short_description,
+        description: cleanProduct.description,
+        width_mm: cleanProduct.width_mm,
+        depth_mm: cleanProduct.depth_mm,
+        height_mm: cleanProduct.height_mm,
+        weight_kg: cleanProduct.weight_kg,
+        volume_m3: cleanProduct.volume_m3,
+        pack_type: cleanProduct.pack_type,
+        carton_length_mm: cleanProduct.carton_length_mm,
+        carton_width_mm: cleanProduct.carton_width_mm,
+        carton_height_mm: cleanProduct.carton_height_mm,
+        materials: cleanProduct.materials,
+        colors: cleanProduct.colors,
+        price_usd: cleanProduct.price_usd,
+        cost_usd: cleanProduct.cost_usd,
+        moq: cleanProduct.moq,
+        lead_time_weeks: cleanProduct.lead_time_weeks,
+        stock_available: cleanProduct.stock_available,
+        stock_reserved: cleanProduct.stock_reserved,
+        stock_incoming: cleanProduct.stock_incoming,
+        low_stock_threshold: cleanProduct.low_stock_threshold,
+        is_active: cleanProduct.is_active,
+        is_new: cleanProduct.is_new,
+        is_bestseller: cleanProduct.is_bestseller,
+        sort_order: cleanProduct.sort_order,
       }, { onConflict: 'article_no' })
       .select('id')
       .single();
     
     if (productError) {
-      console.error('Product error:', rawProduct.name, productError);
+      console.error('Product error:', cleanProduct.name, productError);
+      errorCount++;
       continue;
     }
-
-        // Seed product images - use R2 images from cleaned data
-        if (productData && rawProduct.r2_images && rawProduct.r2_images.length > 0) {
-          // First, clean up any existing images for this product to avoid duplicates
-          await supabase
-            .from('product_images')
-            .delete()
-            .eq('product_id', productData.id);
-
-          for (let i = 0; i < rawProduct.r2_images.length; i++) {
-            const imgUrl = rawProduct.r2_images[i];
-            const { error: imgError } = await supabase
-              .from('product_images')
-              .insert({
-                product_id: productData.id,
-                url: imgUrl,
-                alt_text: `${rawProduct.name} - Image ${i + 1}`,
-                sort_order: i,
-                is_primary: i === 0,
-              });
-            if (imgError) {
-              if (!imgError.message.includes('duplicate')) {
-                console.error('Image error:', imgUrl, imgError);
-              }
-            }
+    
+    successCount++;
+    
+    // Seed product images - use R2 images from cleaned data
+    if (productData && cleanProduct.r2_images && cleanProduct.r2_images.length > 0) {
+      // First, clean up any existing images for this product to avoid duplicates
+      await supabase
+        .from('product_images')
+        .delete()
+        .eq('product_id', productData.id);
+      
+      for (let i = 0; i < cleanProduct.r2_images.length; i++) {
+        const imgUrl = cleanProduct.r2_images[i];
+        const { error: imgError } = await supabase
+          .from('product_images')
+          .insert({
+            product_id: productData.id,
+            url: imgUrl,
+            alt_text: `${cleanProduct.name} - Image ${i + 1}`,
+            sort_order: i,
+            is_primary: i === 0,
+          });
+        if (imgError) {
+          if (!imgError.message.includes('duplicate')) {
+            console.error('Image error:', imgUrl, imgError);
           }
         }
       }
-  console.log('Products seeded.');
+    }
+  }
   
+  console.log(`Products seeded: ${successCount} success, ${errorCount} errors`);
   console.log('Database seeding complete!');
 }
 

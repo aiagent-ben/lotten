@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
     ],
     formats: ['image/avif', 'image/webp'],
   },
-  // Turbopack is enabled by default in Next.js 16
+  // Turbopack config - empty to disable error
   turbopack: {},
 };
 
