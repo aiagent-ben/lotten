@@ -92,7 +92,7 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
     // Color swatches are small hinlim images with /color/ in URL
     return img.url.includes('/color/') && (img.width && img.width <= 100 || img.height && img.height <= 100);
   };
- 
+
   const productImages = images.filter(img => !isColorSwatch(img));
   const primaryImage = productImages.find(img => img.is_primary) || productImages[0];
   const galleryImages = productImages.filter(img => !img.is_primary) || [];
@@ -296,12 +296,20 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                   <h1 className="heading-1 text-gray-900">{product.name}</h1>
                   {product.colors && product.colors.length > 0 && (
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-500">Finish:</span>
                       {product.colors.map((color, index) => (
-                        <span
+                        <div
                           key={`${color.part}-${color.code}`}
-                          className="inline-flex items-center gap-1 px-3 py-1 rounded-lg border border-gray-200 bg-white text-sm"
+                          className="flex items-center gap-2 px-3 py-1 rounded-lg border border-gray-200 bg-white text-sm"
                         >
+                          {/* Color swatch image from source */}
+                          <img
+                            src={`https://mm.hinlim.com/cache/b2bfs/color/${color.code} ${color.name}-30x30.jpg`}
+                            alt={`${color.name} (${color.code})`}
+                            className="w-6 h-6 rounded border border-gray-300 flex-shrink-0"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
                           <span
                             className="w-5 h-5 rounded border border-gray-300 flex-shrink-0"
                             style={{ backgroundColor: color.hex || getColorHex(color.code) }}
@@ -309,10 +317,11 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                           />
                           <span className="font-medium text-gray-900">{color.name}</span>
                           <span className="text-xs text-gray-500 font-mono">#{color.code}</span>
-                        </span>
+                        </div>
                       ))}
                     </div>
                   )}
+
                 </div>
 
                 {/* Article Number */}
@@ -737,8 +746,7 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                       </p>
                     </div>
                   </Link>
-                );
-              })}
+                );})}
             </div>
           </div>
         </section>
