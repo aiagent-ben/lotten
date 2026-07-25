@@ -331,3 +331,4 @@ export default async function CollectionDetailPage({ params }: Props) {
     </main>
   );
 } 
+ 
