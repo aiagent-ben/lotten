@@ -170,4 +170,4 @@ export default async function CollectionsPage() {
       </section>
     </main>
   );
-}
+} 
