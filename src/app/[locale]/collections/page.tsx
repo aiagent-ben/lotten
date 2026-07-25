@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getCollections } from '@/lib/data/products';
+import { getCollections, getBrands } from '@/lib/data/products';
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
@@ -12,30 +12,24 @@ export const metadata: Metadata = {
 export const revalidate = 3600; // ISR: revalidate every hour
 
 export default async function CollectionsPage() {
-  const allCollections = await getCollections();
-  const activeCollections = allCollections.filter(c => c.is_active);
+  const [allCollections, allBrands] = await Promise.all([
+    getCollections(),
+    getBrands()
+  ]);
   
+  const activeCollections = allCollections.filter(c => c.is_active);
+  const activeBrands = allBrands.filter(b => 
+    activeCollections.some(c => c.brand_id === b.id)
+  );
+
   // Group collections by brand
-  const brands = [
-    {
-      id: 'brand-nesthouz',
-      name: 'NestHouZ',
-      description: 'Contemporary Malaysian Oak furniture with warm, sophisticated finishes for modern living spaces.',
-      collections: activeCollections.filter(c => c.brand_id === '507dfb2a-02cd-4f74-b6f5-96941ad211c1'),
-    },
-    {
-      id: 'brand-nestnordic',
-      name: 'NestNordic',
-      description: 'Scandinavian-inspired designs featuring clean lines, light washes, and minimalist aesthetics.',
-      collections: activeCollections.filter(c => c.brand_id === '6c3d2602-8265-44a9-a93d-7fd7210331ae'),
-    },
-    {
-      id: 'brand-luooma',
-      name: 'Luooma',
-      description: 'Modern furniture collections with innovative material combinations and architectural silhouettes.',
-      collections: activeCollections.filter(c => c.brand_id === '780da9c3-ed25-4c70-a734-e12d63e318e2'),
-    },
-  ].filter(b => b.collections.length > 0);
+  const brands = activeBrands.map(brand => ({
+    id: brand.id,
+    name: brand.name,
+    slug: brand.slug,
+    description: brand.description || `${brand.name} furniture collection`,
+    collections: activeCollections.filter(c => c.brand_id === brand.id),
+  })).filter(b => b.collections.length > 0);
 
   return (
     <main className="min-h-screen bg-white">
