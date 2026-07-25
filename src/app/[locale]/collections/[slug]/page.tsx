@@ -2,10 +2,8 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getCollectionBySlug, getProductsByCollection, getCollectionsByBrand, formatPrice, collections } from '@/lib/data/products';
+import { getCollectionBySlug, getProductsByCollection, getCollectionsByBrand, formatPrice, getCollections, getBrands } from '@/lib/data/products';
 import { cn } from '@/lib/utils';
-
-import { brands } from '@/lib/data/products';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -13,7 +11,8 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const collection = getCollectionBySlug(slug);
+  const allCollections = await getCollections();
+  const collection = allCollections.find(c => c.slug === slug);
 
   if (!collection) {
     return {
@@ -21,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const collectionsOfBrand = getCollectionsByBrand(collection.brand_id);
+  const collectionsOfBrand = allCollections.filter(c => c.brand_id === collection.brand_id);
   const brand = collectionsOfBrand[0]?.brand;
 
   return {
@@ -49,23 +48,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export async function generateStaticParams() {
-  const allCollections = collections
+  const allCollections = await getCollections();
+  return allCollections
     .filter(c => c.is_active)
     .map(c => ({ slug: c.slug }));
-  return allCollections;
 }
 
 export const revalidate = 3600; // ISR: revalidate every hour
 
-export async function CollectionDetailPage({ params }: Props) {
+export default async function CollectionDetailPage({ params }: Props) {
   const { slug } = await params;
-  const collection = getCollectionBySlug(slug);
+  const allCollections = await getCollections();
+  const collection = allCollections.find(c => c.slug === slug);
 
   if (!collection) {
     notFound();
   }
 
-  const collectionsOfBrand = getCollectionsByBrand(collection.brand_id);
+  const collectionsOfBrand = allCollections.filter(c => c.brand_id === collection.brand_id);
   const brand = collectionsOfBrand[0]?.brand;
   const products = getProductsByCollection(collection.id);
   const featuredProducts = products.slice(0, 8);
@@ -272,11 +272,11 @@ export async function CollectionDetailPage({ params }: Props) {
           <h2 className="heading-2 text-gray-900 text-center mb-12">Explore More Collections</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {collections
+            {allCollections
                           .filter(c => c.is_active && c.id !== collection.id)
                           .slice(0, 6)
                           .map((relatedCollection) => {
-                const relatedBrand = brands.find(b => b.id === relatedCollection.brand_id);
+                const relatedBrand = getBrands().find(b => b.id === relatedCollection.brand_id);
                 return (
                   <Link
                     key={relatedCollection.id}
@@ -331,4 +331,3 @@ export async function CollectionDetailPage({ params }: Props) {
     </main>
   );
 }
-export default CollectionDetailPage;
