@@ -1,5 +1,5 @@
 // Products data - synchronous access for build-time rendering
-// This module reads from public JSON file at build time using Node.js fs
+// This module reads from public JSON files at build time using Node.js fs
 
 import type { Brand, Collection, Product, ProductVariant, MaterialSpec, ColorOption, ProductImage } from '@/lib/types/database';
 
@@ -11,7 +11,6 @@ function loadProductsSync(): Product[] {
   }
   
   try {
-    // Use require for Node.js fs module (only runs on server)
     const fs = require('fs');
     const path = require('path');
     const filePath = path.join(process.cwd(), 'public', 'data', 'products.json');
@@ -24,8 +23,52 @@ function loadProductsSync(): Product[] {
   }
 }
 
+// Load collections from JSON file at build time (server-side only)
+function loadCollectionsSync(): Collection[] {
+  if (typeof window !== 'undefined') {
+    return [];
+  }
+  
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const filePath = path.join(process.cwd(), 'public', 'data', 'collections.json');
+    const fileContent = fs.readFileSync(filePath, 'utf-8');
+    const data = JSON.parse(fileContent);
+    return data.collections || [];
+  } catch (error) {
+    console.error('Error loading collections:', error);
+    return [];
+  }
+}
+
+// Load brands from JSON file at build time (server-side only)
+function loadBrandsSync(): Brand[] {
+  if (typeof window !== 'undefined') {
+    return [];
+  }
+  
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const filePath = path.join(process.cwd(), 'public', 'data', 'brands.json');
+    const fileContent = fs.readFileSync(filePath, 'utf-8');
+    const data = JSON.parse(fileContent);
+    return data.brands || [];
+  } catch (error) {
+    console.error('Error loading brands:', error);
+    return [];
+  }
+}
+
 // Load products at module initialization (build time - server only)
 const products = loadProductsSync();
+
+// Load collections at module initialization (build time - server only)
+const collections = loadCollectionsSync();
+
+// Load brands at module initialization (build time - server only)
+const brands = loadBrandsSync();
 
 // ============= Synchronous exports for build-time rendering =============
 
@@ -54,30 +97,6 @@ export function getAllProducts(): Product[] {
   return products;
 }
 
-// Collections derived from products
-const collectionMap = new Map<string, Collection>();
-
-products.forEach(p => {
-  if (p.collection_id && !collectionMap.has(p.collection_id)) {
-    collectionMap.set(p.collection_id, {
-      id: p.collection_id,
-      brand_id: 'brand-lotten',
-      name: p.collection_id.replace('col-', '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-      slug: p.collection_id,
-      brand: undefined,
-      description: null,
-      hero_image_url: null,
-      color_palette: null,
-      is_active: true,
-      sort_order: 0,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    });
-  }
-});
-
-const collections = Array.from(collectionMap.values());
-
 export function getCollections(): Collection[] {
   return collections;
 }
@@ -86,8 +105,8 @@ export function getAllCollections(): Collection[] {
   return collections;
 }
 
-export function getCollectionsByBrand(brand: string): Collection[] {
-  return collections.filter(c => c.brand?.name?.toLowerCase() === brand.toLowerCase());
+export function getCollectionsByBrand(brandId: string): Collection[] {
+  return collections.filter(c => c.brand_id === brandId);
 }
 
 export function getCollectionBySlug(slug: string): Collection | null {
@@ -98,70 +117,24 @@ export function getCollectionById(id: string): Collection | null {
   return collections.find(c => c.id === id) || null;
 }
 
-export function getCollectionName(collectionId: string): string {
-  const collectionsMap: Record<string, string> = {
-    'col-breda': 'Breda',
-    'col-dover': 'Dover',
-    'col-malton': 'Malton',
-    'col-lamar': 'Lamar',
-    'col-kyoto': 'Kyoto',
-    'col-dudley': 'Dudley',
-    'col-ludlow': 'Ludlow',
-    'col-loftus': 'Loftus',
-    'col-hutto': 'Hutto',
-    'col-royston': 'Royston',
-    'col-oruro': 'Oruro',
-    'col-waldo': 'Waldo',
-    'col-castor': 'Castor',
-    'col-hayton': 'Hayton',
-    'col-neath': 'Neath',
-    'col-hampton': 'Hampton',
-    'col-noud': 'Noud',
-    'col-nakula': 'Nakula',
-    'col-alford': 'Alford',
-    'col-alford-solid': 'Alford Solid',
-    'col-alford-veneer': 'Alford Veneer',
-    'col-sivan': 'Sivan',
-    'col-torrell': 'Torell',
-    'col-madrid': 'Madrid',
-    'col-forres': 'Forres',
-    'col-hamilton': 'Hamilton',
-    'col-brinhill': 'Brinhill',
-  };
-  return collectionsMap[collectionId] || 'Collection';
-}
-
-// Brands derived from collections
-const brandMap = new Map<string, Brand>();
-
-collections.forEach(c => {
-  const brandName = c.brand?.name || 'Lotten';
-  if (brandName && !brandMap.has(brandName)) {
-    brandMap.set(brandName, {
-      id: brandName.toLowerCase().replace(/\s+/g, '-'),
-      name: brandName,
-      slug: brandName.toLowerCase().replace(/\s+/g, '-'),
-      description: '',
-      logo_url: '',
-      sort_order: 0,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    });
-  }
-});
-
-const brands = Array.from(brandMap.values());
-
-export { products, collections, brands };
-
 export function getBrands(): Brand[] {
   return brands;
 }
 
+export function getBrandBySlug(slug: string): Brand | null {
+  return brands.find(b => b.slug === slug) || null;
+}
+
+export function getBrandById(id: string): Brand | null {
+  return brands.find(b => b.id === id) || null;
+}
+
+export { products, collections, brands };
+
 // Products by brand
-export function getProductsByBrand(brand: string): Product[] {
+export function getProductsByBrand(brandId: string): Product[] {
   const collectionsOfBrand = collections
-    .filter(c => c.brand?.name?.toLowerCase() === brand.toLowerCase())
+    .filter(c => c.brand_id === brandId)
     .map(c => c.id);
   return products.filter(p => p.is_active && collectionsOfBrand.includes(p.collection_id || ''));
 }
@@ -226,8 +199,8 @@ export async function getAllCollectionsAsync(): Promise<Collection[]> {
   return collections;
 }
 
-export async function getCollectionsByBrandAsync(brand: string): Promise<Collection[]> {
-  return collections.filter(c => c.brand?.name?.toLowerCase() === brand.toLowerCase());
+export async function getCollectionsByBrandAsync(brandId: string): Promise<Collection[]> {
+  return collections.filter(c => c.brand_id === brandId);
 }
 
 export async function getCollectionBySlugAsync(slug: string): Promise<Collection | null> {
@@ -238,32 +211,23 @@ export async function getCollectionByIdAsync(id: string): Promise<Collection | n
   return collections.find(c => c.id === id) || null;
 }
 
-export async function getProductsByBrandAsync(brand: string): Promise<Product[]> {
+export async function getProductsByBrandAsync(brandId: string): Promise<Product[]> {
   const collectionsOfBrand = collections
-    .filter(c => c.brand?.name?.toLowerCase() === brand.toLowerCase())
+    .filter(c => c.brand_id === brandId)
     .map(c => c.id);
   return products.filter(p => p.is_active && collectionsOfBrand.includes(p.collection_id || ''));
 }
 
 export async function getBrandsAsync(): Promise<Brand[]> {
-  const brandMap = new Map<string, Brand>();
-  
-  collections.forEach(c => {
-    if (c.brand && !brandMap.has(c.brand.name)) {
-      brandMap.set(c.brand.name, {
-        id: c.brand.name.toLowerCase().replace(/\s+/g, '-'),
-        name: c.brand.name,
-        slug: c.brand.name.toLowerCase().replace(/\s+/g, '-'),
-        description: c.brand.description || '',
-        logo_url: c.brand.logo_url || '',
-        sort_order: 0,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      });
-    }
-  });
-  
-  return Array.from(brandMap.values());
+  return brands;
+}
+
+export async function getBrandBySlugAsync(slug: string): Promise<Brand | null> {
+  return brands.find(b => b.slug === slug) || null;
+}
+
+export async function getBrandByIdAsync(id: string): Promise<Brand | null> {
+  return brands.find(b => b.id === id) || null;
 }
 
 // Type exports
