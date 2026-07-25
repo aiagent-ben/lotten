@@ -234,3 +234,4 @@ export async function getBrandByIdAsync(id: string): Promise<Brand | null> {
 export type { Brand, Collection, Product, ProductVariant, MaterialSpec, ColorOption, ProductImage } from '@/lib/types/database'; 
  
  
+ 
