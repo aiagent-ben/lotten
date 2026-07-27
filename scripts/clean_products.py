@@ -204,6 +204,33 @@ def parse_collection_name(full_name: str | None) -> tuple[str, str]:
     return full_name.strip(), ""
 
 
+def infer_collection_from_slug(slug: str) -> str | None:
+    """Extract collection name from product slug.
+    
+    Slugs follow pattern: {article_no}-{collection}-{product_name}-{finish_code}
+    e.g., "346036-dover-1-8m-sideboard-109113" -> "Dover"
+    """
+    if not slug:
+        return None
+    
+    # Remove article_no prefix (leading digits + dash)
+    match = re.match(r'^\d+-(.+)$', slug.lower())
+    if not match:
+        return None
+    
+    remainder = match.group(1)
+    
+    # Collection is the first word before the next dash
+    # e.g., "dover-1-8m-sideboard-109113" -> "dover"
+    collection_slug = remainder.split('-')[0]
+    
+    # Convert to title case for collection name
+    if collection_slug:
+        return collection_slug.capitalize()
+    
+    return None
+
+
 def parse_specifications(specs: str) -> dict:
     """Parse specifications text into structured fields."""
     result = {}
@@ -492,62 +519,39 @@ def clean_products(raw_products: list[RawProduct]) -> list[CleanProduct]:
     seen = set()
     clean = []
     
-    # First pass: group by base slug (article_no + product name before color code)
-    by_base_slug = defaultdict(list)
+    # First pass: group by article_no (each article_no is a unique product/SKU)
+    by_article_no = defaultdict(list)
     
     for raw in raw_products:
         if not raw.name:
             continue
-        # Extract base slug: article_no + product name, before trailing color code (6+ digits)
-        if raw.slug:
-            match = re.match(r'^\d+-([a-z0-9-]+?)(?:-?\d{6})(?:-?\d{3,})?$', raw.slug.lower())
-            if match:
-                base_slug = match.group(1)
-            else:
-                # No color suffix, just remove article_no prefix
-                match = re.match(r'^\d+-(.+)$', raw.slug.lower())
-                if match:
-                    base_slug = match.group(1)
-                else:
-                    base_slug = raw.slug.lower()
-        else:
-            base_slug = None
-        by_base_slug[base_slug].append(raw)
+        # Use article_no as the grouping key - each SKU is a distinct product
+        article_no = raw.article_no if raw.article_no else raw.slug
+        by_article_no[article_no].append(raw)
     
-    # Second pass: for each base slug, keep the best product (full name, not just color)
-    for base_slug, variants in by_base_slug.items():
-        if not base_slug:
+    # Second pass: for each article_no, keep the best variant (usually just one)
+    for article_no, variants in by_article_no.items():
+        if not article_no or article_no == "None":
             continue
         
-        # Use dynamic color detection
-        # Prefer variant with longest, most descriptive name (not just a color)
-        best_variant = None
-        best_score = -1
-        
-        for raw in variants:
-            name = raw.name.strip()
-            # Skip pure color name products (they're color variants)
-            if is_color_name(name):
-                continue
-            # Score: longer name = more descriptive = better
-            score = len(name)
-            if score > best_score:
-                best_score = score
-                best_variant = raw
-        
-        # If all variants are color names, pick the first one with images
-        if best_variant is None:
+        # Use the first variant (they should all be the same product)
+        # If multiple, prefer the one with most complete data
+        best_variant = variants[0]
+        if len(variants) > 1:
+            # Score by data completeness
+            best_score = -1
             for raw in variants:
-                has_images = bool(
-                    (hasattr(raw, 'r2_images') and raw.r2_images) or
-                    (hasattr(raw, 'product_gallery') and raw.product_gallery) or
-                    raw.images or raw.img
-                )
-                if has_images:
+                score = 0
+                if raw.description: score += 1
+                if raw.materials: score += 1
+                if raw.colors: score += 1
+                if raw.specifications: score += 1
+                if raw.dimensions: score += 1
+                if raw.product_gallery: score += 1
+                if raw.r2_images: score += 1
+                if score > best_score:
+                    best_score = score
                     best_variant = raw
-                    break
-            if best_variant is None:
-                best_variant = variants[0]  # fallback
         
         raw = best_variant
         
@@ -570,8 +574,8 @@ def clean_products(raw_products: list[RawProduct]) -> list[CleanProduct]:
             print(f"  ⊘ Skipping color swatch: {raw.name} (article_no: {raw.article_no})")
             continue
         
-        # Deduplicate by base slug
-        key = base_slug
+        # Deduplicate by article_no (each article_no is a unique product)
+        key = raw.article_no if raw.article_no else slug
         if key in seen:
             continue
         seen.add(key)
@@ -603,6 +607,28 @@ def clean_products(raw_products: list[RawProduct]) -> list[CleanProduct]:
             image_urls = [raw.img]
             primary_image = raw.img
         
+        # Filter out cross-contaminated images (different article_no in URL)
+        # hinlim URLs contain /product/{article_no}/ - only keep images matching our article_no
+        article_no = raw.article_no
+        if article_no:
+            filtered_urls = []
+            for url in image_urls:
+                # Extract article number from hinlim URL pattern
+                import re
+                match = re.search(r'/product/(\d{6})/', url)
+                if match:
+                    url_article = match.group(1)
+                    if url_article == article_no:
+                        filtered_urls.append(url)
+                    else:
+                        print(f"  ⊘ Filtering cross-contaminated image for {article_no}: {url} (belongs to {url_article})")
+                else:
+                    # Keep non-hinlim URLs (R2, etc.)
+                    filtered_urls.append(url)
+            image_urls = filtered_urls
+            if primary_image and primary_image not in image_urls:
+                primary_image = image_urls[0] if image_urls else ""
+        
         # Parse structured data
         specs = parse_specifications(raw.specifications)
         carton = parse_carton_dimensions(raw.carton_dimensions)
@@ -620,6 +646,13 @@ def clean_products(raw_products: list[RawProduct]) -> list[CleanProduct]:
         
         # Parse collection to get collection_id (will be mapped later)
         collection_name, brand_name = parse_collection_name(raw.collection)
+        
+        # Fallback: infer collection from slug if raw collection is not available
+        if not collection_name or collection_name == "Unknown":
+            inferred_collection = infer_collection_from_slug(raw.slug)
+            if inferred_collection:
+                collection_name = inferred_collection
+        
         collection_slug = slugify(collection_name) if collection_name else "unknown"
         collection_id = f"col-{collection_slug}"
         

@@ -1,84 +1,14 @@
 {
   "brands": [
     {
-      "id": "d1a9f85b-b202-41c4-9d33-f20b87afce19",
-      "name": "NestHouZ",
-      "slug": "nesthouz",
-      "description": "NestHouZ furniture collection",
-      "logo_url": null,
-      "sort_order": 0,
-      "created_at": "2026-07-16T07:37:00.13631+00:00",
-      "updated_at": "2026-07-23T08:27:36.547075+00:00"
-    },
-    {
-      "id": "6c3d2602-8265-44a9-a93d-7fd7210331ae",
-      "name": "",
-      "slug": "",
-      "description": " furniture collection",
-      "logo_url": null,
-      "sort_order": 0,
-      "created_at": "2026-07-23T09:55:59.746249+00:00",
-      "updated_at": "2026-07-24T20:25:45.964126+00:00"
-    },
-    {
-      "id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "brand-b2bfurniture",
       "name": "B2B Furniture Supply",
       "slug": "b2bfurniture",
       "description": "B2B Furniture Supply furniture collection",
       "logo_url": null,
       "sort_order": 0,
-      "created_at": "2026-07-24T20:27:03.888371+00:00",
-      "updated_at": "2026-07-25T04:28:18.79748+00:00"
-    },
-    {
-      "id": "e579f81a-26e8-457f-9978-215b08b32bae",
-      "name": "Loftus",
-      "slug": "loftus",
-      "description": "Loftus furniture collection",
-      "logo_url": null,
-      "sort_order": 0,
-      "created_at": "2026-07-26T13:51:52.576999+00:00",
-      "updated_at": "2026-07-26T14:02:42.852703+00:00"
-    },
-    {
-      "id": "d9d22fa8-2df7-4d18-989c-afa95908bba1",
-      "name": "Hallway",
-      "slug": "hallway",
-      "description": "Hallway furniture collection",
-      "logo_url": null,
-      "sort_order": 1,
-      "created_at": "2026-07-26T13:51:52.777491+00:00",
-      "updated_at": "2026-07-26T14:02:43.048627+00:00"
-    },
-    {
-      "id": "2d6ad0e5-82ed-4150-9624-44f9308c8352",
-      "name": "Luooma",
-      "slug": "luooma",
-      "description": "Luooma furniture collection",
-      "logo_url": null,
-      "sort_order": 1,
-      "created_at": "2026-07-16T07:37:00.337977+00:00",
-      "updated_at": "2026-07-23T08:27:36.601491+00:00"
-    },
-    {
-      "id": "0afc6759-aeea-4141-ad19-384d8ff1b82d",
-      "name": "NestNordic",
-      "slug": "nestnordic",
-      "description": "NestNordic furniture collection",
-      "logo_url": null,
-      "sort_order": 2,
-      "created_at": "2026-07-16T07:37:00.244609+00:00",
-      "updated_at": "2026-07-23T08:27:36.626978+00:00"
-    },
-    {
-      "id": "814e233a-5178-42f5-bfca-7ea6cde814e4",
-      "name": "Collection",
-      "slug": "collection",
-      "description": "Collection furniture collection",
-      "logo_url": null,
-      "sort_order": 2,
-      "created_at": "2026-07-26T13:51:52.873064+00:00",
-      "updated_at": "2026-07-26T14:02:43.133783+00:00"
+      "created_at": "2026-07-27T00:00:00.000000+00:00",
+      "updated_at": "2026-07-27T00:00:00.000000+00:00"
     }
   ]
 }

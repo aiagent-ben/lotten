@@ -1,928 +1,615 @@
 {
   "collections": [
     {
-      "id": "e1d1d27d-944b-4c0d-a7b9-7d2cceef72fa",
-      "brand_id": "6c3d2602-8265-44a9-a93d-7fd7210331ae",
-      "name": "Unknown",
-      "slug": "unknown",
-      "description": "Unknown collection by ",
-      "hero_image_url": null,
+      "id": "col-alford",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Alford",
+      "slug": "alford",
+      "description": "Alford collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/145163/145163-1500x1500.jpg",
       "color_palette": null,
       "is_active": true,
       "sort_order": 0,
-      "created_at": "2026-07-23T09:56:00.141665+00:00",
-      "updated_at": "2026-07-24T20:25:46.566376+00:00"
+      "created_at": "2026-07-27T16:58:33.909056",
+      "updated_at": "2026-07-27T16:58:33.909057"
     },
     {
-      "id": "19c9b9ba-8451-4916-a9a9-497332c61d25",
-      "brand_id": "e579f81a-26e8-457f-9978-215b08b32bae",
+      "id": "col-breda",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Breda",
+      "slug": "breda",
+      "description": "Breda collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/335048/335048-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.921750",
+      "updated_at": "2026-07-27T16:58:33.921752"
+    },
+    {
+      "id": "col-brinhill",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Brinhill",
+      "slug": "brinhill",
+      "description": "Brinhill collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/355005/355005-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.937834",
+      "updated_at": "2026-07-27T16:58:33.937835"
+    },
+    {
+      "id": "col-capri",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Capri",
+      "slug": "capri",
+      "description": "Capri collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/343038/343038-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.931155",
+      "updated_at": "2026-07-27T16:58:33.931157"
+    },
+    {
+      "id": "col-castor",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Castor",
+      "slug": "castor",
+      "description": "Castor collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/335043/335043-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.921577",
+      "updated_at": "2026-07-27T16:58:33.921579"
+    },
+    {
+      "id": "col-dabney",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Dabney",
+      "slug": "dabney",
+      "description": "Dabney collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/345016/345016-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.933056",
+      "updated_at": "2026-07-27T16:58:33.933057"
+    },
+    {
+      "id": "col-dallas",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Dallas",
+      "slug": "dallas",
+      "description": "Dallas collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/345075/345075-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.934845",
+      "updated_at": "2026-07-27T16:58:33.934845"
+    },
+    {
+      "id": "col-denver",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Denver",
+      "slug": "denver",
+      "description": "Denver collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/336050/336050-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.924458",
+      "updated_at": "2026-07-27T16:58:33.924459"
+    },
+    {
+      "id": "col-dover",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Dover",
+      "slug": "dover",
+      "description": "Dover collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/346036/346036-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.935727",
+      "updated_at": "2026-07-27T16:58:33.935728"
+    },
+    {
+      "id": "col-dudley",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Dudley",
+      "slug": "dudley",
+      "description": "Dudley collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/345066/345066-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.934305",
+      "updated_at": "2026-07-27T16:58:33.934306"
+    },
+    {
+      "id": "col-floro",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Floro",
+      "slug": "floro",
+      "description": "Floro collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/344041/344041-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.932942",
+      "updated_at": "2026-07-27T16:58:33.932943"
+    },
+    {
+      "id": "col-forres",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Forres",
+      "slug": "forres",
+      "description": "Forres collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/245013/245013-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.919744",
+      "updated_at": "2026-07-27T16:58:33.919745"
+    },
+    {
+      "id": "col-hachi",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Hachi",
+      "slug": "hachi",
+      "description": "Hachi collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/233242/233242-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.915417",
+      "updated_at": "2026-07-27T16:58:33.915419"
+    },
+    {
+      "id": "col-hamilton",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Hamilton",
+      "slug": "hamilton",
+      "description": "Hamilton collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/355021/355021-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.938080",
+      "updated_at": "2026-07-27T16:58:33.938080"
+    },
+    {
+      "id": "col-hampton",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Hampton",
+      "slug": "hampton",
+      "description": "Hampton collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/345018/345018-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.933115",
+      "updated_at": "2026-07-27T16:58:33.933116"
+    },
+    {
+      "id": "col-hayton",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Hayton",
+      "slug": "hayton",
+      "description": "Hayton collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/334027/334027-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.921036",
+      "updated_at": "2026-07-27T16:58:33.921038"
+    },
+    {
+      "id": "col-hirado",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Hirado",
+      "slug": "hirado",
+      "description": "Hirado collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/131194/131194-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.899942",
+      "updated_at": "2026-07-27T16:58:33.899943"
+    },
+    {
+      "id": "col-hutto",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Hutto",
+      "slug": "hutto",
+      "description": "Hutto collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/145150/145150-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.908621",
+      "updated_at": "2026-07-27T16:58:33.908622"
+    },
+    {
+      "id": "col-kotka",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Kotka",
+      "slug": "kotka",
+      "description": "Kotka collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/344023/344023-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.932141",
+      "updated_at": "2026-07-27T16:58:33.932142"
+    },
+    {
+      "id": "col-kyoto",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Kyoto",
+      "slug": "kyoto",
+      "description": "Kyoto collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/336075/336075-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.926297",
+      "updated_at": "2026-07-27T16:58:33.926298"
+    },
+    {
+      "id": "col-lamar",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Lamar",
+      "slug": "lamar",
+      "description": "Lamar collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/335027/335027-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.921307",
+      "updated_at": "2026-07-27T16:58:33.921309"
+    },
+    {
+      "id": "col-leyton",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Leyton",
+      "slug": "leyton",
+      "description": "Leyton collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/230052/230052-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.913831",
+      "updated_at": "2026-07-27T16:58:33.913832"
+    },
+    {
+      "id": "col-loftus",
+      "brand_id": "brand-b2bfurniture",
       "name": "Loftus",
       "slug": "loftus",
       "description": "Loftus collection",
-      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/134107/134107-550x500.jpg",
-      "color_palette": [
-        {
-          "hex": "#C8B8A8",
-          "code": "102/112",
-          "name": "Natural/White",
-          "part": "frame"
-        },
-        {
-          "hex": "#8B7355",
-          "code": "1001",
-          "name": "Natural",
-          "part": "top"
-        }
-      ],
-      "is_active": true,
-      "sort_order": 0,
-      "created_at": "2026-07-16T07:37:01.250937+00:00",
-      "updated_at": "2026-07-26T14:02:43.205382+00:00"
-    },
-    {
-      "id": "60076cec-b361-4586-96c7-88aa87dd895b",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Alford",
-      "slug": "alford",
-      "description": "Alford collection by B2B Furniture Supply",
-      "hero_image_url": null,
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/133153/133153-1500x1500.jpg",
       "color_palette": null,
       "is_active": true,
       "sort_order": 0,
-      "created_at": "2026-07-24T02:30:05.39011+00:00",
-      "updated_at": "2026-07-25T04:28:18.915758+00:00"
+      "created_at": "2026-07-27T16:58:33.902928",
+      "updated_at": "2026-07-27T16:58:33.902930"
     },
     {
-      "id": "7e9b2419-9292-4961-b247-b8250a1e5e7b",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Breda",
-      "slug": "breda",
-      "description": "Breda collection by B2B Furniture Supply",
-      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/335048/335048-550x500.jpg",
-      "color_palette": [
-        {
-          "hex": "#4A3728",
-          "code": "109",
-          "name": "Cocoa",
-          "part": "body"
-        },
-        {
-          "hex": "#E8E0D8",
-          "code": "167",
-          "name": "White Marble",
-          "part": "top"
-        }
-      ],
-      "is_active": true,
-      "sort_order": 1,
-      "created_at": "2026-07-16T07:37:00.439393+00:00",
-      "updated_at": "2026-07-25T04:28:18.969545+00:00"
-    },
-    {
-      "id": "49d7a211-4fb0-4476-a1e3-57ff73526e1f",
-      "brand_id": "d9d22fa8-2df7-4d18-989c-afa95908bba1",
-      "name": "Shoe Cabinet",
-      "slug": "shoe-cabinet",
-      "description": "Shoe Cabinet collection",
-      "hero_image_url": null,
-      "color_palette": null,
-      "is_active": true,
-      "sort_order": 1,
-      "created_at": "2026-07-26T13:51:53.153832+00:00",
-      "updated_at": "2026-07-26T14:02:43.286548+00:00"
-    },
-    {
-      "id": "d79fdf77-9b2a-4680-95dc-b2467c7ade0d",
-      "brand_id": "814e233a-5178-42f5-bfca-7ea6cde814e4",
-      "name": "fyndfurniture",
-      "slug": "fyndfurniture",
-      "description": "fyndfurniture collection",
-      "hero_image_url": null,
-      "color_palette": null,
-      "is_active": true,
-      "sort_order": 2,
-      "created_at": "2026-07-26T13:51:53.192795+00:00",
-      "updated_at": "2026-07-26T14:02:43.341453+00:00"
-    },
-    {
-      "id": "147a4aad-9fd1-4d69-b640-ba0bf5fc0b14",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Brinhill",
-      "slug": "brinhill",
-      "description": "Brinhill collection by B2B Furniture Supply",
-      "hero_image_url": null,
-      "color_palette": null,
-      "is_active": true,
-      "sort_order": 2,
-      "created_at": "2026-07-24T02:30:05.611545+00:00",
-      "updated_at": "2026-07-25T04:28:19.038555+00:00"
-    },
-    {
-      "id": "a0a3b962-16d7-4111-9ecc-57dc2ddbf396",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Capri",
-      "slug": "capri",
-      "description": "Capri collection by B2B Furniture Supply",
-      "hero_image_url": null,
-      "color_palette": null,
-      "is_active": true,
-      "sort_order": 3,
-      "created_at": "2026-07-24T02:30:05.677333+00:00",
-      "updated_at": "2026-07-25T04:28:19.103675+00:00"
-    },
-    {
-      "id": "ea9fa55a-8d1d-4709-8ba9-14a0614a3927",
-      "brand_id": "814e233a-5178-42f5-bfca-7ea6cde814e4",
-      "name": "luooma",
-      "slug": "luooma",
-      "description": "luooma collection",
-      "hero_image_url": null,
-      "color_palette": null,
-      "is_active": true,
-      "sort_order": 3,
-      "created_at": "2026-07-26T13:51:53.224571+00:00",
-      "updated_at": "2026-07-26T14:02:43.385347+00:00"
-    },
-    {
-      "id": "a24da139-7799-430f-b59b-e048a446c700",
-      "brand_id": "814e233a-5178-42f5-bfca-7ea6cde814e4",
-      "name": "nesthouz",
-      "slug": "nesthouz",
-      "description": "nesthouz collection",
-      "hero_image_url": null,
-      "color_palette": null,
-      "is_active": true,
-      "sort_order": 4,
-      "created_at": "2026-07-26T13:51:53.253229+00:00",
-      "updated_at": "2026-07-26T14:02:43.431557+00:00"
-    },
-    {
-      "id": "1ef73dd1-67b8-49e0-a58c-724cf56e50c7",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Castor",
-      "slug": "castor",
-      "description": "Castor collection by B2B Furniture Supply",
-      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/335043/335043-550x500.jpg",
-      "color_palette": [
-        {
-          "hex": "#1A1A1A",
-          "code": "114",
-          "name": "Black",
-          "part": "legs"
-        },
-        {
-          "hex": "#8B7355",
-          "code": "102",
-          "name": "Natural",
-          "part": "frame"
-        },
-        {
-          "hex": "#2A3B4D",
-          "code": "1325",
-          "name": "Space Blue",
-          "part": "doors"
-        }
-      ],
-      "is_active": true,
-      "sort_order": 4,
-      "created_at": "2026-07-16T07:37:01.551991+00:00",
-      "updated_at": "2026-07-25T04:28:19.171475+00:00"
-    },
-    {
-      "id": "5ccd626d-e101-4fce-9728-2da6857f0c5c",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Dabney",
-      "slug": "dabney",
-      "description": "Dabney collection by B2B Furniture Supply",
-      "hero_image_url": null,
-      "color_palette": null,
-      "is_active": true,
-      "sort_order": 5,
-      "created_at": "2026-07-24T02:30:05.888489+00:00",
-      "updated_at": "2026-07-25T04:28:19.227299+00:00"
-    },
-    {
-      "id": "c15a7b20-bff2-4eb8-83b9-57aa79920516",
-      "brand_id": "814e233a-5178-42f5-bfca-7ea6cde814e4",
-      "name": "nestnordic",
-      "slug": "nestnordic",
-      "description": "nestnordic collection",
-      "hero_image_url": null,
-      "color_palette": null,
-      "is_active": true,
-      "sort_order": 5,
-      "created_at": "2026-07-26T13:51:53.286889+00:00",
-      "updated_at": "2026-07-26T14:02:43.477262+00:00"
-    },
-    {
-      "id": "63a9c9dd-d98d-4cb6-b6d6-37ec8f637662",
-      "brand_id": "814e233a-5178-42f5-bfca-7ea6cde814e4",
-      "name": "nuhoom",
-      "slug": "nuhoom",
-      "description": "nuhoom collection",
-      "hero_image_url": null,
-      "color_palette": null,
-      "is_active": true,
-      "sort_order": 6,
-      "created_at": "2026-07-26T13:51:53.314052+00:00",
-      "updated_at": "2026-07-26T14:02:43.510515+00:00"
-    },
-    {
-      "id": "e1177f6f-46a4-49c4-9e6f-dd2ebfef108f",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Dallas",
-      "slug": "dallas",
-      "description": "Dallas collection by B2B Furniture Supply",
-      "hero_image_url": null,
-      "color_palette": null,
-      "is_active": true,
-      "sort_order": 6,
-      "created_at": "2026-07-24T02:30:05.944835+00:00",
-      "updated_at": "2026-07-25T04:28:19.27788+00:00"
-    },
-    {
-      "id": "fa68fbb7-7688-46c4-82ee-a0890dcaaa9c",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Denver",
-      "slug": "denver",
-      "description": "Denver collection by B2B Furniture Supply",
-      "hero_image_url": null,
-      "color_palette": null,
-      "is_active": true,
-      "sort_order": 7,
-      "created_at": "2026-07-24T02:30:06.032799+00:00",
-      "updated_at": "2026-07-25T04:28:19.325793+00:00"
-    },
-    {
-      "id": "d3737b59-5402-4c7e-8312-10eab78efd6b",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Dover",
-      "slug": "dover",
-      "description": "Dover collection by B2B Furniture Supply",
-      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/346036/346036-550x500.jpg",
-      "color_palette": [
-        {
-          "hex": "#3D2B1F",
-          "code": "113",
-          "name": "Walnut",
-          "part": "body"
-        },
-        {
-          "hex": "#4A3728",
-          "code": "109",
-          "name": "Cocoa",
-          "part": "legs"
-        }
-      ],
-      "is_active": true,
-      "sort_order": 8,
-      "created_at": "2026-07-16T07:37:00.533822+00:00",
-      "updated_at": "2026-07-25T04:28:19.379487+00:00"
-    },
-    {
-      "id": "a880d3ef-a8e9-4071-96cc-65a638536e21",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Dudley",
-      "slug": "dudley",
-      "description": "Dudley collection by B2B Furniture Supply",
-      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/345066/345066-550x500.jpg",
-      "color_palette": [
-        {
-          "hex": "#5D4E3D",
-          "code": "102/173",
-          "name": "Natural/Dark",
-          "part": "body"
-        }
-      ],
-      "is_active": true,
-      "sort_order": 9,
-      "created_at": "2026-07-16T07:37:01.146+00:00",
-      "updated_at": "2026-07-25T04:28:19.458312+00:00"
-    },
-    {
-      "id": "69987cd3-f6f8-4320-ba21-43d33abab948",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Floro",
-      "slug": "floro",
-      "description": "Floro collection by B2B Furniture Supply",
-      "hero_image_url": null,
-      "color_palette": null,
-      "is_active": true,
-      "sort_order": 10,
-      "created_at": "2026-07-24T02:30:06.201886+00:00",
-      "updated_at": "2026-07-25T04:28:19.506765+00:00"
-    },
-    {
-      "id": "d5dde52a-9edc-49f9-b002-72d8a56d126d",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Forres",
-      "slug": "forres",
-      "description": "Forres collection by B2B Furniture Supply",
-      "hero_image_url": null,
-      "color_palette": null,
-      "is_active": true,
-      "sort_order": 11,
-      "created_at": "2026-07-24T02:30:06.255291+00:00",
-      "updated_at": "2026-07-25T04:28:19.55862+00:00"
-    },
-    {
-      "id": "e27abc91-74f5-4236-b964-297ec6c7c65f",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Hachi",
-      "slug": "hachi",
-      "description": "Hachi collection by B2B Furniture Supply",
-      "hero_image_url": null,
-      "color_palette": null,
-      "is_active": true,
-      "sort_order": 12,
-      "created_at": "2026-07-24T02:30:06.307979+00:00",
-      "updated_at": "2026-07-25T04:28:19.609295+00:00"
-    },
-    {
-      "id": "d4919bfa-6a97-4767-9e78-a884472a810a",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Hamilton",
-      "slug": "hamilton",
-      "description": "Hamilton collection by B2B Furniture Supply",
-      "hero_image_url": null,
-      "color_palette": null,
-      "is_active": true,
-      "sort_order": 13,
-      "created_at": "2026-07-24T02:30:06.361895+00:00",
-      "updated_at": "2026-07-25T04:28:19.672822+00:00"
-    },
-    {
-      "id": "fd6bbc79-e1ba-46eb-812c-773bc795c14f",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Hampton",
-      "slug": "hampton",
-      "description": "Hampton collection by B2B Furniture Supply",
-      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/345018/345018-550x500.jpg",
-      "color_palette": [
-        {
-          "hex": "#4A4238",
-          "code": "112/114",
-          "name": "White/Dark",
-          "part": "body"
-        }
-      ],
-      "is_active": true,
-      "sort_order": 14,
-      "created_at": "2026-07-16T07:37:01.704367+00:00",
-      "updated_at": "2026-07-25T04:28:19.730999+00:00"
-    },
-    {
-      "id": "0a4864f8-1aaf-4d14-b4c8-f3846ae86fba",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Hayton",
-      "slug": "hayton",
-      "description": "Hayton collection by B2B Furniture Supply",
-      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/334027/334027-550x500.jpg",
-      "color_palette": [
-        {
-          "hex": "#F5F0E8",
-          "code": "111",
-          "name": "White Wash",
-          "part": "body"
-        },
-        {
-          "hex": "#4A3728",
-          "code": "109",
-          "name": "Cocoa",
-          "part": "body"
-        }
-      ],
-      "is_active": true,
-      "sort_order": 15,
-      "created_at": "2026-07-16T07:37:01.603389+00:00",
-      "updated_at": "2026-07-25T04:28:19.785816+00:00"
-    },
-    {
-      "id": "f5131cc1-a246-4701-81f6-f30ba5a2cafd",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Hirado",
-      "slug": "hirado",
-      "description": "Hirado collection by B2B Furniture Supply",
-      "hero_image_url": null,
-      "color_palette": null,
-      "is_active": true,
-      "sort_order": 16,
-      "created_at": "2026-07-24T02:30:06.518022+00:00",
-      "updated_at": "2026-07-25T04:28:19.834873+00:00"
-    },
-    {
-      "id": "b29a19b9-2156-4dcd-96e4-fd87af1061d8",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Hutto",
-      "slug": "hutto",
-      "description": "Hutto collection by B2B Furniture Supply",
-      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/336069/336069-550x500.jpg",
-      "color_palette": [
-        {
-          "hex": "#4A3728",
-          "code": "802/113",
-          "name": "Walnut/Natural",
-          "part": "body"
-        },
-        {
-          "hex": "#5D4E3D",
-          "code": "109/113/166",
-          "name": "Mixed",
-          "part": "body"
-        }
-      ],
-      "is_active": true,
-      "sort_order": 17,
-      "created_at": "2026-07-16T07:37:01.314005+00:00",
-      "updated_at": "2026-07-25T04:28:19.886506+00:00"
-    },
-    {
-      "id": "844c4d8b-8c45-4927-9e56-5ecf5cf6b91e",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Kotka",
-      "slug": "kotka",
-      "description": "Kotka collection by B2B Furniture Supply",
-      "hero_image_url": null,
-      "color_palette": null,
-      "is_active": true,
-      "sort_order": 18,
-      "created_at": "2026-07-24T02:30:06.669186+00:00",
-      "updated_at": "2026-07-25T04:28:19.937147+00:00"
-    },
-    {
-      "id": "9837c082-b834-4457-86de-5cbd260fc379",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Kyoto",
-      "slug": "kyoto",
-      "description": "Kyoto collection by B2B Furniture Supply",
-      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/336075/336075-550x500.jpg",
-      "color_palette": [
-        {
-          "hex": "#8B7355",
-          "code": "102",
-          "name": "Natural",
-          "part": "body"
-        },
-        {
-          "hex": "#4A3728",
-          "code": "109",
-          "name": "Cocoa",
-          "part": "body"
-        }
-      ],
-      "is_active": true,
-      "sort_order": 19,
-      "created_at": "2026-07-16T07:37:01.085557+00:00",
-      "updated_at": "2026-07-25T04:28:19.991362+00:00"
-    },
-    {
-      "id": "3556be74-abf7-4839-81be-66ad4e6a78ef",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Lamar",
-      "slug": "lamar",
-      "description": "Lamar collection by B2B Furniture Supply",
-      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/335027/335027-550x500.jpg",
-      "color_palette": [
-        {
-          "hex": "#8B7355",
-          "code": "102",
-          "name": "Natural",
-          "part": "body"
-        },
-        {
-          "hex": "#4A3728",
-          "code": "109",
-          "name": "Cocoa",
-          "part": "body"
-        }
-      ],
-      "is_active": true,
-      "sort_order": 20,
-      "created_at": "2026-07-16T07:37:00.694432+00:00",
-      "updated_at": "2026-07-25T04:28:20.042742+00:00"
-    },
-    {
-      "id": "cf316ee4-e829-4dd4-a4f2-5ec6fca6de92",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Leyton",
-      "slug": "leyton",
-      "description": "Leyton collection by B2B Furniture Supply",
-      "hero_image_url": null,
-      "color_palette": null,
-      "is_active": true,
-      "sort_order": 21,
-      "created_at": "2026-07-24T02:30:06.83233+00:00",
-      "updated_at": "2026-07-25T04:28:20.094787+00:00"
-    },
-    {
-      "id": "0b980590-590d-4b07-bd1c-2ec8978a4c20",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-lome",
+      "brand_id": "brand-b2bfurniture",
       "name": "Lome",
       "slug": "lome",
-      "description": "Lome collection by B2B Furniture Supply",
-      "hero_image_url": null,
+      "description": "Lome collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/336105/336105-1500x1500.jpg",
       "color_palette": null,
       "is_active": true,
-      "sort_order": 23,
-      "created_at": "2026-07-24T02:30:06.967875+00:00",
-      "updated_at": "2026-07-25T04:28:20.2017+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.928951",
+      "updated_at": "2026-07-27T16:58:33.928952"
     },
     {
-      "id": "b3caa479-8524-4fb2-8765-322f3c287f92",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-ludlow",
+      "brand_id": "brand-b2bfurniture",
       "name": "Ludlow",
       "slug": "ludlow",
-      "description": "Ludlow collection by B2B Furniture Supply",
-      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/345064/345064-550x500.jpg",
-      "color_palette": [
-        {
-          "hex": "#F5F0E8",
-          "code": "111",
-          "name": "White Wash",
-          "part": "body"
-        }
-      ],
+      "description": "Ludlow collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/233327/233327-1500x1500.jpg",
+      "color_palette": null,
       "is_active": true,
-      "sort_order": 24,
-      "created_at": "2026-07-16T07:37:01.198862+00:00",
-      "updated_at": "2026-07-25T04:28:20.248584+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.916340",
+      "updated_at": "2026-07-27T16:58:33.916341"
     },
     {
-      "id": "b768984b-a956-49a6-864e-33d6ecf56a78",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-lundby",
+      "brand_id": "brand-b2bfurniture",
       "name": "Lundby",
       "slug": "lundby",
-      "description": "Lundby collection by B2B Furniture Supply",
-      "hero_image_url": null,
+      "description": "Lundby collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/345077/345077-1500x1500.jpg",
       "color_palette": null,
       "is_active": true,
-      "sort_order": 25,
-      "created_at": "2026-07-24T19:29:35.331213+00:00",
-      "updated_at": "2026-07-25T04:28:20.306155+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.935032",
+      "updated_at": "2026-07-27T16:58:33.935033"
     },
     {
-      "id": "6c9cdc50-4a97-4a63-891b-ec5d08fd4375",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-madrid",
+      "brand_id": "brand-b2bfurniture",
       "name": "Madrid",
       "slug": "madrid",
-      "description": "Madrid collection by B2B Furniture Supply",
-      "hero_image_url": null,
+      "description": "Madrid collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/241471/241471-1500x1500.jpg",
       "color_palette": null,
       "is_active": true,
-      "sort_order": 26,
-      "created_at": "2026-07-24T02:30:07.082284+00:00",
-      "updated_at": "2026-07-25T04:28:20.360642+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.917444",
+      "updated_at": "2026-07-27T16:58:33.917445"
     },
     {
-      "id": "92e583ef-edd4-4a78-99f3-31cb06bb72b4",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-malmo",
+      "brand_id": "brand-b2bfurniture",
       "name": "Malmo",
       "slug": "malmo",
-      "description": "Malmo collection by B2B Furniture Supply",
-      "hero_image_url": null,
+      "description": "Malmo collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/345070/345070-1500x1500.jpg",
       "color_palette": null,
       "is_active": true,
-      "sort_order": 27,
-      "created_at": "2026-07-24T02:30:07.136662+00:00",
-      "updated_at": "2026-07-25T04:28:20.414488+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.934526",
+      "updated_at": "2026-07-27T16:58:33.934527"
     },
     {
-      "id": "a2e27604-7a77-4a51-815d-1011864878e9",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-malton",
+      "brand_id": "brand-b2bfurniture",
       "name": "Malton",
       "slug": "malton",
-      "description": "Malton collection by B2B Furniture Supply",
-      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/344011/344011-550x500.jpg",
-      "color_palette": [
-        {
-          "hex": "#1A1A1A",
-          "code": "114",
-          "name": "Black",
-          "part": "legs"
-        },
-        {
-          "hex": "#8B7355",
-          "code": "102",
-          "name": "Natural",
-          "part": "frame"
-        }
-      ],
+      "description": "Malton collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/344011/344011-1500x1500.jpg",
+      "color_palette": null,
       "is_active": true,
-      "sort_order": 28,
-      "created_at": "2026-07-16T07:37:00.626797+00:00",
-      "updated_at": "2026-07-25T04:28:20.467368+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.931996",
+      "updated_at": "2026-07-27T16:58:33.931997"
     },
     {
-      "id": "cbd30d4f-7199-4d5a-9b37-2c94d0cd47e8",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-mando",
+      "brand_id": "brand-b2bfurniture",
       "name": "Mando",
       "slug": "mando",
-      "description": "Mando collection by B2B Furniture Supply",
-      "hero_image_url": null,
+      "description": "Mando collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/345055/345055-1500x1500.jpg",
       "color_palette": null,
       "is_active": true,
-      "sort_order": 29,
-      "created_at": "2026-07-24T02:30:07.241414+00:00",
-      "updated_at": "2026-07-25T04:28:20.515092+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.933810",
+      "updated_at": "2026-07-27T16:58:33.933811"
     },
     {
-      "id": "d5eb7b1f-458e-4260-a116-f5d00a91014d",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-merton",
+      "brand_id": "brand-b2bfurniture",
       "name": "Merton",
       "slug": "merton",
-      "description": "Merton collection by B2B Furniture Supply",
-      "hero_image_url": null,
+      "description": "Merton collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/241276/241276-1500x1500.jpg",
       "color_palette": null,
       "is_active": true,
-      "sort_order": 30,
-      "created_at": "2026-07-24T02:30:07.29455+00:00",
-      "updated_at": "2026-07-25T04:28:20.564347+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.917270",
+      "updated_at": "2026-07-27T16:58:33.917271"
     },
     {
-      "id": "7989c43d-8479-4989-b3ee-35607cb854a1",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-nakula",
+      "brand_id": "brand-b2bfurniture",
       "name": "Nakula",
       "slug": "nakula",
-      "description": "Nakula collection by B2B Furniture Supply",
-      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/336055/336055-550x500.jpg",
-      "color_palette": [
-        {
-          "hex": "#8B7355",
-          "code": "102",
-          "name": "Natural",
-          "part": "legs"
-        },
-        {
-          "hex": "#F8F8F8",
-          "code": "130",
-          "name": "White Lacquer",
-          "part": "body"
-        },
-        {
-          "hex": "#4A3728",
-          "code": "109",
-          "name": "Cocoa",
-          "part": "legs"
-        },
-        {
-          "hex": "#3D2B1F",
-          "code": "113/1318",
-          "name": "Walnut/Gunmetal",
-          "part": "body"
-        }
-      ],
+      "description": "Nakula collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/346023/346023-1500x1500.jpg",
+      "color_palette": null,
       "is_active": true,
-      "sort_order": 31,
-      "created_at": "2026-07-16T07:37:01.808686+00:00",
-      "updated_at": "2026-07-25T04:28:20.614474+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.935309",
+      "updated_at": "2026-07-27T16:58:33.935310"
     },
     {
-      "id": "2bdedca0-b42e-4be4-93cf-85ef297a69ee",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-neath",
+      "brand_id": "brand-b2bfurniture",
       "name": "Neath",
       "slug": "neath",
-      "description": "Neath collection by B2B Furniture Supply",
-      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/335058/335058-550x500.jpg",
-      "color_palette": [
-        {
-          "hex": "#F5F0E8",
-          "code": "111",
-          "name": "White Wash",
-          "part": "body"
-        },
-        {
-          "hex": "#4A3728",
-          "code": "109",
-          "name": "Cocoa",
-          "part": "body"
-        },
-        {
-          "hex": "#6B6B6B",
-          "code": "185",
-          "name": "Grey Marble",
-          "part": "top"
-        }
-      ],
+      "description": "Neath collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/335059/335059-1500x1500.jpg",
+      "color_palette": null,
       "is_active": true,
-      "sort_order": 32,
-      "created_at": "2026-07-16T07:37:01.651404+00:00",
-      "updated_at": "2026-07-25T04:28:20.661236+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.922556",
+      "updated_at": "2026-07-27T16:58:33.922557"
     },
     {
-      "id": "58288f1a-2fd4-4b9e-b92a-5cb7085cb856",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-noud",
+      "brand_id": "brand-b2bfurniture",
       "name": "Noud",
       "slug": "noud",
-      "description": "Noud collection by B2B Furniture Supply",
-      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/145040/145040-550x500.jpg",
-      "color_palette": [
-        {
-          "hex": "#B8A898",
-          "code": "112",
-          "name": "Oak",
-          "part": "body"
-        }
-      ],
+      "description": "Noud collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/344007/344007-1500x1500.jpg",
+      "color_palette": null,
       "is_active": true,
-      "sort_order": 33,
-      "created_at": "2026-07-16T07:37:01.756681+00:00",
-      "updated_at": "2026-07-25T04:28:20.722775+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.931943",
+      "updated_at": "2026-07-27T16:58:33.931944"
     },
     {
-      "id": "e2a27e3d-a347-44b0-accb-b758d6ce5211",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-olaine",
+      "brand_id": "brand-b2bfurniture",
       "name": "Olaine",
       "slug": "olaine",
-      "description": "Olaine collection by B2B Furniture Supply",
-      "hero_image_url": null,
+      "description": "Olaine collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/353029/353029-1500x1500.jpg",
       "color_palette": null,
       "is_active": true,
-      "sort_order": 34,
-      "created_at": "2026-07-24T02:30:07.512233+00:00",
-      "updated_at": "2026-07-25T04:28:20.773521+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.937451",
+      "updated_at": "2026-07-27T16:58:33.937452"
     },
     {
-      "id": "cab45c43-2130-496e-9fdb-5996321acb0a",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-oregon",
+      "brand_id": "brand-b2bfurniture",
       "name": "Oregon",
       "slug": "oregon",
-      "description": "Oregon collection by B2B Furniture Supply",
-      "hero_image_url": null,
+      "description": "Oregon collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/335071/335071-1500x1500.jpg",
       "color_palette": null,
       "is_active": true,
-      "sort_order": 35,
-      "created_at": "2026-07-24T02:30:07.567209+00:00",
-      "updated_at": "2026-07-25T04:28:20.825679+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.922851",
+      "updated_at": "2026-07-27T16:58:33.922853"
     },
     {
-      "id": "89ae7bac-6bdc-4bc4-be66-25675307e6ca",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-oruro",
+      "brand_id": "brand-b2bfurniture",
       "name": "Oruro",
       "slug": "oruro",
-      "description": "Oruro collection by B2B Furniture Supply",
-      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/336109/336109-550x500.jpg",
-      "color_palette": [
-        {
-          "hex": "#4A3728",
-          "code": "109",
-          "name": "Cocoa",
-          "part": "body"
-        }
-      ],
+      "description": "Oruro collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/336109/336109-1500x1500.jpg",
+      "color_palette": null,
       "is_active": true,
-      "sort_order": 36,
-      "created_at": "2026-07-16T07:37:01.432938+00:00",
-      "updated_at": "2026-07-25T04:28:20.875664+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.929457",
+      "updated_at": "2026-07-27T16:58:33.929458"
     },
     {
-      "id": "8d196ec5-6022-479e-8540-329933b2253c",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-rhodes",
+      "brand_id": "brand-b2bfurniture",
       "name": "Rhodes",
       "slug": "rhodes",
-      "description": "Rhodes collection by B2B Furniture Supply",
-      "hero_image_url": null,
+      "description": "Rhodes collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/972002/972002-1500x1500.jpg",
       "color_palette": null,
       "is_active": true,
-      "sort_order": 37,
-      "created_at": "2026-07-24T02:30:07.673841+00:00",
-      "updated_at": "2026-07-25T04:28:20.953196+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.942173",
+      "updated_at": "2026-07-27T16:58:33.942174"
     },
     {
-      "id": "30533e02-8f04-4d07-a319-d48208522740",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-royston",
+      "brand_id": "brand-b2bfurniture",
       "name": "Royston",
       "slug": "royston",
-      "description": "Royston collection by B2B Furniture Supply",
-      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/color/808 GOLD-30x30.jpg",
-      "color_palette": [
-        {
-          "hex": "#C5A050",
-          "code": "808",
-          "name": "Gold",
-          "part": "legs"
-        },
-        {
-          "hex": "#3D2B1F",
-          "code": "113",
-          "name": "Walnut",
-          "part": "body"
-        }
-      ],
+      "description": "Royston collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/146110/146110-1500x1500.jpg",
+      "color_palette": null,
       "is_active": true,
-      "sort_order": 38,
-      "created_at": "2026-07-16T07:37:01.366641+00:00",
-      "updated_at": "2026-07-25T04:28:21.010075+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.910289",
+      "updated_at": "2026-07-27T16:58:33.910291"
     },
     {
-      "id": "fd4551bf-ea4f-4fad-9d82-ce69cb98f0cc",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-samos",
+      "brand_id": "brand-b2bfurniture",
       "name": "Samos",
       "slug": "samos",
-      "description": "Samos collection by B2B Furniture Supply",
-      "hero_image_url": null,
+      "description": "Samos collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/344030/344030-1500x1500.jpg",
       "color_palette": null,
       "is_active": true,
-      "sort_order": 39,
-      "created_at": "2026-07-24T02:30:07.783753+00:00",
-      "updated_at": "2026-07-25T04:28:21.061306+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.932316",
+      "updated_at": "2026-07-27T16:58:33.932317"
     },
     {
-      "id": "5821c87b-62db-4f91-8ab9-5307c7fd3d92",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-sivan",
+      "brand_id": "brand-b2bfurniture",
       "name": "Sivan",
       "slug": "sivan",
-      "description": "Sivan collection by B2B Furniture Supply",
-      "hero_image_url": null,
+      "description": "Sivan collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/233326/233326-1500x1500.jpg",
       "color_palette": null,
       "is_active": true,
-      "sort_order": 40,
-      "created_at": "2026-07-24T02:30:07.835507+00:00",
-      "updated_at": "2026-07-25T04:28:21.112206+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.916197",
+      "updated_at": "2026-07-27T16:58:33.916199"
     },
     {
-      "id": "af8805cb-a836-4d32-b339-961c04d34789",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-toba",
+      "brand_id": "brand-b2bfurniture",
       "name": "Toba",
       "slug": "toba",
-      "description": "Toba collection by B2B Furniture Supply",
-      "hero_image_url": null,
+      "description": "Toba collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/345078/345078-1500x1500.jpg",
       "color_palette": null,
       "is_active": true,
-      "sort_order": 41,
-      "created_at": "2026-07-24T19:29:36.198367+00:00",
-      "updated_at": "2026-07-25T04:28:21.163754+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.935105",
+      "updated_at": "2026-07-27T16:58:33.935106"
     },
     {
-      "id": "780da9c3-ed25-4c70-a734-e12d63e318e2",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-toronto",
+      "brand_id": "brand-b2bfurniture",
       "name": "Toronto",
       "slug": "toronto",
-      "description": "Toronto collection by B2B Furniture Supply",
-      "hero_image_url": null,
+      "description": "Toronto collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/343048/343048-1500x1500.jpg",
       "color_palette": null,
       "is_active": true,
-      "sort_order": 42,
-      "created_at": "2026-07-24T02:30:07.888599+00:00",
-      "updated_at": "2026-07-25T04:28:21.214954+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.931783",
+      "updated_at": "2026-07-27T16:58:33.931784"
     },
     {
-      "id": "9f0870d6-07c0-44f5-9797-c67524857dfd",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-torrell",
+      "brand_id": "brand-b2bfurniture",
       "name": "Torrell",
       "slug": "torrell",
-      "description": "Torrell collection by B2B Furniture Supply",
-      "hero_image_url": null,
+      "description": "Torrell collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/335075/335075-1500x1500.jpg",
       "color_palette": null,
       "is_active": true,
-      "sort_order": 43,
-      "created_at": "2026-07-24T02:30:07.942055+00:00",
-      "updated_at": "2026-07-25T04:28:21.26327+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.923058",
+      "updated_at": "2026-07-27T16:58:33.923059"
     },
     {
-      "id": "afc01de5-66ce-43b0-813d-c134fe6f79fd",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-volos",
+      "brand_id": "brand-b2bfurniture",
       "name": "Volos",
       "slug": "volos",
-      "description": "Volos collection by B2B Furniture Supply",
-      "hero_image_url": null,
+      "description": "Volos collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/344022/344022-1500x1500.jpg",
       "color_palette": null,
       "is_active": true,
-      "sort_order": 44,
-      "created_at": "2026-07-24T02:30:07.995218+00:00",
-      "updated_at": "2026-07-25T04:28:21.311673+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.932077",
+      "updated_at": "2026-07-27T16:58:33.932078"
     },
     {
-      "id": "b77e727b-c62e-4fe2-9de1-714d2289289e",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
+      "id": "col-waldo",
+      "brand_id": "brand-b2bfurniture",
       "name": "Waldo",
       "slug": "waldo",
-      "description": "Waldo collection by B2B Furniture Supply",
-      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/145137/145137-550x500.jpg",
-      "color_palette": [
-        {
-          "hex": "#2D2520",
-          "code": "802/179",
-          "name": "Walnut/Black",
-          "part": "body"
-        }
-      ],
-      "is_active": true,
-      "sort_order": 45,
-      "created_at": "2026-07-16T07:37:01.481633+00:00",
-      "updated_at": "2026-07-25T04:28:21.363678+00:00"
-    },
-    {
-      "id": "6fe0b18b-f574-49fe-a053-085d52d028fa",
-      "brand_id": "507dfb2a-02cd-4f74-b6f5-96941ad211c1",
-      "name": "Willingham",
-      "slug": "willingham",
-      "description": "Willingham collection by B2B Furniture Supply",
-      "hero_image_url": null,
+      "description": "Waldo collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/145137/145137-1500x1500.jpg",
       "color_palette": null,
       "is_active": true,
-      "sort_order": 46,
-      "created_at": "2026-07-24T02:30:08.102515+00:00",
-      "updated_at": "2026-07-25T04:28:21.412044+00:00"
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.908480",
+      "updated_at": "2026-07-27T16:58:33.908481"
+    },
+    {
+      "id": "col-willingham",
+      "brand_id": "brand-b2bfurniture",
+      "name": "Willingham",
+      "slug": "willingham",
+      "description": "Willingham collection",
+      "hero_image_url": "https://mm.hinlim.com/cache/b2bfs/product/241221/241221-1500x1500.jpg",
+      "color_palette": null,
+      "is_active": true,
+      "sort_order": 0,
+      "created_at": "2026-07-27T16:58:33.916938",
+      "updated_at": "2026-07-27T16:58:33.916939"
     }
   ]
 }
