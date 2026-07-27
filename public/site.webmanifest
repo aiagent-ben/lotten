@@ -2,24 +2,24 @@
   "name": "Lotten — Curated Malaysian Oak Furniture",
   "short_name": "Lotten",
   "description": "Curated Malaysian Oak furniture for modern homes — direct from manufacturer to your door.",
-  "start_url": "/en",
+  "start_url": "https://lotten.2share.tech/en",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#78350f",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/favicon.ico",
+      "src": "https://lotten.2share.tech/favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     },
     {
-      "src": "/favicon-16x16.png",
+      "src": "https://lotten.2share.tech/favicon-16x16.png",
       "sizes": "16x16",
       "type": "image/png"
     },
     {
-      "src": "/apple-touch-icon.png",
+      "src": "https://lotten.2share.tech/apple-touch-icon.png",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "any maskable"
