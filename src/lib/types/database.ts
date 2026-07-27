@@ -107,6 +107,7 @@ export interface Product {
   updated_at: string;
   collection?: Collection;
   images?: ProductImage[];
+  product_images?: ProductImage[];
   variants?: ProductVariant[];
 }
 

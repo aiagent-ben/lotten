@@ -19,6 +19,7 @@ export interface ProductData {
   created_at: string;
   collections: { id: string; name: string; slug: string } | null;
   images: { url: string; is_primary: boolean; sort_order: number }[];
+  product_images: { url: string; is_primary: boolean; sort_order: number; alt_text: string | null }[];
 }
 
 export interface CollectionData {
@@ -387,7 +388,7 @@ export default function ProductsClient({
                 </tr>
               ) : (
                 products.map((product) => {
-                  const primaryImage = product.images?.find((img) => img.is_primary) || product.images?.[0];
+                  const primaryImage = product.product_images?.find((img) => img.is_primary) || product.product_images?.[0];
                   const netStock = product.stock_available - product.stock_reserved;
                   const stockStatus = netStock <= 0 ? 'out_of_stock' : netStock <= 5 ? 'low' : 'in_stock';
 

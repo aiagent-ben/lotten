@@ -18,7 +18,7 @@ interface Product {
   collection_id: string;
   collection_name: string;
   brand_name: string;
-  images: {
+  product_images: {
     id: string;
     url: string;
     alt_text: string | null;
@@ -432,7 +432,7 @@ function FilterSection({ title, icon, children }: { title: string; icon: React.R
 }
 
 function ProductCard({ product }: { product: Product }) {
-  const primaryImage = product.images?.find(img => img.is_primary) || product.images?.[0];
+  const primaryImage = product.product_images?.find(img => img.is_primary) || product.product_images?.[0];
 
   return (
     <article className="product-card group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300" role="listitem">

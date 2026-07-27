@@ -9,6 +9,7 @@ export type RecentlyViewedProduct = {
   slug: string;
   price_usd: number;
   images: { url: string; alt_text?: string; is_primary?: boolean }[];
+  product_images: { url: string; alt_text?: string; is_primary?: boolean }[];
   collection_id: string;
   is_new?: boolean;
   is_bestseller?: boolean;

@@ -147,7 +147,7 @@ export default async function ProductsPage({ searchParams }: Props) {
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" role="list">
                 {paginatedProducts.map((product) => {
-                  const primaryImage = product.images?.find((img) => img.is_primary) || product.images?.[0];
+                  const primaryImage = product.product_images?.find((img) => img.is_primary) || product.product_images?.[0];
                   
                   return (
                     <article 
@@ -165,7 +165,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                           {primaryImage ? (
                             <Image
                               src={primaryImage.url}
-                              alt={product.name}
+                              alt={primaryImage.alt_text || product.name}
                               fill
                               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                               className="object-cover transition-transform duration-500 group-hover:scale-105"

@@ -281,7 +281,7 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" role="list">
             {featuredProducts.map((product) => {
-              const primaryImage = product.images?.find((img) => img.is_primary) || product.images?.[0];
+              const primaryImage = product.product_images?.find((img) => img.is_primary) || product.product_images?.[0];
               return (
                 <Link
                   key={product.id}

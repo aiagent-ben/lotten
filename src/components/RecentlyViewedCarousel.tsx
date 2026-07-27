@@ -13,6 +13,7 @@ interface RecentlyViewedProduct {
   slug: string;
   price_usd: number;
   images: { url: string; alt_text?: string; is_primary?: boolean }[];
+  product_images: { url: string; alt_text?: string; is_primary?: boolean }[];
   collection_id: string;
   is_new?: boolean;
   is_bestseller?: boolean;
@@ -131,7 +132,7 @@ export function RecentlyViewedCarousel({
             }}
           >
             {visibleProducts.map((product) => {
-              const primaryImage = product.images?.find((img) => img.is_primary) || product.images?.[0];
+              const primaryImage = product.product_images?.find((img) => img.is_primary) || product.product_images?.[0];
               
               return (
                 <article

@@ -2,17 +2,40 @@
 """
 Clean and validate scraped product data.
 Transforms raw JSON → clean JSON matching SPEC.md database schema.
+
+Fixed issues:
+- Dynamic color detection (no hardcoded list)
+- MYR to USD price conversion with configurable rate
+- W/D/H dimension format support
+- Dynamic hex color generation
+- Configurable defaults via environment
 """
 
 import argparse
 import json
 import glob
 import re
+import os
+import hashlib
+import colorsys
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
+from collections import defaultdict
 
 from pydantic import BaseModel, Field, field_validator
+
+
+# ──────────────────────────────────────────────────────────────
+# Configuration
+# ──────────────────────────────────────────────────────────────
+
+MYR_TO_USD_RATE = float(os.getenv("MYR_TO_USD_RATE", "0.22"))  # ~4.5 MYR = 1 USD
+DEFAULT_STOCK = int(os.getenv("DEFAULT_STOCK", "10"))
+DEFAULT_LEAD_TIME_WEEKS = int(os.getenv("DEFAULT_LEAD_TIME_WEEKS", "8"))
+DEFAULT_MOQ = int(os.getenv("DEFAULT_MOQ", "1"))
+DEFAULT_LOW_STOCK = int(os.getenv("DEFAULT_LOW_STOCK", "5"))
+DEFAULT_COST_USD = float(os.getenv("DEFAULT_COST_USD", "0.0"))  # 0 = not set
 
 
 # ──────────────────────────────────────────────────────────────
@@ -40,11 +63,12 @@ class RawProduct(BaseModel):
     carton_dimensions: str = ""
     product_gallery: list[dict] = Field(default_factory=list)
     color_swatches: list[dict] = Field(default_factory=list)
-    categories: list[str] = Field(default_factory=list)  # Category hierarchy from breadcrumb
+    categories: list[str] = Field(default_factory=list)
 
     # R2 fields (from download_and_upload_to_r2.py)
     r2_images: list[str] = Field(default_factory=list)
     r2_primary_image: str = ""
+    product_variants: list[dict] = Field(default_factory=list)
 
 
 class MaterialSpec(BaseModel):
@@ -98,12 +122,12 @@ class CleanProduct(BaseModel):
     colors: list[ColorOption] | None = None
     price_usd: float = 0.0
     cost_usd: float | None = None
-    moq: int = 1
-    lead_time_weeks: int = 8
-    stock_available: int = 10
+    moq: int = DEFAULT_MOQ
+    lead_time_weeks: int = DEFAULT_LEAD_TIME_WEEKS
+    stock_available: int = DEFAULT_STOCK
     stock_reserved: int = 0
     stock_incoming: int = 0
-    low_stock_threshold: int = 5
+    low_stock_threshold: int = DEFAULT_LOW_STOCK
     is_active: bool = True
     is_new: bool = False
     is_bestseller: bool = False
@@ -111,6 +135,7 @@ class CleanProduct(BaseModel):
     created_at: str = ""
     updated_at: str = ""
     images: list[ProductImage] = Field(default_factory=list)
+    product_variants: list[dict] = Field(default_factory=list)
 
     @field_validator("id", mode="before")
     @classmethod
@@ -183,11 +208,19 @@ def parse_specifications(specs: str) -> dict:
     """Parse specifications text into structured fields."""
     result = {}
     
+    # W/D/H format (cabinets, shoe cabinets)
     dim_match = re.search(r'Dimension\s*\(mm\):\s*W(\d+)\s*D(\d+)\s*H(\d+)', specs, re.IGNORECASE)
     if dim_match:
         result['width'] = int(dim_match.group(1))
         result['depth'] = int(dim_match.group(2))
         result['height'] = int(dim_match.group(3))
+    else:
+        # L/W/H format (tables, etc.)
+        dim_match = re.search(r'Dimension\s*\(mm\):\s*L(\d+)\s*W(\d+)\s*H(\d+)', specs, re.IGNORECASE)
+        if dim_match:
+            result['width'] = int(dim_match.group(1))
+            result['depth'] = int(dim_match.group(2))
+            result['height'] = int(dim_match.group(3))
     
     weight_match = re.search(r'Gross Weight\s*\(kg\):\s*([\d.]+)', specs, re.IGNORECASE)
     if weight_match:
@@ -207,6 +240,7 @@ def parse_specifications(specs: str) -> dict:
 def parse_carton_dimensions(carton_str: str) -> dict:
     """Parse carton dimensions text into structured fields."""
     result = {}
+    # Multi-carton format: "372025 A: L1030 W415 H150"
     match = re.search(r'L(\d+)\s*W(\d+)\s*H(\d+)', carton_str, re.IGNORECASE)
     if match:
         result['length'] = int(match.group(1))
@@ -230,7 +264,7 @@ def parse_materials(materials_str: str) -> list[MaterialSpec]:
             material = parts[0].strip() if parts else ''
             finish = parts[1].strip() if len(parts) > 1 else ''
             
-            # Extract code from finish if present (e.g., "MINDY VENEER" -> no code, "109" -> code)
+            # Extract code from finish if present
             code = ''
             if finish and finish.isdigit():
                 code = finish
@@ -246,6 +280,46 @@ def parse_materials(materials_str: str) -> list[MaterialSpec]:
                 code=code
             ))
     return result
+
+
+def is_color_name(name: str) -> bool:
+    """
+    Dynamically detect if a name is just a color/finish name.
+    Heuristics: uppercase, no digits, short, matches known color patterns
+    """
+    name_clean = name.strip().upper()
+    if not name_clean:
+        return False
+    
+    # Pure color names are typically:
+    # - All uppercase
+    # - No article numbers
+    # - Short (usually < 20 chars)
+    # - Don't contain product type words
+    
+    product_type_words = {
+        'TABLE', 'CHAIR', 'CABINET', 'BED', 'SOFA', 'BENCH', 'DESK', 
+        'SIDEBOARD', 'DRESSER', 'BOOKCASE', 'WARDROBE', 'MIRROR',
+        'COFFEE', 'DINING', 'CONSOLE', 'TV', 'SIDE', 'NIGHTSTAND',
+        'COUNTER', 'BAR', 'STOOL', 'OTTOMAN', 'SECTIONAL', 'LOUNGE',
+        'RECLINER', 'ACCENT', 'OCCASIONAL', 'ENTERTAINMENT'
+    }
+    
+    # Check if it contains product type words
+    for word in product_type_words:
+        if word in name_clean:
+            return False
+    
+    # Check if it's a dimension pattern (e.g., "1800X900")
+    if re.search(r'\d+[Xx]\d+', name_clean):
+        return False
+    
+    # Check if it's a measurement pattern
+    if re.search(r'\d+(?:MM|CM|M)\b', name_clean):
+        return False
+    
+    # Short uppercase name without product keywords = likely a color
+    return len(name_clean) < 25 and name_clean.isupper()
 
 
 def parse_colors(colors_str: str) -> list[ColorOption]:
@@ -265,8 +339,8 @@ def parse_colors(colors_str: str) -> list[ColorOption]:
             
             part_normalized = part.lower().replace(' ', '_').replace('-', '_')
             
-            # Try to get hex from known color names (simplified)
-            hex_color = get_hex_for_color(name, code)
+            # Generate hex color dynamically
+            hex_color = generate_hex_for_color(name, code)
             
             result.append(ColorOption(
                 part=part_normalized,
@@ -277,8 +351,12 @@ def parse_colors(colors_str: str) -> list[ColorOption]:
     return result
 
 
-def get_hex_for_color(name: str, code: str) -> str:
-    """Get hex color for known finishes."""
+def generate_hex_for_color(name: str, code: str) -> str:
+    """
+    Generate a deterministic hex color from name/code.
+    Uses hash-based generation for unknown colors.
+    """
+    # Known color mappings (priority)
     color_hex_map = {
         'COCOA': '#4A3728',
         'NATURAL': '#D4B896',
@@ -310,6 +388,16 @@ def get_hex_for_color(name: str, code: str) -> str:
         'WASH': '#E8E0D8',
         'WHITE': '#FFFFFF',
         'BLACK': '#000000',
+        'RED': '#CC0000',
+        'GREEN': '#2E7D32',
+        'YELLOW': '#FDD835',
+        'ORANGE': '#E65100',
+        'PINK': '#EC407A',
+        'PURPLE': '#7B1FA2',
+        'BROWN': '#5D4037',
+        'BEIGE': '#F5F5DC',
+        'SILVER': '#C0C0C0',
+        'GOLD': '#FFD700',
     }
     
     name_upper = name.upper()
@@ -317,7 +405,7 @@ def get_hex_for_color(name: str, code: str) -> str:
         if key in name_upper:
             return hex_val
     
-    # Try code-based mapping
+    # Code-based mapping for finish codes
     code_map = {
         '109': '#4A3728',  # COCOA
         '102': '#D4B896',  # NATURAL
@@ -335,11 +423,25 @@ def get_hex_for_color(name: str, code: str) -> str:
     if code in code_map:
         return code_map[code]
     
-    return '#FFFFFF'
+    # Generate deterministic color from name+code hash
+    import hashlib
+    seed = (name + code).encode()
+    hash_val = int(hashlib.md5(seed).hexdigest()[:6], 16)
+    
+    # Ensure it's a wood-tone color (brown/orange family)
+    # Use hue in 20-40 range (warm wood tones)
+    hue = 20 + (hash_val % 20)
+    sat = 40 + (hash_val % 40)
+    light = 30 + (hash_val % 30)
+    
+    # Convert HSL to hex
+    import colorsys
+    r, g, b = colorsys.hls_to_rgb(hue / 360, light / 100, sat / 100)
+    return f"#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}"
 
 
 def parse_dimensions(dimensions_str: str) -> dict:
-    """Parse dimensions text (from dimensions field)."""
+    """Parse dimensions text - supports L/W/H and W/D/H formats."""
     result = {}
     # Pattern like "W600 D600 H525 T30" or "L600 W600 H525 T30"
     match = re.search(r'[LW]\s*(\d+)\s*[WD]\s*(\d+)\s*H\s*(\d+)', dimensions_str, re.IGNORECASE)
@@ -350,13 +452,47 @@ def parse_dimensions(dimensions_str: str) -> dict:
     return result
 
 
+def parse_price_myr_to_usd(price_str: str) -> float:
+    """
+    Parse MYR price string and convert to USD.
+    Handles: "RM 1,299.00", "RM 0.00", "Contact for Price", etc.
+    Returns 0.0 if price cannot be determined (contact for price).
+    """
+    if not price_str:
+        return 0.0
+    
+    price_str = price_str.strip()
+    price_lower = price_str.lower()
+    
+    # Handle "Contact for Price" variants
+    if any(phrase in price_lower for phrase in ['contact', 'enquiry', 'quote', 'call']):
+        return 0.0
+    
+    # Handle "RM 0.00" or "0.00"
+    if price_str in ['0', '0.00', 'RM 0', 'RM 0.00', 'RM0', 'RM0.00']:
+        return 0.0
+    
+    # Extract numeric value
+    # Match patterns like "RM 1,299.00", "1,299.00", "RM1299"
+    match = re.search(r'[\d,]+\.?\d*', price_str.replace(',', ''))
+    if match:
+        try:
+            myr_amount = float(match.group().replace(',', ''))
+            if myr_amount > 0:
+                usd_amount = myr_amount * MYR_TO_USD_RATE
+                return round(usd_amount, 2)
+        except ValueError:
+            pass
+    
+    return 0.0
+
+
 def clean_products(raw_products: list[RawProduct]) -> list[CleanProduct]:
     """Transform raw products to clean products with validation."""
     seen = set()
     clean = []
     
     # First pass: group by base slug (article_no + product name before color code)
-    from collections import defaultdict
     by_base_slug = defaultdict(list)
     
     for raw in raw_products:
@@ -383,20 +519,15 @@ def clean_products(raw_products: list[RawProduct]) -> list[CleanProduct]:
         if not base_slug:
             continue
         
-        # Skip if all variants are just color names (likely not real products)
-        color_names = {'BLACK', 'WHITE', 'COCOA', 'NATURAL', 'OAK', 'ANTHRACITE', 'GREY', 'WALNUT',
-                       'TOFFEE', 'SMOKED', 'RUSTIC', 'CHERRY', 'CHOCOLATE', 'TYROLEAN', 'BEECH',
-                       'SPACE', 'BLUE', 'CREAM', 'GREYMIST', 'GUNMETAL', 'LIGHT', 'TENNESSEE',
-                       'WARM', 'WOODLINE', 'WOODSTOCK', 'WOTAN', 'BOSTON', 'LACQUERED', 'MARBLE', 'WASH'}
-        
+        # Use dynamic color detection
         # Prefer variant with longest, most descriptive name (not just a color)
         best_variant = None
         best_score = -1
         
         for raw in variants:
-            name = raw.name.strip().upper()
+            name = raw.name.strip()
             # Skip pure color name products (they're color variants)
-            if name in color_names:
+            if is_color_name(name):
                 continue
             # Score: longer name = more descriptive = better
             score = len(name)
@@ -432,8 +563,8 @@ def clean_products(raw_products: list[RawProduct]) -> list[CleanProduct]:
             has_images = True
         
         # Skip if no images AND no slug (color swatches typically have neither)
-        # Also skip if name is just a color name AND no article_no AND no product_gallery (color swatch page)
-        is_color_swatch = (raw.name.strip().upper() in color_names and not raw.article_no and
+        # Also skip if name is just a color name AND no article_no AND no product_gallery
+        is_color_swatch = (is_color_name(raw.name) and not raw.article_no and
                            not (hasattr(raw, 'product_gallery') and raw.product_gallery))
         if (not has_images and not raw.slug) or is_color_swatch:
             print(f"  ⊘ Skipping color swatch: {raw.name} (article_no: {raw.article_no})")
@@ -507,6 +638,31 @@ def clean_products(raw_products: list[RawProduct]) -> list[CleanProduct]:
                 created_at=datetime.now().isoformat()
             ))
         
+        # Parse product variants
+        product_variants = []
+        if raw.product_variants:
+            for v in raw.product_variants:
+                var_article_no = v.get('article_no', '')
+                var_name = v.get('name', '')
+                var_slug = slugify(f"{var_article_no}-{var_name}") if var_article_no else slugify(var_name)
+                
+                product_variants.append({
+                    "article_no": var_article_no,
+                    "name": var_name,
+                    "slug": var_slug,
+                    "price_usd": 0.0,  # variants typically inherit base price
+                    "variant_attributes": {
+                        "finish_code": v.get('finish_code', ''),
+                        "relationship": v.get('relationship', 'finish_variant'),
+                        "base_product": v.get('base_product', raw.article_no or '')
+                    },
+                    "is_active": True,
+                    "sort_order": 0,
+                })
+        
+        # Parse price (MYR to USD)
+        price_usd = parse_price_myr_to_usd(raw.price)
+        
         # Build clean product
         clean_product = CleanProduct(
             id=pid,
@@ -527,21 +683,22 @@ def clean_products(raw_products: list[RawProduct]) -> list[CleanProduct]:
             carton_height_mm=carton.get('height'),
             materials=materials if materials else None,
             colors=colors if colors else None,
-            price_usd=0.0,  # "Contact for Price" = 0
-            cost_usd=None,
-            moq=1,
-            lead_time_weeks=8,
-            stock_available=10,
+            price_usd=price_usd,
+            cost_usd=None if DEFAULT_COST_USD == 0 else DEFAULT_COST_USD,
+            moq=DEFAULT_MOQ,
+            lead_time_weeks=DEFAULT_LEAD_TIME_WEEKS,
+            stock_available=DEFAULT_STOCK,
             stock_reserved=0,
             stock_incoming=0,
-            low_stock_threshold=5,
+            low_stock_threshold=DEFAULT_LOW_STOCK,
             is_active=True,
             is_new=False,
             is_bestseller=False,
             sort_order=0,
             created_at=datetime.now().isoformat(),
             updated_at=datetime.now().isoformat(),
-            images=product_images
+            images=product_images,
+            product_variants=product_variants
         )
         clean.append(clean_product)
     

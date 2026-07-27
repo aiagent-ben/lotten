@@ -1,18 +1,30 @@
+#!/usr/bin/env python3
+"""
+One-time migration: seed Supabase from parser's clean JSON output.
+
+Reads: data/clean/products.json (from clean_products.py)
+Writes: Supabase (brands, collections, products, product_images, product_variants)
+"""
+
 import asyncio
 import json
 import os
 import re
 import sys
+import uuid
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 from urllib.parse import urlparse
 from dotenv import load_dotenv
 
+# Load env from lotten project root BEFORE reading env vars
+load_dotenv(Path(__file__).parent.parent / ".env.local")
+
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from supabase import create_client
-
+from supabase import create_client, Client
 
 # ──────────────────────────────────────────────────────────────
 # Config
@@ -27,7 +39,7 @@ if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
-CLEAN_JSON_PATH = Path(__file__).parent.parent / "b2b-furniture-ecommerce" / "data" / "clean" / "products.json"
+CLEAN_JSON_PATH = Path(__file__).parent.parent / "data" / "clean" / "products.json"
 R2_PUBLIC_DOMAIN = "pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev"
 
 
@@ -42,12 +54,12 @@ def slugify(text: str) -> str:
     return text.strip('-')
 
 
-def parse_price(price_str: str) -> tuple[Optional[float], bool]:
-    """Parse price string → (amount_usd, is_contact_for_price)."""
+def parse_price(price_str) -> tuple[Optional[float], bool]:
+    """Parse price string -> (amount_usd, is_contact_for_price)."""
     if not price_str or price_str.strip() == "":
         return None, True
     
-    price_str = price_str.strip().lower()
+    price_str = str(price_str).strip().lower()
     if "contact" in price_str or "enquiry" in price_str or price_str in ["0", "0.00", "rm 0.00"]:
         return None, True
     
@@ -56,9 +68,7 @@ def parse_price(price_str: str) -> tuple[Optional[float], bool]:
     if match:
         try:
             amount = float(match.group())
-            # Assume MYR, convert to USD (rough rate: 1 USD = 4.5 MYR)
-            # Or keep as MYR if price_usd column expects MYR
-            return round(amount / 4.5, 2), False  # Convert MYR to USD
+            return round(amount / 4.5, 2), False
         except:
             pass
     
@@ -66,7 +76,7 @@ def parse_price(price_str: str) -> tuple[Optional[float], bool]:
 
 
 def parse_dimensions(dim_str: str) -> dict:
-    """Parse 'L1050.0 W560.0 H340.0' → dict with mm values."""
+    """Parse 'L1050.0 W560.0 H340.0' -> dict with mm values."""
     result = {}
     for prefix, key in [('L', 'width_mm'), ('W', 'depth_mm'), ('H', 'height_mm')]:
         match = re.search(rf'{prefix}(\d+(?:\.\d+)?)', dim_str)
@@ -76,7 +86,7 @@ def parse_dimensions(dim_str: str) -> dict:
 
 
 def parse_weight(weight_str: str) -> Optional[float]:
-    """Parse '27.4 kg' → 27.4"""
+    """Parse '27.4 kg' -> 27.4"""
     match = re.search(r'([\d.]+)', weight_str)
     if match:
         return float(match.group(1))
@@ -84,7 +94,7 @@ def parse_weight(weight_str: str) -> Optional[float]:
 
 
 def parse_materials(materials_str: str) -> list[dict]:
-    """Parse 'table_leg: MALAYSIAN OAK\ntable_top: MDF+OAK VENEER' → list of dicts."""
+    """Parse 'table_leg: MALAYSIAN OAK\ntable_top: MDF+OAK VENEER' -> list of dicts."""
     materials = []
     for line in materials_str.split('\n'):
         line = line.strip()
@@ -100,7 +110,7 @@ def parse_materials(materials_str: str) -> list[dict]:
 
 
 def parse_finishes(colors_str: str) -> list[dict]:
-    """Parse '1001 SMOKED OAK' → list of dicts."""
+    """Parse '1001 SMOKED OAK' -> list of dicts."""
     finishes = []
     for line in colors_str.split('\n'):
         line = line.strip()
@@ -116,7 +126,7 @@ def parse_finishes(colors_str: str) -> list[dict]:
 
 
 def parse_specifications(spec_str: str) -> dict:
-    """Parse specification text → structured dict."""
+    """Parse specification text -> structured dict."""
     specs = {}
     for line in spec_str.split('\n'):
         line = line.strip()
@@ -125,9 +135,6 @@ def parse_specifications(spec_str: str) -> dict:
         if ':' in line:
             key, val = line.split(':', 1)
             specs[key.strip().lower().replace(' ', '_')] = val.strip()
-        else:
-            # Try to parse key-value without colon
-            pass
     return specs
 
 
@@ -173,21 +180,6 @@ def parse_dimensions_raw(dim_raw: str) -> dict:
 # ──────────────────────────────────────────────────────────────
 
 async def migrate():
-    from supabase import create_client
-    import os
-    from dotenv import load_dotenv
-    
-    load_dotenv(Path(__file__).parent.parent / "lotten" / ".env.local")
-    
-    url = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
-    key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-    
-    if not url or not key:
-        print("ERROR: Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY")
-        return
-    
-    supabase = create_client(url, key)
-    
     # Load clean products
     print(f"Loading products from {CLEAN_JSON_PATH}")
     with open(CLEAN_JSON_PATH) as f:
@@ -196,89 +188,70 @@ async def migrate():
     print(f"Loaded {len(clean_products)} products")
     
     # ──────────────────────────────────────────────────────────
-    # 1. Collect unique brands & collections
+    # 1. Extract unique collection_ids and brand mappings
     # ──────────────────────────────────────────────────────────
     
-    brand_map = {}  # slug -> {name, slug, description}
-    collection_map = {}  # slug -> {name, slug, brand_slug, description}
+    collection_ids = set()
+    brand_map = {}  # collection_id -> brand_name
     
     for p in clean_products:
-        collection = p.get('collection', '').strip()
-        categories = p.get('categories', [])
-        
-        # Derive brand from categories or collection
-        brand_name = categories[0] if categories else "B2B Furniture Supply"
+        cid = p.get('collection_id')
+        if cid:
+            collection_ids.add(cid)
+            # Derive brand from collection name
+            collection_name = p.get('collection', '')
+            brand_name = collection_name or 'B2B Furniture Supply'
+            brand_map[cid] = brand_name
+    
+    print(f"Found {len(collection_ids)} unique collections, {len(brand_map)} brand mappings")
+    
+    # ──────────────────────────────────────────────────────────
+    # 2. Seed Brands
+    # ──────────────────────────────────────────────────────────
+    
+    brand_id_map = {}  # collection_id -> brand_id
+    
+    for cid, brand_name in brand_map.items():
         brand_slug = slugify(brand_name)
-        
-        if brand_slug not in brand_map:
-            brand_map[brand_slug] = {
-                "name": brand_name,
-                "slug": brand_slug,
-                "description": f"{brand_name} furniture collection"
-            }
-        
-        collection_name = collection or "Uncategorized"
-        collection_slug = slugify(collection_name)
-        
-        if collection_slug not in collection_map:
-            collection_map[collection_slug] = {
-                "name": collection_name,
-                "slug": collection_slug,
-                "brand_slug": brand_slug,
-                "description": f"{collection_name} collection"
-            }
-    
-    print(f"Found {len(brand_map)} brands, {len(collection_map)} collections")
-    
-    # ──────────────────────────────────────────────────────────
-    # 2. Upsert Brands
-    # ──────────────────────────────────────────────────────────
-    
-    print("\n🌱 Seeding brands...")
-    brand_id_map = {}
-    for slug, brand in brand_map.items():
         result = supabase.table('brands').upsert({
-            "name": brand["name"],
-            "slug": brand["slug"],
-            "description": brand["description"],
-            "sort_order": list(brand_map.keys()).index(slug),
-        }, on_conflict="slug").execute()
+            "name": brand_name,
+            "slug": brand_slug,
+            "description": f"{brand_name} furniture collection",
+        }, on_conflict="name").execute()
         
         if result.data:
-            brand_id_map[slug] = result.data[0]['id']
-            print(f"  ✓ Brand: {brand['name']} ({slug})")
+            brand_id_map[cid] = result.data[0]['id']
+            print(f"  ✓ Brand: {brand_name} -> {result.data[0]['id']}")
         else:
-            print(f"  ✗ Brand failed: {slug}")
+            print(f"  ✗ Failed to seed brand: {brand_name}")
     
     # ──────────────────────────────────────────────────────────
-    # 3. Upsert Collections
+    # 3. Seed Collections
     # ──────────────────────────────────────────────────────────
     
-    print("\n🌱 Seeding collections...")
-    collection_id_map = {}
-    for slug, coll in collection_map.items():
-        brand_id = brand_id_map.get(coll["brand_slug"])
+    collection_id_map = {}  # collection_id -> id
+    
+    for cid in collection_ids:
+        brand_id = brand_id_map.get(cid)
         if not brand_id:
-            print(f"  ✗ Brand not found for collection: {slug}")
+            print(f"  ✗ No brand_id for collection: {cid}")
             continue
         
         result = supabase.table('collections').upsert({
             "brand_id": brand_id,
-            "name": coll["name"],
-            "slug": slug,
-            "description": coll["description"],
-            "is_active": True,
-            "sort_order": list(collection_map.keys()).index(slug),
+            "name": cid.replace('col-', '').replace('-', ' ').title(),
+            "slug": cid.replace('col-', ''),
+            "description": f"{cid.replace('col-', '').replace('-', ' ').title()} furniture collection",
         }, on_conflict="slug").execute()
         
         if result.data:
-            collection_id_map[slug] = result.data[0]['id']
-            print(f"  ✓ Collection: {coll['name']} ({slug})")
+            collection_id_map[cid] = result.data[0]['id']
+            print(f"  ✓ Collection: {cid} -> {result.data[0]['id']}")
         else:
-            print(f"  ✗ Collection failed: {slug}")
+            print(f"  ✗ Failed to seed collection: {cid}")
     
     # ──────────────────────────────────────────────────────────
-    # 4. Upsert Products
+    # 4. Seed Products
     # ──────────────────────────────────────────────────────────
     
     print(f"\n🌱 Seeding {len(clean_products)} products...")
@@ -287,67 +260,128 @@ async def migrate():
     
     for p in clean_products:
         try:
-            article_no = p.get('articleNo') or p.get('id')
-            if not article_no:
-                print(f"  ✗ No article_no for: {p.get('name')}")
+            article_no = p.get('article_no', '')
+            collection_id = p.get('collection_id')
+            
+            if not collection_id or collection_id not in collection_id_map:
+                print(f"  ⊘ Skipping: {p.get('name', 'Unknown')} (no valid collection_id)")
                 errors += 1
                 continue
             
-            # Collection mapping
-            collection_name = p.get('collection', '').strip()
-            collection_slug = slugify(collection_name) if collection_name else "uncategorized"
-            collection_id = collection_id_map.get(collection_slug)
+            supabase_collection_id = collection_id_map[collection_id]
             
-            if not collection_id:
-                print(f"  ⚠ Collection not found: {collection_slug}, using first available")
-                collection_id = list(collection_id_map.values())[0] if collection_id_map else None
-            
-            if not collection_id:
-                print(f"  ✗ No collection for: {p.get('name')}")
-                errors += 1
-                continue
-            
-            # Parse price
-            price_amount, is_contact = parse_price(p.get('price', ''))
+            # Price (already in USD from parser)
+            price_amount = p.get('price_usd', 0) or 0
             
             # Parse dimensions
             dims = parse_dimensions(p.get('dimensions', ''))
             weight = parse_weight(p.get('weight', ''))
-            carton = parse_dimensions(p.get('cartonDimensions', ''))
+            carton = parse_dimensions_raw(p.get('carton_dimensions', ''))
             
-            # Parse structured data
-            materials = parse_materials(p.get('materials', ''))
-            finishes = parse_finishes(p.get('colors', ''))
-            specs = parse_specifications(p.get('specifications', ''))
-            dims_raw = parse_dimensions_raw(p.get('specifications', ''))  # specs often contain dims
+            # Parse structured data - already structured from parser
+            materials = p.get('materials') if isinstance(p.get('materials'), list) else parse_materials(p.get('materials', ''))
+            colors_data = p.get('colors')
+            if isinstance(colors_data, list):
+                finishes = colors_data
+            else:
+                finishes = parse_finishes(colors_data)
+            specs = p.get('specifications') or {}
+            raw_dims = parse_dimensions_raw(str(specs)) if specs else {}
             
-            # Merge dimension sources
-            final_dims = {**dims, **dims_raw}
+            # Merge dimensions from different sources
+            width = raw_dims.get('width_mm') or dims.get('width_mm')
+            depth = raw_dims.get('depth_mm') or dims.get('depth_mm')
+            height = raw_dims.get('height_mm') or dims.get('height_mm')
+            weight_kg = raw_dims.get('weight_kg') or weight
+            volume = raw_dims.get('volume_m3')
+            pack_type = raw_dims.get('pack_type')
+            carton_length = raw_dims.get('carton_length_mm')
+            carton_width = raw_dims.get('carton_width_mm')
+            carton_height = raw_dims.get('carton_height_mm')
             
-            # Product data
+            # Build image list
+            image_urls = []
+            primary_image = ""
+            
+            if p.get('r2_images'):
+                image_urls = p['r2_images']
+                primary_image = p.get('r2_primary_image') or p['r2_images'][0]
+            elif p.get('product_gallery'):
+                image_urls = [g['src'] for g in p['product_gallery'] if 'src' in g]
+                primary_image = image_urls[0] if image_urls else ""
+            elif p.get('images'):
+                image_urls = p['images']
+                primary_image = p.get('img') or image_urls[0]
+            elif p.get('img'):
+                image_urls = [p['img']]
+                primary_image = p['img']
+            
+            # Build ProductImage objects
+            product_images = []
+            for idx, url in enumerate(image_urls):
+                product_images.append({
+                    "id": f"img-{idx}",
+                    "url": url,
+                    "alt_text": f"{p.get('name', '')} - Image {idx + 1}",
+                    "sort_order": idx,
+                    "is_primary": (idx == 0),
+                    "width": 1200,
+                    "height": 1200,
+                    "created_at": datetime.now().isoformat()
+                })
+            
+            # Build product variants
+            product_variants = []
+            if p.get('product_variants'):
+                for v in p['product_variants']:
+                    var_article_no = v.get('article_no')
+                    var_name = v.get('name')
+                    var_slug = slugify(f"{var_article_no}-{var_name}") if var_article_no else slugify(var_name)
+                    
+                    product_variants.append({
+                        "article_no": var_article_no,
+                        "name": var_name,
+                        "slug": var_slug,
+                        "price_usd": price_amount,
+                        "variant_attributes": {
+                            "finish_code": v.get('finish_code', ''),
+                            "relationship": v.get('relationship', 'finish_variant'),
+                            "base_product": v.get('base_product', article_no)
+                        },
+                        "is_active": True,
+                        "sort_order": 0,
+                    })
+            
+            pid = f"prod-{article_no}" if article_no else slugify(p.get('name', ''))
+            # Generate proper UUID from the pid
+            pid = str(uuid.uuid5(uuid.NAMESPACE_DNS, pid))
+            slug = p.get('slug', slugify(p.get('name', '')))
+            
+            # Upsert product
             product_data = {
+                "id": pid,
                 "article_no": article_no,
-                "collection_id": collection_id,
+                "collection_id": supabase_collection_id,
                 "name": p.get('name', '').strip(),
-                "slug": p.get('slug', ''),
-                "description": p.get('description', ''),
-                "short_description": p.get('description', '')[:200] if p.get('description') else None,
-                "width_mm": final_dims.get('width_mm'),
-                "depth_mm": final_dims.get('depth_mm'),
-                "height_mm": final_dims.get('height_mm'),
-                "weight_kg": final_dims.get('weight_kg') or weight,
-                "volume_m3": final_dims.get('volume_m3'),
-                "pack_type": final_dims.get('pack_type'),
-                "carton_length_mm": carton.get('carton_length_mm'),
-                "carton_width_mm": carton.get('carton_width_mm'),
-                "carton_height_mm": carton.get('carton_height_mm'),
-                "materials": materials,
-                "colors": finishes,
-                "price_usd": price_amount if price_amount is not None else 0,
+                "slug": slug,
+                "description": p.get('description', '').strip() if p.get('description') else None,
+                "short_description": p.get('description', '').strip()[:200] if p.get('description') else None,
+                "width_mm": width,
+                "depth_mm": depth,
+                "height_mm": height,
+                "weight_kg": weight_kg,
+                "volume_m3": volume,
+                "pack_type": pack_type,
+                "carton_length_mm": carton_length,
+                "carton_width_mm": carton_width,
+                "carton_height_mm": carton_height,
+                "materials": materials if materials else None,
+                "colors": finishes if finishes else None,
+                "price_usd": price_amount,
                 "cost_usd": None,
                 "moq": 1,
                 "lead_time_weeks": 8,
-                "stock_available": 0,
+                "stock_available": 10,
                 "stock_reserved": 0,
                 "stock_incoming": 0,
                 "low_stock_threshold": 5,
@@ -355,71 +389,38 @@ async def migrate():
                 "is_new": False,
                 "is_bestseller": False,
                 "sort_order": 0,
+                "created_at": datetime.now().isoformat(),
+                "updated_at": datetime.now().isoformat(),
             }
             
-            # Upsert product
-            result = supabase.table('products').upsert(
-                product_data, on_conflict="article_no"
-            ).execute()
+            result = supabase.table('products').upsert(product_data, on_conflict="id").execute()
             
-            if not result.data:
-                print(f"  ✗ Product upsert failed: {article_no}")
-                errors += 1
-                continue
-            
-            product_id = result.data[0]['id']
-            
-            # ────────────────────────────────────────────────────
-            # Product Images
-            # ────────────────────────────────────────────────────
-            
-            images = p.get('images', [])
-            if images:
-                # Delete existing images to avoid duplicates on re-run
+            if result.data:
+                product_id = result.data[0]['id']
+                
+                # Delete existing variants
+                if product_variants:
+                    supabase.table('product_variants').delete().eq('product_id', product_id).execute()
+                    
+                    for v in product_variants:
+                        v['product_id'] = product_id
+                        supabase.table('product_variants').upsert(v, on_conflict="article_no").execute()
+                
+                # Delete existing images and re-insert
                 supabase.table('product_images').delete().eq('product_id', product_id).execute()
+                for idx, img in enumerate(product_images):
+                    img['product_id'] = product_id
+                    img['id'] = f"img-{product_id}-{idx}"
+                    supabase.table('product_images').upsert(img).execute()
                 
-                for i, img_url in enumerate(images):
-                    supabase.table('product_images').insert({
-                        "product_id": product_id,
-                        "url": img_url,
-                        "alt_text": f"{p.get('name')} - Image {i + 1}",
-                        "sort_order": i,
-                        "is_primary": i == 0,
-                    }).execute()
-            
-            # ────────────────────────────────────────────────────
-            # Product Variants (finish variants)
-            # ────────────────────────────────────────────────────
-            
-            variants = p.get('productVariants', [])
-            for var in variants:
-                var_article_no = var.get('article_no')
-                if not var_article_no:
-                    continue
+                print(f"  ✓ {p.get('name', 'Unknown')} ({article_no})")
+                success += 1
+            else:
+                print(f"  ✗ {p.get('name', 'Unknown')}: No data returned")
+                errors += 1
                 
-                supabase.table('product_variants').upsert({
-                    "product_id": product_id,
-                    "article_no": var_article_no,
-                    "name": var.get('name', ''),
-                    "slug": slugify(var.get('name', '')),
-                    "price_usd": 0,  # Will be updated when variant is scraped
-                    "stock_available": 0,
-                    "stock_reserved": 0,
-                    "stock_incoming": 0,
-                    "variant_attributes": {
-                        "finish_code": var.get('finish_code', ''),
-                        "relationship": var.get('relationship', 'finish_variant'),
-                        "base_product": var.get('base_product', ''),
-                    },
-                    "is_active": True,
-                    "sort_order": 0,
-                }, on_conflict="article_no").execute()
-            
-            print(f"  ✓ {article_no}: {p.get('name')}")
-            success += 1
-            
         except Exception as e:
-            print(f"  ✗ Error on {p.get('name', 'unknown')}: {e}")
+            print(f"  ✗ {p.get('name', 'Unknown')}: {e}")
             errors += 1
     
     print(f"\n✅ Migration complete: {success} success, {errors} errors")

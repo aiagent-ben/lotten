@@ -29,7 +29,7 @@ export async function GET(request: Request) {
       sort_order,
       created_at,
       collections:collection_id (id, name, slug),
-      images:product_images!product_id (url, is_primary, sort_order)
+      images:product_images!product_id (url, is_primary, sort_order, alt_text)
     `,
       { count: 'exact' }
     )
@@ -71,6 +71,7 @@ export async function GET(request: Request) {
       ...p,
       collections: coll ? { id: coll.id, name: coll.name, slug: coll.slug } : null,
       images: p.images?.map((i) => ({ url: i.url, is_primary: i.is_primary, sort_order: i.sort_order })) || [],
+      product_images: p.images?.map((i) => ({ url: i.url, is_primary: i.is_primary, sort_order: i.sort_order, alt_text: i.alt_text })) || [],
     };
   });
 

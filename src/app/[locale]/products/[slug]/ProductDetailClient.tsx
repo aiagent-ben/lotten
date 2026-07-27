@@ -78,6 +78,11 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
         alt_text: img.alt_text ?? undefined,
         is_primary: img.is_primary,
       })) || [],
+      product_images: images.map(img => ({
+        url: img.url,
+        alt_text: img.alt_text ?? undefined,
+        is_primary: img.is_primary,
+      })) || [],
       collection_id: product.collection_id,
       is_new: product.is_new,
       is_bestseller: product.is_bestseller,
