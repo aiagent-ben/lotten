@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     shortcut: "/favicon-16x16.png",
     apple: "/apple-touch-icon.png",
   },
-  manifest: "/site.webmanifest",
+  manifest: "https://lotten.2share.tech/site.webmanifest",
 };
 
 interface LayoutProps {
