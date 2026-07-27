@@ -2,8 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getCollectionBySlug, getProductsByCollection, getCollectionsByBrand, formatPrice, getCollections, getBrands } from '@/lib/data/products';
-import { cn } from '@/lib/utils';
+import { getCollectionBySlug, getProductsByCollection, formatPrice, getCollections, getBrands, getBrandById } from '@/lib/data/products';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -11,8 +10,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const allCollections = await getCollections();
-  const collection = allCollections.find(c => c.slug === slug);
+  const collection = await getCollectionBySlug(slug);
 
   if (!collection) {
     return {
@@ -20,8 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const collectionsOfBrand = allCollections.filter(c => c.brand_id === collection.brand_id);
-  const brand = collectionsOfBrand[0]?.brand;
+  const brand = getBrandById(collection.brand_id);
 
   return {
     title: `${collection.name} Collection`,
@@ -58,15 +55,13 @@ export const revalidate = 3600; // ISR: revalidate every hour
 
 export default async function CollectionDetailPage({ params }: Props) {
   const { slug } = await params;
-  const allCollections = await getCollections();
-  const collection = allCollections.find(c => c.slug === slug);
+  const collection = getCollectionBySlug(slug);
 
   if (!collection) {
     notFound();
   }
 
-  const collectionsOfBrand = allCollections.filter(c => c.brand_id === collection.brand_id);
-  const brand = collectionsOfBrand[0]?.brand;
+  const brand = getBrandById(collection.brand_id);
   const products = getProductsByCollection(collection.id);
   const featuredProducts = products.slice(0, 8);
 
@@ -272,7 +267,7 @@ export default async function CollectionDetailPage({ params }: Props) {
           <h2 className="heading-2 text-gray-900 text-center mb-12">Explore More Collections</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {allCollections
+            {getCollections()
                           .filter(c => c.is_active && c.id !== collection.id)
                           .slice(0, 6)
                           .map((relatedCollection) => {

@@ -2,7 +2,6 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getCollections, getBrands } from '@/lib/data/products';
-import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: 'Collections',
@@ -66,7 +65,7 @@ export default async function CollectionsPage() {
                   <Link
                     key={collection.id}
                     href={`/collections/${collection.slug}`}
-                    className="collection-card group scroll-reveal"
+                    className="collection-card group animate-slide-up"
                     style={{ animationDelay: `${collectionIndex * 100}ms` }}
                     aria-label={`View ${collection.name} collection`}
                   >
