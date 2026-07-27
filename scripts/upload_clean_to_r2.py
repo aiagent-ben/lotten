@@ -346,6 +346,32 @@ async def main():
         with open(args.output, "w") as f:
             json.dump(output_data, f, indent=2, ensure_ascii=False)
         
+        # ALSO update the main products.json used by Next.js build
+        main_products_path = Path("data/clean/products.json")
+        if main_products_path.exists():
+            with open(main_products_path) as f:
+                main_products = json.load(f)
+            
+            # Build lookup from processed products
+            r2_lookup = {}
+            for p in processed:
+                if p.article_no:
+                    r2_lookup[p.article_no] = {
+                        "r2_images": p.r2_images,
+                        "r2_primary_image": p.r2_primary_image,
+                    }
+            
+            # Update main products with R2 URLs
+            for main_p in main_products:
+                article_no = main_p.get("article_no")
+                if article_no in r2_lookup:
+                    main_p["images"] = [{"url": url, "is_primary": i==0, "sort_order": i} 
+                                         for i, url in enumerate(r2_lookup[article_no]["r2_images"])]
+            
+            with open(main_products_path, "w") as f:
+                json.dump(main_products, f, indent=2, ensure_ascii=False)
+            print(f"✓ Updated {main_products_path} with R2 URLs")
+        
         print(f"\n✓ Saved {len(processed)} products with R2 URLs to {args.output}")
         
         # Clean up checkpoint on full success
