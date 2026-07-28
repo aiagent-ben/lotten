@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createBrowserClient } from '@/lib/db/client-browser';
 import { cn } from '@/lib/utils';
-import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 import {
   LayoutDashboard,
   Package,

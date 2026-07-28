@@ -69,7 +69,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
 
   return (
     <>
-      <LocaleSwitcher />
+      <header className="fixed top-0 right-0 z-40 p-4">
+        <LocaleSwitcher />
+      </header>
       {children}
       <Footer />
     </>
