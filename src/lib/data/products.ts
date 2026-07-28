@@ -10,7 +10,7 @@ async function loadProductsFromSupabase(): Promise<Product[]> {
   const supabase = createServiceClient();
   const { data, error } = await supabase
     .from('products')
-    .select('*')
+    .select('*, product_images(*)')
     .eq('is_active', true)
     .order('sort_order', { ascending: true });
 
