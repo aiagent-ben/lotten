@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { getAllActiveProducts, getCollectionById as getCollection, formatPrice, getColorHex } from '@/lib/data/products';
+import { formatPrice, getColorHex } from '@/lib/data/products';
 import { cn } from '@/lib/utils';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { RecentlyViewedCarousel } from '@/components/RecentlyViewedCarousel';
@@ -44,7 +44,7 @@ interface ProductDetailClientProps {
     created_at: string;
     updated_at: string;
     collection?: any;
-    variants?: any[];
+    relatedProducts?: any[];
   };
   images?: {
     id: string;
@@ -57,6 +57,7 @@ interface ProductDetailClientProps {
     height: number | null;
     created_at: string;
   }[];
+  relatedProducts?: any[];
 }
 
 export default function ProductDetailClient({ product, images = [] }: ProductDetailClientProps) {
@@ -89,7 +90,10 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
     });
   }, [product.id, addToRecentlyViewed]);
 
-  const collection = getCollection(product.collection_id);
+  const collection = product.collection;
+
+  // Related products from same collection (passed as prop from server component)
+  const relatedProducts = product.relatedProducts || [];
 
   // Filter primary image and gallery images - exclude color swatches (small 30x30 hinlim URLs)
   const isColorSwatch = (img: typeof images[0]) => {
@@ -106,7 +110,6 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
   // Handle finish selection
   const handleFinishSelect = useCallback((finish: { code: string; name: string; hex: string; part: string }) => {
     setSelectedFinish(finish);
-    // Could filter images by finish here in the future
   }, []);
 
   // Update selected index if it goes out of bounds
@@ -155,11 +158,6 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
 
   // Parse specifications
   const specs = parseSpecifications(product);
-
-  // Related products from same collection
-  const relatedProducts = getAllActiveProducts()
-    .filter(p => p.collection_id === product.collection_id && p.id !== product.id)
-    .slice(0, 4);
 
   // Recently viewed (excluding current product)
   const filteredRecentlyViewed = recentlyViewed.filter(p => p.id !== product.id);
@@ -454,9 +452,9 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                   </div>
                 </div>
               </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
         {/* Product Details Tabs */}
         <section className="py-16 bg-gray-50">
@@ -527,9 +525,12 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
             </nav>
 
             {activeTab === 'description' && (
-              <div className="prose prose-lg prose-gray max-w-none dark:prose-invert">
-                <h2 className="heading-2 text-gray-900 mb-4">About This Product</h2>
-                <div dangerouslySetInnerHTML={{ __html: product.description || '' }} />
+              <div className="prose prose-amber max-w-none">
+                {product.description ? (
+                  <div dangerouslySetInnerHTML={{ __html: product.description }} />
+                ) : (
+                  <p className="text-gray-500">No description available.</p>
+                )}
               </div>
             )}
 
@@ -644,132 +645,118 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                     </div>
                   </div>
                 ) : (
-                  <p className="text-gray-500">Dimension data not available</p>
+                  <p className="text-gray-500">Dimensions not specified.</p>
                 )}
 
                 {product.weight_kg && (
-                  <div className="bg-white p-6 rounded-xl border border-gray-100">
+                  <div className="bg-white p-6 rounded-xl border border-gray-100 text-center max-w-md mx-auto">
                     <p className="caption text-gray-500">Weight</p>
                     <p className="heading-2 font-bold text-gray-900">{product.weight_kg} kg</p>
                   </div>
                 )}
 
                 {product.volume_m3 && (
-                  <div className="bg-white p-6 rounded-xl border border-gray-100">
+                  <div className="bg-white p-6 rounded-xl border border-gray-100 text-center max-w-md mx-auto">
                     <p className="caption text-gray-500">Volume</p>
                     <p className="heading-2 font-bold text-gray-900">{product.volume_m3} m³</p>
                   </div>
                 )}
 
-                {product.carton_length_mm || product.carton_width_mm || product.carton_height_mm ? (
-                  <div className="bg-gray-50 p-6 rounded-xl">
-                    <h3 className="heading-3 text-gray-900 mb-4">Carton Dimensions</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {product.carton_length_mm && (
-                        <div className="bg-white p-4 rounded-lg border border-gray-100 text-center">
-                          <p className="caption text-gray-500">Length</p>
-                          <p className="font-bold text-gray-900">{product.carton_length_mm} mm</p>
-                        </div>
-                      )}
-                      {product.carton_width_mm && (
-                        <div className="bg-white p-4 rounded-lg border border-gray-100 text-center">
-                          <p className="caption text-gray-500">Width</p>
-                          <p className="font-bold text-gray-900">{product.carton_width_mm} mm</p>
-                        </div>
-                      )}
-                      {product.carton_height_mm && (
-                        <div className="bg-white p-4 rounded-lg border border-gray-100 text-center">
-                          <p className="caption text-gray-500">Height</p>
-                          <p className="font-bold text-gray-900">{product.carton_height_mm} mm</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ) : null}
-
                 {product.pack_type && (
-                  <div className="bg-white p-6 rounded-xl border border-gray-100">
+                  <div className="bg-white p-6 rounded-xl border border-gray-100 text-center max-w-md mx-auto">
                     <p className="caption text-gray-500">Packaging</p>
-                    <p className="font-bold text-gray-900">{product.pack_type}</p>
+                    <p className="heading-3 font-bold text-gray-900">{product.pack_type}</p>
                   </div>
                 )}
+
+                {product.carton_length_mm || product.carton_width_mm || product.carton_height_mm ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {product.carton_length_mm && (
+                      <div className="bg-white p-6 rounded-xl border border-gray-100 text-center">
+                        <p className="caption text-gray-500">Carton Length</p>
+                        <p className="heading-2 font-bold text-gray-900">{product.carton_length_mm} mm</p>
+                      </div>
+                    )}
+                    {product.carton_width_mm && (
+                      <div className="bg-white p-6 rounded-xl border border-gray-100 text-center">
+                        <p className="caption text-gray-500">Carton Width</p>
+                        <p className="heading-2 font-bold text-gray-900">{product.carton_width_mm} mm</p>
+                      </div>
+                    )}
+                    {product.carton_height_mm && (
+                      <div className="bg-white p-6 rounded-xl border border-gray-100 text-center">
+                        <p className="caption text-gray-500">Carton Height</p>
+                        <p className="heading-2 font-bold text-gray-900">{product.carton_height_mm} mm</p>
+                      </div>
+                    )}
+                  </div>
+                ) : null}
               </div>
             )}
-          </div>
-        </section>
 
-        {/* You May Also Like */}
-        <section className="py-16">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="heading-2 text-gray-900">You May Also Like</h2>
-              <Link href={`/collections/${collection?.slug}`} className="text-amber-700 hover:text-amber-900 font-medium text-sm">
-                View All {collection?.name} →
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relatedProducts.map((related) => {
-                const primaryImg = related.images?.find(img => img.is_primary) || related.images?.[0];
-                return (
-                  <Link 
-                    key={related.id} 
-                    href={`/products/${related.slug}`}
-                    className="product-card group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300"
-                  >
-                    <div className="relative aspect-[4/3] overflow-hidden bg-gray-50">
-                      {primaryImg ? (
-                        <Image
-                          src={primaryImg.url}
-                          alt={related.name}
-                          fill
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
-                          placeholder="blur"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <svg className="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <p className="caption text-amber-700 font-medium mb-1">
-                        {getCollectionName(related.collection_id)}
-                      </p>
-                      <h3 className="product-card-title font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-amber-700 transition-colors">
-                        {related.name}
-                      </h3>
-                      <p className="product-card-price text-lg font-bold text-gray-900">
-                        {formatPrice(related.price_usd)}
-                      </p>
-                    </div>
-                  </Link>
-                );})}
-            </div>
-          </div>
-        </section>
+            {/* Related Products */}
+            {relatedProducts.length > 0 && (
+              <section className="py-16">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="flex items-center justify-between mb-8">
+                    <h2 className="heading-2 text-gray-900">You May Also Like</h2>
+                    <Link href={`/collections/${collection?.slug}`} className="text-amber-700 hover:text-amber-900 font-medium text-sm">
+                      View All {collection?.name} →
+                    </Link>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {relatedProducts.map((related) => {
+                      const primaryImg = related.images?.find((img: any) => img.is_primary) || related.images?.[0];
+                      return (
+                        <Link 
+                          key={related.id} 
+                          href={`/products/${related.slug}`}
+                          className="product-card group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                        >
+                          <div className="relative aspect-[4/3] overflow-hidden bg-gray-50">
+                            {primaryImg ? (
+                              <Image
+                                src={primaryImg.url}
+                                alt={related.name}
+                                fill
+                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                placeholder="blur"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <svg className="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-4">
+                            <p className="caption text-amber-700 font-medium mb-1">
+                              {collection?.name || 'Collection'}
+                            </p>
+                            <h3 className="product-card-title font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-amber-700 transition-colors">
+                              {related.name}
+                            </h3>
+                            <p className="product-card-price text-lg font-bold text-gray-900">
+                              {formatPrice(related.price_usd)}
+                            </p>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              </section>
+            )}
 
-        {/* Recently Viewed */}
-        <RecentlyViewedCarousel products={filteredRecentlyViewed} />
-
-        {/* CTA Section */}
-        <section className="py-16 bg-amber-900 text-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="heading-2 mb-4">Ready to Order?</h2>
-            <p className="text-lg text-amber-100/80 mb-8 max-w-2xl mx-auto">
-              Contact our team for pricing, customization options, or to place your order. We're here to help you find the perfect piece for your space.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/contact" className="btn-primary btn-lg bg-white text-amber-900 hover:bg-amber-50">
-                Contact Sales
-              </Link>
-              <Link href="/products" className="btn-outline btn-lg border-white text-white hover:bg-white/10">
-                Browse Collections
-              </Link>
-            </div>
+            {/* Recently Viewed */}
+            <section className="py-16">
+              <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <RecentlyViewedCarousel products={filteredRecentlyViewed} />
+              </div>
+            </section>
           </div>
         </section>
       </main>
@@ -777,50 +764,20 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
   );
 }
 
-// Helper function to get collection name from collection_id
-function getCollectionName(collectionId: string): string {
-  const collectionsMap: Record<string, string> = {
-    'col-breda': 'Breda',
-    'col-dover': 'Dover',
-    'col-malton': 'Malton',
-    'col-lamar': 'Lamar',
-    'col-kyoto': 'Kyoto',
-    'col-dudley': 'Dudley',
-    'col-ludlow': 'Ludlow',
-    'col-loftus': 'Loftus',
-    'col-hutto': 'Hutto',
-    'col-royston': 'Royston',
-    'col-oruro': 'Oruro',
-    'col-waldo': 'Waldo',
-    'col-castor': 'Castor',
-    'col-hayton': 'Hayton',
-    'col-neath': 'Neath',
-    'col-hampton': 'Hampton',
-    'col-noud': 'Noud',
-    'col-nakula': 'Nakula',
-  };
-  return collectionsMap[collectionId] || 'Collection';
-}
+// Helper function to parse specifications from product data
+function parseSpecifications(product: any): { dimensions?: string; weight?: string; volume?: string; packType?: string } {
+  const specs: { dimensions?: string; weight?: string; volume?: string; packType?: string } = {};
+  
+  // Build dimensions string
+  const dims: string[] = [];
+  if (product.width_mm) dims.push(`W${product.width_mm}mm`);
+  if (product.depth_mm) dims.push(`D${product.depth_mm}mm`);
+  if (product.height_mm) dims.push(`H${product.height_mm}mm`);
+  if (dims.length > 0) specs.dimensions = dims.join(' × ');
 
-// Helper function to parse specifications from product
-function parseSpecifications(product: any) {
-  const specs: Record<string, string> = {};
-  
-  if (product.width_mm && product.depth_mm && product.height_mm) {
-    specs.dimensions = `${product.width_mm} × ${product.depth_mm} × ${product.height_mm} mm`;
-  }
-  
-  if (product.weight_kg) {
-    specs.weight = product.weight_kg.toString();
-  }
-  
-  if (product.volume_m3) {
-    specs.volume = product.volume_m3.toString();
-  }
-  
-  if (product.pack_type) {
-    specs.packType = product.pack_type;
-  }
-  
+  if (product.weight_kg) specs.weight = product.weight_kg.toString();
+  if (product.volume_m3) specs.volume = product.volume_m3.toString();
+  if (product.pack_type) specs.packType = product.pack_type;
+
   return specs;
-} 
+}
