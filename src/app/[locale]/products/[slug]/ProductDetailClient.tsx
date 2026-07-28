@@ -213,7 +213,6 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                       sizes="(max-width: 1024px) 100vw, 50vw"
                       className="object-cover"
                       priority
-                      placeholder="blur"
                       quality={90}
                     />
                   ) : (
@@ -268,7 +267,6 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                           fill
                           sizes="80px"
                           className="object-cover"
-                          placeholder="blur"
                         />
                         {selectedIndex === index && (
                           <span className="absolute inset-0 bg-amber-600/20 pointer-events-none" aria-hidden="true" />
@@ -721,7 +719,6 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                                 fill
                                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                                 className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                placeholder="blur"
                                 loading="lazy"
                               />
                             ) : (

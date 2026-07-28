@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { Plus, Trash2, GripVertical } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface ColorOption {
   part: string;
@@ -20,36 +19,36 @@ interface ColorOptionEditorProps {
 export function ColorOptionEditor({ value, onChange, label = "Color Options" }: ColorOptionEditorProps) {
   const [colors, setColors] = useState<ColorOption[]>(value);
 
-  const handleChange = (newColors: ColorOption[]) => {
+  const handleChange = useCallback((newColors: ColorOption[]) => {
     setColors(newColors);
     onChange(newColors);
-  };
+  }, [onChange]);
 
-  const addColor = () => {
+  const addColor = useCallback(() => {
     handleChange([...colors, { part: "", name: "", code: "", hex: "#FFFFFF" }]);
-  };
+  }, [handleChange, colors]);
 
-  const updateColor = (index: number, field: keyof ColorOption, newValue: string) => {
+  const updateColor = useCallback((index: number, field: keyof ColorOption, newValue: string) => {
     const newColors = [...colors];
     newColors[index] = { ...newColors[index], [field]: newValue };
     handleChange(newColors);
-  };
+  }, [handleChange, colors]);
 
-  const removeColor = (index: number) => {
+  const removeColor = useCallback((index: number) => {
     handleChange(colors.filter((_, i) => i !== index));
-  };
+  }, [handleChange, colors]);
 
-  const moveColor = (fromIndex: number, toIndex: number) => {
+  const moveColor = useCallback((fromIndex: number, toIndex: number) => {
     const newColors = [...colors];
     const [removed] = newColors.splice(fromIndex, 1);
     newColors.splice(toIndex, 0, removed);
     handleChange(newColors);
-  };
+  }, [handleChange, colors]);
 
   return (
     <div className="space-y-4">
       <label className="label">{label}</label>
-      
+
       {colors.length === 0 ? (
         <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
           <p className="text-gray-500 mb-4">No color options defined yet</p>
@@ -75,7 +74,7 @@ export function ColorOptionEditor({ value, onChange, label = "Color Options" }: 
               >
                 <GripVertical className="w-5 h-5 text-gray-400" />
               </button>
-              
+
               <div className="flex-1 grid grid-cols-1 md:grid-cols-5 gap-3">
                 <div>
                   <label className="label text-xs">Part</label>
@@ -133,7 +132,7 @@ export function ColorOptionEditor({ value, onChange, label = "Color Options" }: 
                   />
                 </div>
               </div>
-              
+
               <button
                 type="button"
                 onClick={() => removeColor(index)}
@@ -146,7 +145,7 @@ export function ColorOptionEditor({ value, onChange, label = "Color Options" }: 
               </button>
             </div>
           ))}
-          
+
           <button
             type="button"
             onClick={addColor}

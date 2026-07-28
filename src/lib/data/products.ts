@@ -1,154 +1,170 @@
-// Products data - synchronous access for build-time rendering
-// This module reads from public JSON files at build time using Node.js fs
-
+import { createServiceClient } from '@/lib/db/client';
 import type { Brand, Collection, Product, ProductVariant, MaterialSpec, ColorOption, ProductImage } from '@/lib/types/database';
 
-// Load products from JSON file at build time (server-side only)
-function loadProductsSync(): Product[] {
-  if (typeof window !== 'undefined') {
-    // Client-side: return empty array, use async functions instead
-    return [];
+// Per-request promise cache (module-level, survives across invocations in same process)
+let productsPromise: Promise<Product[]> | null = null;
+let collectionsPromise: Promise<Collection[]> | null = null;
+let brandsPromise: Promise<Brand[]> | null = null;
+
+async function loadProductsFromSupabase(): Promise<Product[]> {
+  const supabase = createServiceClient();
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('Error loading products from Supabase:', error);
+    throw error;
   }
-  
-  try {
-    const fs = require('fs');
-    const path = require('path');
-    const filePath = path.join(process.cwd(), 'public', 'data', 'products.json');
-    const fileContent = fs.readFileSync(filePath, 'utf-8');
-    const data = JSON.parse(fileContent);
-    return data.products || data;
-  } catch (error) {
-    console.error('Error loading products:', error);
-    return [];
-  }
+
+  return data || [];
 }
 
-// Load collections from JSON file at build time (server-side only)
-function loadCollectionsSync(): Collection[] {
-  if (typeof window !== 'undefined') {
-    return [];
+async function loadCollectionsFromSupabase(): Promise<Collection[]> {
+  const supabase = createServiceClient();
+  const { data, error } = await supabase
+    .from('collections')
+    .select('*')
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('Error loading collections from Supabase:', error);
+    throw error;
   }
-  
-  try {
-    const fs = require('fs');
-    const path = require('path');
-    const filePath = path.join(process.cwd(), 'public', 'data', 'collections.json');
-    const fileContent = fs.readFileSync(filePath, 'utf-8');
-    const data = JSON.parse(fileContent);
-    return data.collections || [];
-  } catch (error) {
-    console.error('Error loading collections:', error);
-    return [];
-  }
+
+  return data || [];
 }
 
-// Load brands from JSON file at build time (server-side only)
-function loadBrandsSync(): Brand[] {
-  if (typeof window !== 'undefined') {
-    return [];
+async function loadBrandsFromSupabase(): Promise<Brand[]> {
+  const supabase = createServiceClient();
+  const { data, error } = await supabase
+    .from('brands')
+    .select('*')
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('Error loading brands from Supabase:', error);
+    throw error;
   }
-  
-  try {
-    const fs = require('fs');
-    const path = require('path');
-    const filePath = path.join(process.cwd(), 'public', 'data', 'brands.json');
-    const fileContent = fs.readFileSync(filePath, 'utf-8');
-    const data = JSON.parse(fileContent);
-    return data.brands || [];
-  } catch (error) {
-    console.error('Error loading brands:', error);
-    return [];
-  }
+
+  return data || [];
 }
 
-// Load products at module initialization (build time - server only)
-const products = loadProductsSync();
+function fetchProducts(): Promise<Product[]> {
+  if (!productsPromise) {
+    productsPromise = loadProductsFromSupabase();
+  }
+  return productsPromise;
+}
 
-// Load collections at module initialization (build time - server only)
-const collections = loadCollectionsSync();
+function fetchCollections(): Promise<Collection[]> {
+  if (!collectionsPromise) {
+    collectionsPromise = loadCollectionsFromSupabase();
+  }
+  return collectionsPromise;
+}
 
-// Load brands at module initialization (build time - server only)
-const brands = loadBrandsSync();
+function fetchBrands(): Promise<Brand[]> {
+  if (!brandsPromise) {
+    brandsPromise = loadBrandsFromSupabase();
+  }
+  return brandsPromise;
+}
 
-// ============= Synchronous exports for build-time rendering =============
+// ============= Public API =============
 
-export function getAllActiveProducts(): Product[] {
+export async function getAllActiveProducts(): Promise<Product[]> {
+  const products = await fetchProducts();
   return products.filter(p => p.is_active);
 }
 
-export function getProductBySlug(slug: string): Product | null {
+export async function getProductBySlug(slug: string): Promise<Product | null> {
+  const products = await fetchProducts();
   return products.find(p => p.slug === slug) || null;
 }
 
-export function getProductById(id: string): Product | null {
+export async function getProductById(id: string): Promise<Product | null> {
+  const products = await fetchProducts();
   return products.find(p => p.id === id) || null;
 }
 
-export function getProductsByCollection(collectionId: string): Product[] {
+export async function getProductsByCollection(collectionId: string): Promise<Product[]> {
+  const products = await fetchProducts();
   return products.filter(p => p.collection_id === collectionId && p.is_active);
 }
 
-export function getFeaturedProducts(limit?: number): Product[] {
+export async function getFeaturedProducts(limit?: number): Promise<Product[]> {
+  const products = await fetchProducts();
   const featured = products.filter(p => p.is_active && (p.is_new || p.is_bestseller));
   return limit ? featured.slice(0, limit) : featured;
 }
 
-export function getAllProducts(): Product[] {
-  return products;
+export async function getAllProducts(): Promise<Product[]> {
+  return fetchProducts();
 }
 
-export function getCollections(): Collection[] {
-  return collections;
+export async function getCollections(): Promise<Collection[]> {
+  return fetchCollections();
 }
 
-export function getAllCollections(): Collection[] {
-  return collections;
+export async function getAllCollections(): Promise<Collection[]> {
+  return fetchCollections();
 }
 
-export function getCollectionsByBrand(brandId: string): Collection[] {
+export async function getCollectionsByBrand(brandId: string): Promise<Collection[]> {
+  const collections = await fetchCollections();
   return collections.filter(c => c.brand_id === brandId);
 }
 
-export function getCollectionBySlug(slug: string): Collection | null {
+export async function getCollectionBySlug(slug: string): Promise<Collection | null> {
+  const collections = await fetchCollections();
   return collections.find(c => c.slug === slug) || null;
 }
 
-export function getCollectionById(id: string): Collection | null {
+export async function getCollectionById(id: string): Promise<Collection | null> {
+  const collections = await fetchCollections();
   return collections.find(c => c.id === id) || null;
 }
 
-export function getBrands(): Brand[] {
-  return brands;
+export async function getBrands(): Promise<Brand[]> {
+  return fetchBrands();
 }
 
-export function getBrandBySlug(slug: string): Brand | null {
+export async function getBrandBySlug(slug: string): Promise<Brand | null> {
+  const brands = await fetchBrands();
   return brands.find(b => b.slug === slug) || null;
 }
 
-export function getBrandById(id: string): Brand | null {
+export async function getBrandById(id: string): Promise<Brand | null> {
+  const brands = await fetchBrands();
   return brands.find(b => b.id === id) || null;
 }
 
-export { products, collections, brands };
-
 // Products by brand
-export function getProductsByBrand(brandId: string): Product[] {
-  const collectionsOfBrand = collections
-    .filter(c => c.brand_id === brandId)
-    .map(c => c.id);
+export async function getProductsByBrand(brandId: string): Promise<Product[]> {
+  const [collections, products] = await Promise.all([getCollections(), getAllProducts()]);
+  const collectionsOfBrand = collections.filter(c => c.brand_id === brandId).map(c => c.id);
   return products.filter(p => p.is_active && collectionsOfBrand.includes(p.collection_id || ''));
 }
 
 // Formatting utilities
-export function formatPrice(price: number | string): string {
+export function formatPrice(price: number | string, locale: string = 'en-MY'): string {
   const priceNum = typeof price === 'string' ? parseFloat(price) : price;
   if (isNaN(priceNum) || priceNum === 0) return 'Contact for Price';
-  return new Intl.NumberFormat('en-MY', {
+  
+  // FX rate from USD to MYR - configurable via env var, fallback to 4.5
+  const fxRate = parseFloat(process.env.USD_TO_MYR_RATE || '4.5');
+  const myrPrice = priceNum * fxRate;
+  
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: 'MYR',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(priceNum);
+  }).format(myrPrice);
 }
 
 export function getColorHex(colorCode: string): string {
@@ -166,72 +182,5 @@ export function getColorHex(colorCode: string): string {
   return colorMap[colorCode] || '#8B7355';
 }
 
-// Async versions for runtime use (client components)
-export async function getProductsAsync(): Promise<Product[]> {
-  return products;
-}
-
-export async function getProductBySlugAsync(slug: string): Promise<Product | null> {
-  return products.find(p => p.slug === slug) || null;
-}
-
-export async function getProductByIdAsync(id: string): Promise<Product | null> {
-  return products.find(p => p.id === id) || null;
-}
-
-export async function getAllActiveProductsAsync(): Promise<Product[]> {
-  return products.filter(p => p.is_active);
-}
-
-export async function getProductsByCollectionAsync(collectionId: string): Promise<Product[]> {
-  return products.filter(p => p.collection_id === collectionId && p.is_active);
-}
-
-export async function getFeaturedProductsAsync(): Promise<Product[]> {
-  return products.filter(p => p.is_active && (p.is_new || p.is_bestseller));
-}
-
-export async function getCollectionsAsync(): Promise<Collection[]> {
-  return collections;
-}
-
-export async function getAllCollectionsAsync(): Promise<Collection[]> {
-  return collections;
-}
-
-export async function getCollectionsByBrandAsync(brandId: string): Promise<Collection[]> {
-  return collections.filter(c => c.brand_id === brandId);
-}
-
-export async function getCollectionBySlugAsync(slug: string): Promise<Collection | null> {
-  return collections.find(c => c.slug === slug) || null;
-}
-
-export async function getCollectionByIdAsync(id: string): Promise<Collection | null> {
-  return collections.find(c => c.id === id) || null;
-}
-
-export async function getProductsByBrandAsync(brandId: string): Promise<Product[]> {
-  const collectionsOfBrand = collections
-    .filter(c => c.brand_id === brandId)
-    .map(c => c.id);
-  return products.filter(p => p.is_active && collectionsOfBrand.includes(p.collection_id || ''));
-}
-
-export async function getBrandsAsync(): Promise<Brand[]> {
-  return brands;
-}
-
-export async function getBrandBySlugAsync(slug: string): Promise<Brand | null> {
-  return brands.find(b => b.slug === slug) || null;
-}
-
-export async function getBrandByIdAsync(id: string): Promise<Brand | null> {
-  return brands.find(b => b.id === id) || null;
-}
-
 // Type exports
-export type { Brand, Collection, Product, ProductVariant, MaterialSpec, ColorOption, ProductImage } from '@/lib/types/database'; 
- 
- 
- 
+export type { Brand, Collection, Product, ProductVariant, MaterialSpec, ColorOption, ProductImage } from '@/lib/types/database';

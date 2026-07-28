@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Inter, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { LocaleProvider } from "@/components/LocaleProvider";
 
 const interSans = Inter({
   variable: "--font-inter",
@@ -20,7 +21,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={cn("h-full antialiased", interSans.variable, cormorantDisplay.variable)}>
       <body className="min-h-full flex flex-col bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100">
-        {children}
+        <LocaleProvider>{children}</LocaleProvider>
       </body>
     </html>
   );

@@ -28,58 +28,125 @@
 | Framework | Next.js | 14.2.x | App Router |
 | Language | TypeScript | 5.4.x | Strict mode |
 | Styling | Tailwind CSS | 3.4.x | Custom design system |
-| Data | Static JSON → TS | `lib/products.ts` | 260KB bundle |
-| Scraping | Playwright + Python | 3.x / 3.11 | `scripts/scrape_products.py` |
+| Database | Supabase (PostgreSQL) | — | Primary data store |
+| Images | Cloudflare R2 | — | Object storage via S3 API |
+| Search | Meilisearch | — | Self-hosted full-text search |
+| Scraping | Playwright + Python | 3.x / 3.11 | `scripts/scrape_comprehensive.py` |
 | Cleaning | Pydantic + Python | 2.x | `scripts/clean_products.py` |
+| Seeding | Python + Supabase JS | — | `scripts/seed_one_time.py`, `scripts/seed-database.ts` |
 | Deploy | Standalone output | `next.config.js` | Docker/Nixpacks ready |
 
-### 2.2 Data Pipeline
+### 2.2 Data Pipeline (Corrected Architecture)
 
 ```
-┌─────────────┐     ┌──────────────────┐     ┌─────────────────┐     ┌──────────────────┐
-│ b2bfurniture│────▶│  Playwright      │────▶│  clean_products │────▶│  lib/products.ts │
-│  supply.com │     │  Scraper         │     │  .py (Pydantic) │     │  (TypeScript)    │
-└─────────────┘     └──────────────────┘     └─────────────────┘     └──────────────────┘
-                                                                         │
-                                                                         ▼
-                                                                ┌──────────────────┐
-                                                                │  Next.js Build   │
-                                                                │  (Static Export) │
-                                                                └──────────────────┘
+┌─────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│ b2bfurniture│────▶│  Playwright      │────▶│  clean_products │
+│  supply.com │     │  Scraper         │     │  .py (Pydantic) │
+└─────────────┘     └──────────────────┘     └────────┬────────┘
+                                                      │
+                                                      ▼
+                        ┌─────────────────────┐  ┌──────────────────┐
+                        │   Cloudflare R2     │◀─│  upload_clean_   │
+                        │  (product images)   │  │  to_r2.py        │
+                        └─────────────────────┘  └──────────────────┘
+                                                      │
+                                                      ▼
+                        ┌─────────────────────┐  ┌──────────────────┐
+                        │    Supabase         │◀─│  seed_one_time.  │
+                        │  (PostgreSQL)       │  │  py / seed-db.ts │
+                        └─────────────────────┘  └──────────────────┘
+                                                      │
+                                                      ▼
+                                             ┌──────────────────┐
+                                             │  Next.js App     │
+                                             │  (reads from     │
+                                             │   Supabase + R2) │
+                                             └──────────────────┘
 ```
 
-**Schedule:** Manual (`npm run scrape && npm run clean:products && npm run build`)
+**Schedule:** Manual (`npm run scrape && npm run clean:products && npm run upload:r2 && npm run seed:db && npm run build`)
+
+**Data Flow:**
+1. **Scraper** (`scrape_comprehensive.py`) → discovers all product URLs, scrapes HTML, saves raw JSON to `data/raw/scrapes/`
+2. **Parser** (`clean_products.py`) → reads raw JSON, extracts structured data, outputs `data/clean/products.json` with `col-*` collection IDs
+3. **R2 Upload** (`upload_clean_to_r2.py`) → downloads images from source, uploads to R2, outputs `data/clean/products_r2.json` with R2 URLs
+4. **Seed** (`seed_one_time.py` / `seed-database.ts`) → reads clean JSON, creates brands/collections with **UUID IDs**, seeds products with UUID `collection_id` references
+5. **App** (`lib/data/products.ts`) → reads from **Supabase** via `createServiceClient()`, images from **R2**
 
 ### 2.3 Page Inventory
 
 | Route | Type | Data Source | Components |
 |-------|------|-------------|------------|
-| `/` | Client | `lib/products.ts` | Hero, Collections, Featured Products, Trust, CTA, Footer |
-| `/products` | Client | `lib/products.ts` | Filters (collection, category, search), Grid/List view, Pagination |
-| `/products/[slug]` | Client | `lib/products.ts` | Gallery, Specs tabs, Related products |
-| `/collections` | Client | Hardcoded `collectionsData` | Brand overview, Collection cards, CTA |
-| `/collections/[slug]` | Client | `lib/products.ts` filtered | Hero, Product grid |
+| `/` | Server | `lib/data/products.ts` (Supabase) | Hero, Collections, Featured Products, Trust, CTA, Footer |
+| `/products` | Server | `lib/data/products.ts` (Supabase) | Filters (collection, category, search), Grid/List view, Pagination |
+| `/products/[slug]` | Server | `lib/data/products.ts` (Supabase) | Gallery, Specs tabs, Related products |
+| `/collections` | Server | `lib/data/products.ts` (Supabase) | Brand overview, Collection cards, CTA |
+| `/collections/[slug]` | Server | `lib/data/products.ts` (Supabase) | Hero, Product grid |
 
-### 2.4 Data Model (Current)
+### 2.4 Data Model (Database Schema)
 
 ```typescript
+// lib/types/database.ts (generated via supabase gen types)
 interface Product {
-  id: string;              // Article number (e.g., "335048")
-  name: string;            // "BREDA 1.5M TV CABINET 109/167"
-  slug: string;            // "breda-15m-tv-cabinet-109167"
-  image: string;           // Primary image URL (hinlim.com)
-  images: string[];        // All gallery images
-  price: string;           // Always "Contact for Price"
-  collection: string;      // "Breda (NestHouZ)"
-  description?: string;    // Rich text from detail page
-  materials?: string;      // Raw text block
-  colors?: string;         // Raw text block
-  specifications?: string; // Raw text block
-  dimensions?: string;     // "W1500 D450 H500"
-  weight?: string;         // "33.30 kg"
-  cartonDimensions?: string;
-  articleNo?: string;      // Same as id
-|| **C6** Wishlist + save for later + alerts | Cookie→DB sync, shareable, price drop/back-in-stock emails | `components/Wishlist.tsx`, `lib/actions/wishlist.ts`, `lib/notifications/alerts.ts` | B12 (auth), B8 (cart) ||
+  id: string;                    // UUID
+  article_no: string;            // '335048' (source of truth)
+  collection_id: string;         // UUID ref to collections.id
+  name: string;                  // "BREDA 1.5M TV CABINET 109/167"
+  slug: string;                  // "breda-15m-tv-cabinet-109167"
+  description: string | null;    // Rich text (Markdown/HTML)
+  short_description: string | null; // For cards/listings
+  width_mm: number | null;
+  depth_mm: number | null;
+  height_mm: number | null;
+  weight_kg: number | null;
+  volume_m3: number | null;
+  pack_type: string | null;
+  carton_length_mm: number | null;
+  carton_width_mm: number | null;
+  carton_height_mm: number | null;
+  materials: Json | null;        // [{part: 'leg', material: 'Malaysian Oak', finish: 'Cocoa', code: '109'}]
+  colors: Json | null;           // [{part: 'body', name: 'Walnut', code: '113', hex: '#3D2B1F'}]
+  price_usd: number;             // Single displayed price
+  cost_usd: number | null;       // Internal cost (admin only)
+  moq: number;                   // Minimum order quantity
+  lead_time_weeks: number;
+  stock_available: number;
+  stock_reserved: number;
+  stock_incoming: number;
+  low_stock_threshold: number;
+  is_active: boolean;
+  is_new: boolean;
+  is_bestseller: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Collection {
+  id: string;                    // UUID
+  brand_id: string;              // UUID ref to brands.id
+  name: string;                  // 'Breda'
+  slug: string;                  // 'breda' (unique)
+  description: string | null;
+  hero_image_url: string | null; // R2 URL
+  color_palette: Json | null;    // [{name: 'Cocoa', code: '109', hex: '#4A3728'}]
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Brand {
+  id: string;                    // UUID
+  name: string;                  // 'NestHouZ', 'Luooma', 'NestNordic'
+  slug: string;                  // 'nesthouz' (unique)
+  description: string | null;
+  logo_url: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+```
 || **C8** Content hub (care guides, styling tips, SEO) | MDX-based blog, categories, tags, related products | `app/blog/`, `lib/cms/`, `components/BlogPost.tsx` | Independent (can start anytime) ||
 || **Phase X** Locale-prefixed internal links | Eliminate middleware 307 redirects by generating locale-aware hrefs in all Link components (`/products` → `/en/products`, etc.) | All `Link` components, new `lib/utils/localePath.ts` helper | Middleware locale detection, i18n routing ||
 
@@ -862,7 +929,7 @@ B13 (Dashboard) ← B12 (Auth)
 
 | Area | Approach |
 |------|----------|
-| **Data Layer** | `lib/data/products.ts` — Server-only functions: `getProducts(filters)`, `getProduct(slug)`, `getCollections()`, `getCollection(slug)`; reads from Supabase, respects `site_settings` toggles |
+| **Data Layer** | `lib/data/products.ts` — Server-only functions: `getProducts(filters)`, `getProduct(slug)`, `getCollections()`, `getCollection(slug)`; reads from **Supabase** via `createServiceClient()`, respects `site_settings` toggles |
 | **Cart** | `lib/actions/cart.ts` — Server Actions: `addToCart`, `updateQuantity`, `removeFromCart`, `getCart`; client state in `CartContext` + cookie sync |
 | **Checkout** | `app/checkout/page.tsx` — Server Component wrapper; each step = Client Component with form; Server Action on submit |
 | **Discount Validation** | `lib/actions/discounts.ts` — `validateDiscount(code, subtotal)` returns `{valid, discountAmount, error}` |

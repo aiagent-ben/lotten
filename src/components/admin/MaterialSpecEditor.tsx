@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { Plus, Trash2, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,31 +20,31 @@ interface MaterialSpecEditorProps {
 export function MaterialSpecEditor({ value, onChange, label = "Materials & Finishes" }: MaterialSpecEditorProps) {
   const [materials, setMaterials] = useState<MaterialSpec[]>(value);
 
-  const handleChange = (newMaterials: MaterialSpec[]) => {
+  const handleChange = useCallback((newMaterials: MaterialSpec[]) => {
     setMaterials(newMaterials);
     onChange(newMaterials);
-  };
+  }, [onChange]);
 
-  const addMaterial = () => {
+  const addMaterial = useCallback(() => {
     handleChange([...materials, { part: "", material: "", finish: "", code: "" }]);
-  };
+  }, [handleChange, materials]);
 
-  const updateMaterial = (index: number, field: keyof MaterialSpec, newValue: string) => {
+  const updateMaterial = useCallback((index: number, field: keyof MaterialSpec, newValue: string) => {
     const newMaterials = [...materials];
     newMaterials[index] = { ...newMaterials[index], [field]: newValue };
     handleChange(newMaterials);
-  };
+  }, [handleChange, materials]);
 
-  const removeMaterial = (index: number) => {
+  const removeMaterial = useCallback((index: number) => {
     handleChange(materials.filter((_, i) => i !== index));
-  };
+  }, [handleChange, materials]);
 
-  const moveMaterial = (fromIndex: number, toIndex: number) => {
+  const moveMaterial = useCallback((fromIndex: number, toIndex: number) => {
     const newMaterials = [...materials];
     const [removed] = newMaterials.splice(fromIndex, 1);
     newMaterials.splice(toIndex, 0, removed);
     handleChange(newMaterials);
-  };
+  }, [handleChange, materials]);
 
   return (
     <div className="space-y-4">

@@ -58,31 +58,27 @@ function parseCollectionName(fullName: string | null | undefined): { name: strin
 
 async function seedDatabase() {
   const supabase = createServiceClient();
-  
+
   // Load products from clean JSON
   const cleanData = JSON.parse(
     fs.readFileSync(resolve(process.cwd(), 'data/clean/products_r2.json'), 'utf-8')
   );
-  
+
   const cleanProducts: CleanProduct[] = cleanData.products || [];
-  
+
   console.log(`Loaded ${cleanProducts.length} products from clean JSON`);
-  
+
   // Extract unique brands and collections from collection_id
   // collection_id format: "col-alford", "col-brinhill", etc.
-  // We need to derive brand from collection name or find another way
   const brandMap = new Map<string, {name: string; slug: string; description: string}>();
   const collectionMap = new Map<string, {name: string; slug: string; brand: string; description: string}>();
-  
+
   for (const product of cleanProducts) {
-    // collection_id is like "col-alford" - extract collection name
     const collectionSlug = product.collection_id.replace('col-', '');
-    // We need to get the full collection name from somewhere
-    // For now, use the slug as name and derive brand from product data
     const collectionName = collectionSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-    const brandSlug = 'b2bfurniture'; // Default brand
+    const brandSlug = 'b2b-furniture-supply'; // Correct slug for existing brand
     const brandName = 'B2B Furniture Supply';
-    
+
     if (!brandMap.has(brandSlug)) {
       brandMap.set(brandSlug, {
         name: brandName,
@@ -90,7 +86,7 @@ async function seedDatabase() {
         description: `${brandName} furniture collection`
       });
     }
-    
+
     if (!collectionMap.has(collectionSlug)) {
       collectionMap.set(collectionSlug, {
         name: collectionName,
@@ -100,9 +96,9 @@ async function seedDatabase() {
       });
     }
   }
-  
+
   console.log(`Found ${brandMap.size} brands and ${collectionMap.size} collections`);
-  
+
   // 1. Seed brands
   console.log('Seeding brands...');
   for (const [slug, brand] of brandMap) {
@@ -117,7 +113,7 @@ async function seedDatabase() {
     if (error) console.error('Brand error:', brand.name, error);
   }
   console.log('Brands seeded.');
-  
+
   // 2. Seed collections
   console.log('Seeding collections...');
   for (const [slug, collection] of collectionMap) {
@@ -126,12 +122,12 @@ async function seedDatabase() {
       .select('id')
       .eq('slug', collection.brand)
       .single();
-    
+
     if (!brandData) {
       console.error('Brand not found:', collection.brand);
       continue;
     }
-    
+
     const { error } = await supabase
       .from('collections')
       .upsert({
@@ -142,7 +138,7 @@ async function seedDatabase() {
         is_active: true,
         sort_order: Array.from(collectionMap.keys()).indexOf(slug),
       }, { onConflict: 'slug' });
-    
+
     if (error) console.error('Collection error:', collection.name, error);
   }
   console.log('Collections seeded.');

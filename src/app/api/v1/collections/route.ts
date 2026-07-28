@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     const brand = searchParams.get('brand') || '';
     const isActive = searchParams.get('isActive') !== 'false';
 
-    const collections = getAllCollections();
+    const collections = await getAllCollections();
 
     let filtered: typeof collections = collections;
 

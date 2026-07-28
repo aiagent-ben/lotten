@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getAllActiveProducts, getCollectionBySlug, formatPrice } from '@/lib/data/products';
+import { getAllActiveProducts, getCollectionBySlug, formatPrice, getCollections } from '@/lib/data/products';
 import { cn } from '@/lib/utils';
 import ProductsPageClient from './ProductsPageClient';
 import { ProductFilters } from './ProductFilters';
@@ -30,8 +30,13 @@ export default async function ProductsPage({ searchParams }: Props) {
   const sortFilter = params.sort || 'featured';
   const perPage = 12;
 
-  // Get all active products
-  let products = getAllActiveProducts();
+  // Get all active products and collections in parallel
+  const [productsData, allCollections] = await Promise.all([
+    getAllActiveProducts(),
+    getCollections(),
+  ]);
+
+  let products = productsData;
 
   // Filter by collection
   if (collectionFilter) {
@@ -75,10 +80,18 @@ export default async function ProductsPage({ searchParams }: Props) {
   const paginatedProducts = products.slice((page - 1) * perPage, page * perPage);
 
   // Get collection for filter display
-  const collection = collectionFilter ? getCollectionBySlug(collectionFilter) : null;
+  const collection = collectionFilter ? await getCollectionBySlug(collectionFilter) : null;
 
-  // Generate static params for ISR (optional - helps with pre-rendering)
-  // This page will be statically generated at build time and revalidated every hour
+  // Transform collections for ProductFilters component
+  const filterCollections = allCollections
+    .filter(c => c.is_active)
+    .map(c => ({ id: c.id, name: c.name }));
+
+  // Helper function to get collection name from collection_id (uses dynamic data)
+  function getCollectionName(collectionId: string): string {
+    const found = allCollections.find(c => c.id === collectionId);
+    return found?.name || 'Collection';
+  }
 
   return (
     <main className="min-h-screen bg-white">
@@ -107,26 +120,7 @@ export default async function ProductsPage({ searchParams }: Props) {
             collectionFilter={collectionFilter}
             categoryFilter={categoryFilter}
             sortFilter={sortFilter}
-            collections={[
-              { id: 'col-breda', name: 'Breda (NestHouZ)' },
-              { id: 'col-dover', name: 'Dover (NestHouZ)' },
-              { id: 'col-malton', name: 'Malton (NestHouZ)' },
-              { id: 'col-lamar', name: 'Lamar (NestHouZ)' },
-              { id: 'col-kyoto', name: 'Kyoto (NestHouZ)' },
-              { id: 'col-dudley', name: 'Dudley (NestHouZ)' },
-              { id: 'col-ludlow', name: 'Ludlow (NestNordic)' },
-              { id: 'col-loftus', name: 'Loftus (NestNordic)' },
-              { id: 'col-hutto', name: 'Hutto (NestNordic)' },
-              { id: 'col-royston', name: 'Royston (NestNordic)' },
-              { id: 'col-oruro', name: 'Oruro (Luooma)' },
-              { id: 'col-waldo', name: 'Waldo (Luooma)' },
-              { id: 'col-castor', name: 'Castor (Luooma)' },
-              { id: 'col-hayton', name: 'Hayton (Luooma)' },
-              { id: 'col-neath', name: 'Neath (Luooma)' },
-              { id: 'col-hampton', name: 'Hampton (Luooma)' },
-              { id: 'col-noud', name: 'Noud (Luooma)' },
-              { id: 'col-nakula', name: 'Nakula (Luooma)' },
-            ]}
+            collections={filterCollections}
           />
         </div>
       </section>
@@ -148,7 +142,7 @@ export default async function ProductsPage({ searchParams }: Props) {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" role="list">
                 {paginatedProducts.map((product) => {
                   const primaryImage = product.product_images?.find((img) => img.is_primary) || product.product_images?.[0];
-                  
+                 
                   return (
                     <article 
                       key={product.id} 
@@ -169,7 +163,6 @@ export default async function ProductsPage({ searchParams }: Props) {
                               fill
                               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                               className="object-cover transition-transform duration-500 group-hover:scale-105"
-                              placeholder="blur"
                               loading="lazy"
                             />
                           ) : (
@@ -179,7 +172,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                               </svg>
                             </div>
                           )}
-                          
+                         
                           {/* Badges */}
                           <div className="absolute top-3 left-3 right-3 flex justify-between">
                             {product.is_new && (
@@ -296,29 +289,4 @@ export default async function ProductsPage({ searchParams }: Props) {
       <ProductsPageClient />
     </main>
   );
-}
-
-// Helper function to get collection name from collection_id
-function getCollectionName(collectionId: string): string {
-  const collectionsMap: Record<string, string> = {
-    'col-breda': 'Breda',
-    'col-dover': 'Dover',
-    'col-malton': 'Malton',
-    'col-lamar': 'Lamar',
-    'col-kyoto': 'Kyoto',
-    'col-dudley': 'Dudley',
-    'col-ludlow': 'Ludlow',
-    'col-loftus': 'Loftus',
-    'col-hutto': 'Hutto',
-    'col-royston': 'Royston',
-    'col-oruro': 'Oruro',
-    'col-waldo': 'Waldo',
-    'col-castor': 'Castor',
-    'col-hayton': 'Hayton',
-    'col-neath': 'Neath',
-    'col-hampton': 'Hampton',
-    'col-noud': 'Noud',
-    'col-nakula': 'Nakula',
-  };
-  return collectionsMap[collectionId] || 'Collection';
 }

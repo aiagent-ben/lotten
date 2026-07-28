@@ -10,8 +10,8 @@ export const metadata: Metadata = {
   description: 'Curated Malaysian Oak furniture for modern homes — direct from manufacturer to your door.',
 };
 
-export default function HomePage() {
-  const featuredProducts = getFeaturedProducts(8);
+export default async function HomePage() {
+  const featuredProducts = await getFeaturedProducts(8);
 
   return (
     <main className="min-h-screen bg-white font-sans antialiased">

@@ -58,11 +58,11 @@ def parse_price(price_str) -> tuple[Optional[float], bool]:
     """Parse price string -> (amount_usd, is_contact_for_price)."""
     if not price_str or price_str.strip() == "":
         return None, True
-    
+
     price_str = str(price_str).strip().lower()
     if "contact" in price_str or "enquiry" in price_str or price_str in ["0", "0.00", "rm 0.00"]:
         return None, True
-    
+
     # Extract numeric value
     match = re.search(r'[\d,]+\.?\d*', price_str.replace(",", "").replace("rm", ""))
     if match:
@@ -71,7 +71,7 @@ def parse_price(price_str) -> tuple[Optional[float], bool]:
             return round(amount / 4.5, 2), False
         except:
             pass
-    
+
     return None, True
 
 
@@ -184,16 +184,16 @@ async def migrate():
     print(f"Loading products from {CLEAN_JSON_PATH}")
     with open(CLEAN_JSON_PATH) as f:
         clean_products = json.load(f)
-    
+
     print(f"Loaded {len(clean_products)} products")
-    
+
     # ──────────────────────────────────────────────────────────
     # 1. Extract unique collection_ids and brand mappings
     # ──────────────────────────────────────────────────────────
-    
+
     collection_ids = set()
     brand_map = {}  # collection_id -> brand_name
-    
+
     for p in clean_products:
         cid = p.get('collection_id')
         if cid:
@@ -202,82 +202,91 @@ async def migrate():
             collection_name = p.get('collection', '')
             brand_name = collection_name or 'B2B Furniture Supply'
             brand_map[cid] = brand_name
-    
+
     print(f"Found {len(collection_ids)} unique collections, {len(brand_map)} brand mappings")
-    
+
     # ──────────────────────────────────────────────────────────
     # 2. Seed Brands
     # ──────────────────────────────────────────────────────────
-    
+
     brand_id_map = {}  # collection_id -> brand_id
-    
+    brand_slug_map = {}  # brand_name -> slug
+
     for cid, brand_name in brand_map.items():
         brand_slug = slugify(brand_name)
-        result = supabase.table('brands').upsert({
-            "name": brand_name,
-            "slug": brand_slug,
-            "description": f"{brand_name} furniture collection",
-        }, on_conflict="name").execute()
-        
-        if result.data:
-            brand_id_map[cid] = result.data[0]['id']
-            print(f"  ✓ Brand: {brand_name} -> {result.data[0]['id']}")
+        brand_slug_map[brand_name] = brand_slug
+
+        # Check if brand already exists
+        existing = supabase.table('brands').select('id, slug').eq('name', brand_name).execute()
+        if existing.data:
+            brand_id_map[cid] = existing.data[0]['id']
+            print(f"  ✓ Brand (existing): {brand_name} -> {existing.data[0]['id']}")
         else:
-            print(f"  ✗ Failed to seed brand: {brand_name}")
-    
+            result = supabase.table('brands').upsert({
+                "name": brand_name,
+                "slug": brand_slug,
+                "description": f"{brand_name} furniture collection",
+            }, on_conflict="name").execute()
+
+            if result.data:
+                brand_id_map[cid] = result.data[0]['id']
+                print(f"  ✓ Brand: {brand_name} -> {result.data[0]['id']}")
+            else:
+                print(f"  ✗ Failed to seed brand: {brand_name}")
+
     # ──────────────────────────────────────────────────────────
     # 3. Seed Collections
     # ──────────────────────────────────────────────────────────
-    
+
     collection_id_map = {}  # collection_id -> id
-    
+
     for cid in collection_ids:
         brand_id = brand_id_map.get(cid)
         if not brand_id:
             print(f"  ✗ No brand_id for collection: {cid}")
             continue
-        
+
         result = supabase.table('collections').upsert({
             "brand_id": brand_id,
             "name": cid.replace('col-', '').replace('-', ' ').title(),
             "slug": cid.replace('col-', ''),
             "description": f"{cid.replace('col-', '').replace('-', ' ').title()} furniture collection",
         }, on_conflict="slug").execute()
-        
+
         if result.data:
             collection_id_map[cid] = result.data[0]['id']
             print(f"  ✓ Collection: {cid} -> {result.data[0]['id']}")
         else:
             print(f"  ✗ Failed to seed collection: {cid}")
-    
+
     # ──────────────────────────────────────────────────────────
     # 4. Seed Products
     # ──────────────────────────────────────────────────────────
-    
+
     print(f"\n🌱 Seeding {len(clean_products)} products...")
     success = 0
     errors = 0
-    
+
     for p in clean_products:
         try:
             article_no = p.get('article_no', '')
             collection_id = p.get('collection_id')
-            
+
             if not collection_id or collection_id not in collection_id_map:
                 print(f"  ⊘ Skipping: {p.get('name', 'Unknown')} (no valid collection_id)")
                 errors += 1
                 continue
-            
+
             supabase_collection_id = collection_id_map[collection_id]
-            
+
             # Price (already in USD from parser)
             price_amount = p.get('price_usd', 0) or 0
-            
+
             # Parse dimensions
             dims = parse_dimensions(p.get('dimensions', ''))
             weight = parse_weight(p.get('weight', ''))
             carton = parse_dimensions_raw(p.get('carton_dimensions', ''))
-            
+
             # Parse structured data - already structured from parser
             materials = p.get('materials') if isinstance(p.get('materials'), list) else parse_materials(p.get('materials', ''))
             colors_data = p.get('colors')
@@ -287,7 +296,7 @@ async def migrate():
                 finishes = parse_finishes(colors_data)
             specs = p.get('specifications') or {}
             raw_dims = parse_dimensions_raw(str(specs)) if specs else {}
-            
+
             # Merge dimensions from different sources
             width = raw_dims.get('width_mm') or dims.get('width_mm')
             depth = raw_dims.get('depth_mm') or dims.get('depth_mm')
@@ -298,11 +307,11 @@ async def migrate():
             carton_length = raw_dims.get('carton_length_mm')
             carton_width = raw_dims.get('carton_width_mm')
             carton_height = raw_dims.get('carton_height_mm')
-            
+
             # Build image list
             image_urls = []
             primary_image = ""
-            
+
             if p.get('r2_images'):
                 image_urls = p['r2_images']
                 primary_image = p.get('r2_primary_image') or p['r2_images'][0]
@@ -315,7 +324,7 @@ async def migrate():
             elif p.get('img'):
                 image_urls = [p['img']]
                 primary_image = p['img']
-            
+
             # Build ProductImage objects
             product_images = []
             for idx, url in enumerate(image_urls):
@@ -329,7 +338,7 @@ async def migrate():
                     "height": 1200,
                     "created_at": datetime.now().isoformat()
                 })
-            
+
             # Build product variants
             product_variants = []
             if p.get('product_variants'):
@@ -337,7 +346,7 @@ async def migrate():
                     var_article_no = v.get('article_no')
                     var_name = v.get('name')
                     var_slug = slugify(f"{var_article_no}-{var_name}") if var_article_no else slugify(var_name)
-                    
+
                     product_variants.append({
                         "article_no": var_article_no,
                         "name": var_name,
@@ -351,12 +360,12 @@ async def migrate():
                         "is_active": True,
                         "sort_order": 0,
                     })
-            
+
             pid = f"prod-{article_no}" if article_no else slugify(p.get('name', ''))
             # Generate proper UUID from the pid
             pid = str(uuid.uuid5(uuid.NAMESPACE_DNS, pid))
             slug = p.get('slug', slugify(p.get('name', '')))
-            
+
             # Upsert product
             product_data = {
                 "id": pid,
@@ -392,37 +401,37 @@ async def migrate():
                 "created_at": datetime.now().isoformat(),
                 "updated_at": datetime.now().isoformat(),
             }
-            
+
             result = supabase.table('products').upsert(product_data, on_conflict="id").execute()
-            
+
             if result.data:
                 product_id = result.data[0]['id']
-                
+
                 # Delete existing variants
                 if product_variants:
                     supabase.table('product_variants').delete().eq('product_id', product_id).execute()
-                    
+
                     for v in product_variants:
                         v['product_id'] = product_id
                         supabase.table('product_variants').upsert(v, on_conflict="article_no").execute()
-                
+
                 # Delete existing images and re-insert
                 supabase.table('product_images').delete().eq('product_id', product_id).execute()
                 for idx, img in enumerate(product_images):
                     img['product_id'] = product_id
                     img['id'] = f"img-{product_id}-{idx}"
                     supabase.table('product_images').upsert(img).execute()
-                
+
                 print(f"  ✓ {p.get('name', 'Unknown')} ({article_no})")
                 success += 1
             else:
                 print(f"  ✗ {p.get('name', 'Unknown')}: No data returned")
                 errors += 1
-                
+
         except Exception as e:
             print(f"  ✗ {p.get('name', 'Unknown')}: {e}")
             errors += 1
-    
+
     print(f"\n✅ Migration complete: {success} success, {errors} errors")
 
 

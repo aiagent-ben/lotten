@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     const maxPrice = searchParams.get('maxPrice') ? parseFloat(searchParams.get('maxPrice')!) : undefined;
     const sort = searchParams.get('sort') || 'sort_order';
 
-    const products = getAllActiveProducts();
+    const products = await getAllActiveProducts();
 
     let filtered = products;
 

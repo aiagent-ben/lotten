@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getCollectionBySlug, getProductsByCollection, formatPrice, getCollections, getBrands, getBrandById } from '@/lib/data/products';
+import { getCollectionBySlug, getProductsByCollection, formatPrice, getCollections, getBrandById, getBrands } from '@/lib/data/products';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const brand = getBrandById(collection.brand_id);
+  const brand = await getBrandById(collection.brand_id);
 
   return {
     title: `${collection.name} Collection`,
@@ -55,15 +55,24 @@ export const revalidate = 3600; // ISR: revalidate every hour
 
 export default async function CollectionDetailPage({ params }: Props) {
   const { slug } = await params;
-  const collection = getCollectionBySlug(slug);
+  const collection = await getCollectionBySlug(slug);
 
   if (!collection) {
     notFound();
   }
 
-  const brand = getBrandById(collection.brand_id);
-  const products = getProductsByCollection(collection.id);
+  // Fetch all required data in parallel at the top level (no IIFE anti-pattern)
+  const [brand, products, allCollections, allBrands] = await Promise.all([
+    getBrandById(collection.brand_id),
+    getProductsByCollection(collection.id),
+    getCollections(),
+    getBrands(),
+  ]);
+
   const featuredProducts = products.slice(0, 8);
+  const relatedCollections = allCollections
+    .filter(c => c.is_active && c.id !== collection.id)
+    .slice(0, 6);
 
   return (
     <main className="min-h-screen bg-white">
@@ -261,47 +270,44 @@ export default async function CollectionDetailPage({ params }: Props) {
       </section>
 
       {/* Related Collections */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="heading-2 text-gray-900 text-center mb-12">Explore More Collections</h2>
+            <section className="py-20 bg-gray-50">
+              <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 className="heading-2 text-gray-900 text-center mb-12">Explore More Collections</h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {getCollections()
-                          .filter(c => c.is_active && c.id !== collection.id)
-                          .slice(0, 6)
-                          .map((relatedCollection) => {
-                const relatedBrand = getBrands().find(b => b.id === relatedCollection.brand_id);
-                return (
-                  <Link
-                    key={relatedCollection.id}
-                    href={`/collections/${relatedCollection.slug}`}
-                    className="relative aspect-[4/3] rounded-2xl overflow-hidden group bg-gray-100"
-                  >
-                    <Image
-                      src={relatedCollection.hero_image_url || '/placeholder-collection.jpg'}
-                      alt={`${relatedCollection.name} collection`}
-                      fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                      <h3 className="heading-3 mb-1">{relatedCollection.name}</h3>
-                      <p className="body-sm text-white/80">{relatedCollection.description}</p>
-                    </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {relatedCollections.map((relatedCollection) => {
+                    const relatedBrand = allBrands.find(b => b.id === relatedCollection.brand_id);
+                    return (
+                      <Link
+                        key={relatedCollection.id}
+                        href={`/collections/${relatedCollection.slug}`}
+                        className="relative aspect-[4/3] rounded-2xl overflow-hidden group bg-gray-100"
+                      >
+                        <Image
+                          src={relatedCollection.hero_image_url || '/placeholder-collection.jpg'}
+                          alt={`${relatedCollection.name} collection`}
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                        <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                          <h3 className="heading-3 mb-1">{relatedCollection.name}</h3>
+                          <p className="body-sm text-white/80">{relatedCollection.description}</p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+
+                <div className="text-center mt-12">
+                  <Link href="/collections" className="btn-outline btn-lg">
+                    View All Collections &rarr;
                   </Link>
-                );
-              })}
-          </div>
-
-          <div className="text-center mt-12">
-            <Link href="/collections" className="btn-outline btn-lg">
-              View All Collections →
-            </Link>
-          </div>
-        </div>
-      </section>
+                </div>
+              </div>
+            </section>
 
       {/* CTA Section */}
       <section className="py-16 bg-amber-900 text-white">
