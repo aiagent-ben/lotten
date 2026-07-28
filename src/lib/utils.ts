@@ -5,8 +5,8 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatPrice(price: number, currency = 'MYR'): string {
-  return new Intl.NumberFormat('en-MY', {
+export function formatPrice(price: number, currency = 'MYR', locale = 'en-MY'): string {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
     minimumFractionDigits: 0,
@@ -14,8 +14,8 @@ export function formatPrice(price: number, currency = 'MYR'): string {
   }).format(price);
 }
 
-export function formatCurrency(amount: number, currency = 'MYR'): string {
-  return new Intl.NumberFormat('en-MY', {
+export function formatCurrency(amount: number, currency = 'MYR', locale = 'en-MY'): string {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
     minimumFractionDigits: 2,
@@ -23,8 +23,8 @@ export function formatCurrency(amount: number, currency = 'MYR'): string {
   }).format(amount);
 }
 
-export function formatNumber(num: number): string {
-  return new Intl.NumberFormat('en-MY').format(num);
+export function formatNumber(num: number, locale = 'en-MY'): string {
+  return new Intl.NumberFormat(locale).format(num);
 }
 
 export function slugify(text: string): string {

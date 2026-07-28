@@ -1,13 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchProducts, SearchFilters } from '@/lib/search';
+import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
 export async function GET(request: NextRequest) {
+  // Rate limiting
+  const ip = getClientIp(request);
+  if (!rateLimit(ip)) {
+    return NextResponse.json(
+      { success: false, error: 'Too many requests' },
+      { status: 429 }
+    );
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     
     const query = searchParams.get('q') || '';
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100);
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
+    const limit = Math.min(Math.max(1, parseInt(searchParams.get('limit') || '20')), 100);
     const sort = searchParams.get('sort') || 'sort_order:asc';
     
     const filters: SearchFilters = {};

@@ -20,33 +20,30 @@ interface MaterialSpecEditorProps {
 export function MaterialSpecEditor({ value, onChange, label = "Materials & Finishes" }: MaterialSpecEditorProps) {
   const [materials, setMaterials] = useState<MaterialSpec[]>(value);
 
-  useEffect(() => {
-    setMaterials(value);
-  }, [value]);
-
-  useEffect(() => {
-    onChange(materials);
-  }, [materials, onChange]);
+  const handleChange = (newMaterials: MaterialSpec[]) => {
+    setMaterials(newMaterials);
+    onChange(newMaterials);
+  };
 
   const addMaterial = () => {
-    setMaterials([...materials, { part: "", material: "", finish: "", code: "" }]);
+    handleChange([...materials, { part: "", material: "", finish: "", code: "" }]);
   };
 
   const updateMaterial = (index: number, field: keyof MaterialSpec, newValue: string) => {
     const newMaterials = [...materials];
     newMaterials[index] = { ...newMaterials[index], [field]: newValue };
-    setMaterials(newMaterials);
+    handleChange(newMaterials);
   };
 
   const removeMaterial = (index: number) => {
-    setMaterials(materials.filter((_, i) => i !== index));
+    handleChange(materials.filter((_, i) => i !== index));
   };
 
   const moveMaterial = (fromIndex: number, toIndex: number) => {
     const newMaterials = [...materials];
     const [removed] = newMaterials.splice(fromIndex, 1);
     newMaterials.splice(toIndex, 0, removed);
-    setMaterials(newMaterials);
+    handleChange(newMaterials);
   };
 
   return (

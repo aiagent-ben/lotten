@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { getFeaturedProducts, getAllActiveProducts, getCollectionBySlug } from '@/lib/data/products';
 import { formatPrice } from '@/lib/utils';
 import NewsletterForm from '@/components/NewsletterForm';
+import { getCollectionName } from '@/lib/collections';
 export const metadata: Metadata = {
   title: 'Lotten — Curated Malaysian Oak Furniture',
   description: 'Curated Malaysian Oak furniture for modern homes — direct from manufacturer to your door.',
@@ -11,31 +12,6 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   const featuredProducts = getFeaturedProducts(8);
-
-  // Helper to get collection name from collection_id
-  const getCollectionName = (collectionId: string) => {
-    const collectionsMap: Record<string, string> = {
-      'col-breda': 'Breda',
-      'col-dover': 'Dover',
-      'col-malton': 'Malton',
-      'col-lamar': 'Lamar',
-      'col-kyoto': 'Kyoto',
-      'col-dudley': 'Dudley',
-      'col-ludlow': 'Ludlow',
-      'col-loftus': 'Loftus',
-      'col-hutto': 'Hutto',
-      'col-royston': 'Royston',
-      'col-oruro': 'Oruro',
-      'col-waldo': 'Waldo',
-      'col-castor': 'Castor',
-      'col-hayton': 'Hayton',
-      'col-neath': 'Neath',
-      'col-hampton': 'Hampton',
-      'col-noud': 'Noud',
-      'col-nakula': 'Nakula',
-    };
-    return collectionsMap[collectionId] || 'Collection';
-  };
 
   return (
     <main className="min-h-screen bg-white font-sans antialiased">
@@ -298,7 +274,6 @@ export default function HomePage() {
                         fill
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        placeholder="blur"
                         loading="lazy"
                       />
                     ) : (

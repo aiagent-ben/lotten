@@ -66,9 +66,9 @@ export function ProductVariantEditor({
     handleVariantsChange(newVariants);
   };
 
-  const updateVariant = (index: number, field: keyof ProductVariant, value: string) => {
+  const updateVariant = (index: number, field: keyof ProductVariant, value: string | boolean) => {
     const newVariants = [...variants];
-    newVariants[index] = { ...newVariants[index], [field]: value };
+    newVariants[index] = { ...newVariants[index], [field]: value } as ProductVariant;
     handleVariantsChange(newVariants);
   };
 
@@ -263,7 +263,7 @@ export function ProductVariantEditor({
                     <input
                       type="checkbox"
                       checked={variant.is_active}
-                      onChange={(e) => updateVariant(index, "is_active", e.target.checked ? "true" : "false")}
+                      onChange={(e) => updateVariant(index, "is_active", e.target.checked)}
                       className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                     />
                     <span className="label mb-0">Active</span>

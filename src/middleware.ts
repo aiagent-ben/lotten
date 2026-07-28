@@ -2,6 +2,10 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { locales, defaultLocale } from '@/i18n/request';
 
+// Cache for maintenance mode settings
+let cachedSettings: any = null;
+let cachedSettingsExpiresAt = 0;
+
 export async function middleware(request: NextRequest) {
   // Handle locale prefix in URL
   const pathname = request.nextUrl.pathname;
@@ -43,16 +47,14 @@ export async function middleware(request: NextRequest) {
   );
 
   // Check if this is an admin route (after locale)
-  const isAdminRoute = pathname.startsWith(`/${defaultLocale}/admin`) || locales.some(
+  const isAdminRoute = locales.some(
     (locale) => pathname.startsWith(`/${locale}/admin`)
   );
-  
+
   // Refresh session if expired - required for Server Components
-  await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (isAdminRoute) {
-    const { data: { user } } = await supabase.auth.getUser();
-    
     if (!user) {
       // Redirect to login if not authenticated
       const loginUrl = new URL(`/${defaultLocale}/admin/login`, request.url);
@@ -78,13 +80,24 @@ export async function middleware(request: NextRequest) {
 
   // Maintenance mode check for non-admin routes
   if (!isAdminRoute && !pathname.startsWith(`/${defaultLocale}/api`)) {
-    const { data: settings } = await supabase
-      .from('site_settings')
-      .select('settings')
-      .eq('id', 1)
-      .single();
+    const isMaintenancePage = locales.some(locale =>
+      pathname.startsWith(`/${locale}/maintenance`)
+    );
+    
+    // Cache maintenance mode check
+    let settings = cachedSettings;
+    if (!settings || cachedSettingsExpiresAt < Date.now()) {
+      const { data } = await supabase
+        .from('site_settings')
+        .select('settings')
+        .eq('id', 1)
+        .single();
+      settings = data?.settings ?? null;
+      cachedSettings = settings;
+      cachedSettingsExpiresAt = Date.now() + 30_000; // 30 seconds
+    }
 
-    if (settings?.settings?.maintenance_mode && !pathname.startsWith(`/${defaultLocale}/maintenance`)) {
+    if (settings?.maintenance_mode && !isMaintenancePage) {
       const maintenanceUrl = new URL(`/${defaultLocale}/maintenance`, request.url);
       return NextResponse.rewrite(maintenanceUrl);
     }

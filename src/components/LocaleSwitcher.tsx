@@ -36,7 +36,6 @@ export function LocaleSwitcher() {
     }
     const newPath = `/${locale}/${segments.join('/')}` || `/${locale}`;
     router.push(newPath);
-    router.refresh();
   };
 
   // Detect current locale from pathname

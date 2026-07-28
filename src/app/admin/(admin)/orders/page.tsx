@@ -13,12 +13,12 @@ interface OrderData {
   total_usd: number;
   currency: string;
   created_at: string;
-  customers: { 
+  customer: { 
     id: string;
     contact_name: string | null;
     company_name: string | null;
     email: string;
-  }[] | null;
+  } | null;
   order_items: { id: string; quantity: number }[];
 }
 
@@ -51,10 +51,10 @@ export default async function OrdersPage() {
     .order('created_at', { ascending: false })
     .limit(50);
     
-  const typedOrders = (orders || []).map((o) => ({
+  const typedOrders = (orders || []).map((o): OrderData => ({
     ...o,
-    customers: o.customers?.[0] ?? null,
-  })) as unknown as OrderData[];
+    customer: o.customers?.[0] ?? null,
+  }));
 
   return (
     <div className="space-y-6">
@@ -107,7 +107,7 @@ export default async function OrdersPage() {
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-gray-900">{order.order_number}</p>
                           <p className="text-sm text-gray-500 mt-1">
-                            {order.customers?.[0]?.contact_name || order.customers?.[0]?.company_name || order.customers?.[0]?.email}
+                            {order.customer?.contact_name || order.customer?.company_name || order.customer?.email}
                           </p>
                           <p className="text-xs text-gray-400 mt-1">
                             {order.order_items?.length || 0} items • {formatPrice(order.total_usd || 0)}
@@ -154,8 +154,8 @@ export default async function OrdersPage() {
                 <tr key={order.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => window.location.href = `/admin/orders/${order.id}`}>
                   <td className="px-4 py-3 font-mono text-sm font-medium">{order.order_number}</td>
                   <td className="px-4 py-3">
-                    <p className="font-medium text-gray-900">{order.customers?.[0]?.contact_name || order.customers?.[0]?.company_name || order.customers?.[0]?.email}</p>
-                    <p className="text-sm text-gray-500">{order.customers?.[0]?.email}</p>
+                    <p className="font-medium text-gray-900">{order.customer?.contact_name || order.customer?.company_name || order.customer?.email}</p>
+                    <p className="text-sm text-gray-500">{order.customer?.email}</p>
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-600">
                     {order.order_items?.length || 0} items

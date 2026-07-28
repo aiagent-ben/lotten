@@ -219,7 +219,6 @@ export default async function CollectionDetailPage({ params }: Props) {
                           fill
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                           className="object-cover transition-transform duration-500 group-hover:scale-105"
-                          placeholder="blur"
                           loading="lazy"
                         />
                       ) : (
@@ -284,7 +283,6 @@ export default async function CollectionDetailPage({ params }: Props) {
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      placeholder="blur"
                       loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />

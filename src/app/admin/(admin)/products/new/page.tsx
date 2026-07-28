@@ -15,13 +15,13 @@ interface FormData {
   collection_id: string;
   short_description: string;
   description: string;
-  
+
   // Pricing
   price_usd: string;
   cost_usd: string;
   moq: string;
   lead_time_weeks: string;
-  
+
   // Dimensions
   width_mm: string;
   depth_mm: string;
@@ -32,22 +32,23 @@ interface FormData {
   carton_length_mm: string;
   carton_width_mm: string;
   carton_height_mm: string;
-  
+
   // Inventory
   stock_available: string;
   stock_reserved: string;
   stock_incoming: string;
   low_stock_threshold: string;
-  
+
   // Status
   is_active: boolean;
   is_new: boolean;
   is_bestseller: boolean;
   sort_order: string;
-  
+
   // Materials & Colors
   materials: string;
   colors: string;
+  variants: string;
 }
 
 interface Collection {
@@ -97,6 +98,7 @@ export default function NewProductPage() {
     colors: JSON.stringify([
       { part: '', name: '', code: '', hex: '#FFFFFF' },
     ], null, 2),
+    variants: '[]',
   });
 
   const [collections, setCollections] = useState<{id: string; name: string; slug: string}[]>([]);
@@ -137,7 +139,34 @@ export default function NewProductPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Submit logic here
+
+    // Prepare form data for submission
+    const submitData = {
+      ...formData,
+      materials: formData.materials,
+      colors: formData.colors,
+      variants: formData.variants,
+    };
+
+    try {
+      const response = await fetch('/api/admin/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(submitData),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create product');
+      }
+
+      // Redirect to product list or edit page
+      window.location.href = `/admin/products`;
+    } catch (error) {
+      console.error('Failed to create product:', error);
+      alert(error instanceof Error ? error.message : 'Failed to create product');
+    }
   };
 
   if (loading) {

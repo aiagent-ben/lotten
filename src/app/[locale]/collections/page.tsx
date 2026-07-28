@@ -77,7 +77,6 @@ export default async function CollectionsPage() {
                         fill
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="collection-card-image object-cover transition-transform duration-700 group-hover:scale-105"
-                        placeholder="blur"
                         loading="lazy"
                       />
                       {/* Gradient overlay for depth */}

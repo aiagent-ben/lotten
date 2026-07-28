@@ -1,10 +1,20 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/db/client';
+import { verifyAdminAuth } from '@/lib/auth/admin';
+import { validateCsrfToken } from '@/lib/csrf';
 
-export async function POST(request: Request) {
-  const supabase = createServiceClient();
+export async function POST(request: NextRequest) {
+  const authError = await verifyAdminAuth(request);
+  if (authError) return authError;
 
+  // CSRF protection for state-changing operations
   const body = await request.json();
+  const csrfToken = body._csrf;
+  if (!csrfToken || !validateCsrfToken(csrfToken)) {
+    return NextResponse.json({ error: 'Invalid CSRF token' }, { status: 403 });
+  }
+
+  const supabase = createServiceClient();
   const { action, productIds, collectionId } = body;
 
   if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {

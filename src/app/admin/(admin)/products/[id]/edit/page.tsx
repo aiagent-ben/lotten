@@ -40,6 +40,7 @@ interface FormData {
   sort_order: string;
   materials: string;
   colors: string;
+  variants: string;
 }
 
 interface Collection {
@@ -129,6 +130,7 @@ export default function EditProductPage() {
     colors: JSON.stringify([
       { part: '', name: '', code: '', hex: '#FFFFFF' },
     ], null, 2),
+    variants: '[]',
   });
 
   const [collections, setCollections] = useState<{id: string; name: string; slug: string}[]>([]);
@@ -153,6 +155,7 @@ export default function EditProductPage() {
         
         if (productData.data) {
           const product = productData.data as ProductData;
+          const initialVariants = product.variants || [];
           setFormData({
             article_no: product.article_no,
             name: product.name,
@@ -183,6 +186,7 @@ export default function EditProductPage() {
             sort_order: product.sort_order.toString(),
             materials: JSON.stringify(product.materials || [], null, 2),
             colors: JSON.stringify(product.colors || [], null, 2),
+            variants: JSON.stringify(initialVariants, null, 2),
           });
         }
         
@@ -692,7 +696,7 @@ export default function EditProductPage() {
           <fieldset className="space-y-6 border-t border-gray-100 pt-6">
             <legend className="form-section-title">Product Variants</legend>
             <ProductVariantEditor
-              value={[]}
+              value={JSON.parse(formData.variants || '[]')}
               onChange={(variants) => setFormData(prev => ({ ...prev, variants: JSON.stringify(variants, null, 2) }))}
             />
           </fieldset>

@@ -16,17 +16,13 @@ import {
   Menu,
   X,
   FileText,
-  Gift,
-  Percent,
 } from 'lucide-react';
-
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Products', href: '/admin/products', icon: Package },
   { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
   { name: 'Customers', href: '/admin/customers', icon: Users },
   { name: 'Discounts', href: '/admin/discounts', icon: ShoppingCart },
-  { name: 'Promotions', href: '/admin/promotions', icon: Percent },
   { name: 'Content', href: '/admin/content', icon: FileText },
   { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
   { name: 'Settings', href: '/admin/settings', icon: Settings },

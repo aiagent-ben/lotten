@@ -140,15 +140,15 @@ export function getProductsByBrand(brandId: string): Product[] {
 }
 
 // Formatting utilities
-export function formatPrice(priceUsd: number | string): string {
-  const price = typeof priceUsd === 'string' ? parseFloat(priceUsd) : priceUsd;
-  if (isNaN(price) || price === 0) return 'Contact for Price';
+export function formatPrice(price: number | string): string {
+  const priceNum = typeof price === 'string' ? parseFloat(price) : price;
+  if (isNaN(priceNum) || priceNum === 0) return 'Contact for Price';
   return new Intl.NumberFormat('en-MY', {
     style: 'currency',
     currency: 'MYR',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(price);
+  }).format(priceNum);
 }
 
 export function getColorHex(colorCode: string): string {

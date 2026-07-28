@@ -78,10 +78,11 @@ export default function ProductsClient({
   };
 
   const handleSelectProduct = (id: string, checked: boolean) => {
-    setSelectedIds((prev) =>
-      checked ? [...prev, id] : prev.filter((x) => x !== id)
-    );
-    setSelectAll(selectedIds.length + 1 === products.length);
+    setSelectedIds((prev) => {
+      const next = checked ? [...prev, id] : prev.filter((x) => x !== id);
+      setSelectAll(next.length === products.length);
+      return next;
+    });
   };
 
   const handleBulkAction = useCallback(

@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/db/client';
+import { verifyAdminAuth } from '@/lib/auth/admin';
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authError = await verifyAdminAuth(request);
+  if (authError) return authError;
+
   try {
     const supabase = createServiceClient();
     const { id } = await params;
@@ -33,9 +38,12 @@ export async function GET(
 }
 
 export async function PUT(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authError = await verifyAdminAuth(request);
+  if (authError) return authError;
+
   try {
     const supabase = createServiceClient();
     const { id } = await params;
@@ -99,9 +107,12 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const authError = await verifyAdminAuth(request);
+  if (authError) return authError;
+
   try {
     const supabase = createServiceClient();
     const { id } = await params;

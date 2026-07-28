@@ -1,7 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/db/client';
+import { verifyAdminAuth } from '@/lib/auth/admin';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authError = await verifyAdminAuth(request);
+  if (authError) return authError;
+
   const supabase = createServiceClient();
   
   const { data, error } = await supabase
@@ -48,7 +52,10 @@ export async function GET() {
   return NextResponse.json({ data });
 }
 
-export async function PUT(request: Request) {
+export async function PUT(request: NextRequest) {
+  const authError = await verifyAdminAuth(request);
+  if (authError) return authError;
+
   const supabase = createServiceClient();
   const body = await request.json();
   

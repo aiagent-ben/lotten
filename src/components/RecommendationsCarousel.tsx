@@ -37,7 +37,7 @@ export function RecommendationsCarousel({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {displayProducts.map((product) => (
-            <a
+            <Link
               key={product.id}
               href={`/products/${product.slug}`}
               className="group block bg-white rounded-xl border border-gray-100 hover:border-amber-200 hover:shadow-lg transition-all duration-300 overflow-hidden"
@@ -51,7 +51,6 @@ export function RecommendationsCarousel({
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    placeholder="blur"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-300">
@@ -60,7 +59,7 @@ export function RecommendationsCarousel({
                     </svg>
                   </div>
                 )}
-              
+             
               {product.is_new && (
                 <span className="absolute top-3 left-3 badge-primary badge-success text-xs px-2 py-1">New</span>
               )}
@@ -92,10 +91,10 @@ export function RecommendationsCarousel({
                 )}
               </div>
             </div>
-          </a>
+          </Link>
         ))}
       </div>
     </div>
   </section>
-);
+  );
 }

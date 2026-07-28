@@ -110,20 +110,24 @@ export interface SearchFacets {
 export function buildFilterString(filters: SearchFilters): string[] {
   const filterParts: string[] = [];
 
+  function escapeFilterValue(value: string): string {
+    return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  }
+
   if (filters.collection) {
-    filterParts.push(`collection_id = "${filters.collection}"`);
+    filterParts.push(`collection_id = "${escapeFilterValue(filters.collection)}"`);
   }
 
   if (filters.category) {
-    filterParts.push(`collection_id = "${filters.category}"`);
+    filterParts.push(`collection_id = "${escapeFilterValue(filters.category)}"`);
   }
 
   if (filters.material) {
-    filterParts.push(`materials.part = "${filters.material}"`);
+    filterParts.push(`materials.part = "${escapeFilterValue(filters.material)}"`);
   }
 
   if (filters.finish) {
-    filterParts.push(`materials.finish = "${filters.finish}"`);
+    filterParts.push(`materials.finish = "${escapeFilterValue(filters.finish)}"`);
   }
 
   if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
@@ -151,11 +155,11 @@ export function buildFilterString(filters: SearchFilters): string[] {
   }
 
   if (filters.roomType) {
-    filterParts.push(`collection_id = "${filters.roomType}"`);
+    filterParts.push(`collection_id = "${escapeFilterValue(filters.roomType)}"`);
   }
 
   if (filters.style) {
-    filterParts.push(`brand_name = "${filters.style}"`);
+    filterParts.push(`brand_name = "${escapeFilterValue(filters.style)}"`);
   }
 
   if (filters.inStock) {

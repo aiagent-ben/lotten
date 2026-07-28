@@ -20,33 +20,30 @@ interface ColorOptionEditorProps {
 export function ColorOptionEditor({ value, onChange, label = "Color Options" }: ColorOptionEditorProps) {
   const [colors, setColors] = useState<ColorOption[]>(value);
 
-  useEffect(() => {
-    setColors(value);
-  }, [value]);
-
-  useEffect(() => {
-    onChange(colors);
-  }, [colors, onChange]);
+  const handleChange = (newColors: ColorOption[]) => {
+    setColors(newColors);
+    onChange(newColors);
+  };
 
   const addColor = () => {
-    setColors([...colors, { part: "", name: "", code: "", hex: "#FFFFFF" }]);
+    handleChange([...colors, { part: "", name: "", code: "", hex: "#FFFFFF" }]);
   };
 
   const updateColor = (index: number, field: keyof ColorOption, newValue: string) => {
     const newColors = [...colors];
     newColors[index] = { ...newColors[index], [field]: newValue };
-    setColors(newColors);
+    handleChange(newColors);
   };
 
   const removeColor = (index: number) => {
-    setColors(colors.filter((_, i) => i !== index));
+    handleChange(colors.filter((_, i) => i !== index));
   };
 
   const moveColor = (fromIndex: number, toIndex: number) => {
     const newColors = [...colors];
     const [removed] = newColors.splice(fromIndex, 1);
     newColors.splice(toIndex, 0, removed);
-    setColors(newColors);
+    handleChange(newColors);
   };
 
   return (

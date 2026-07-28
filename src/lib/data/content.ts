@@ -93,6 +93,10 @@ function mapContentFromDB(data: any): ContentPost {
   };
 }
 
+function escapeLike(value: string): string {
+  return value.replace(/[\\%_]/g, '\\$&');
+}
+
 export async function getContentList(params: ContentListParams = {}): Promise<ContentListResponse> {
   const supabase = await getSupabase();
   const {
@@ -119,7 +123,8 @@ export async function getContentList(params: ContentListParams = {}): Promise<Co
     query = query.eq('status', status);
   }
   if (search) {
-    query = query.or(`title.ilike.%${search}%,slug.ilike.%${search}%,excerpt.ilike.%${search}%`);
+    const escapedSearch = escapeLike(search);
+    query = query.or(`title.ilike.%${escapedSearch}%,slug.ilike.%${escapedSearch}%,excerpt.ilike.%${escapedSearch}%`);
   }
   if (category) {
     query = query.eq('category', category);
@@ -131,25 +136,29 @@ export async function getContentList(params: ContentListParams = {}): Promise<Co
     query = query.eq('is_featured', featured);
   }
 
-  if (limit) {
-    query = query.limit(limit);
+  const pageNum = Math.max(1, page);
+  const perPageNum = Math.min(Math.max(1, perPage), 100);
+  const limitNum = limit ? Math.min(Math.max(1, limit), 100) : undefined;
+
+  if (limitNum) {
+    query = query.limit(limitNum);
   } else {
-    query = query.range((page - 1) * perPage, page * perPage - 1);
+    query = query.range((pageNum - 1) * perPageNum, pageNum * perPageNum - 1);
   }
 
   const { data, error, count } = await query;
 
   if (error) {
     console.error('Error fetching content:', error);
-    return { data: [], count: 0, page, perPage, totalPages: 0 };
+    return { data: [], count: 0, page: pageNum, perPage: perPageNum, totalPages: 0 };
   }
 
   return {
     data: (data || []).map(mapContentFromDB),
     count: count || 0,
-    page,
-    perPage,
-    totalPages: Math.ceil((count || 0) / perPage),
+    page: pageNum,
+    perPage: perPageNum,
+    totalPages: Math.ceil((count || 0) / perPageNum),
   };
 }
 
@@ -268,7 +277,11 @@ export async function getAllTags(): Promise<string[]> {
 export async function incrementViewCount(id: string): Promise<void> {
   const supabase = await getSupabase();
 
-  await supabase.rpc('increment_content_view_count', { content_id: id });
+  try {
+    await supabase.rpc('increment_content_view_count', { content_id: id });
+  } catch (err) {
+    console.error('Failed to increment view count:', err);
+  }
 }
 
 export async function compileContentMDX(content: ContentPost): Promise<any> {

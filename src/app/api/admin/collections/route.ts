@@ -1,7 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/db/client';
+import { verifyAdminAuth } from '@/lib/auth/admin';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  const authError = await verifyAdminAuth(request);
+  if (authError) return authError;
+
   const supabase = createServiceClient();
   
   const { data: collections, error } = await supabase

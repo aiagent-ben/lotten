@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/db/client';
+import { verifyAdminAuth } from '@/lib/auth/admin';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  const authError = await verifyAdminAuth(request);
+  if (authError) return authError;
+
   try {
     const supabase = createServiceClient();
     const { searchParams } = new URL(request.url);
@@ -49,7 +54,10 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const authError = await verifyAdminAuth(request);
+  if (authError) return authError;
+
   try {
     const supabase = createServiceClient();
     const body = await request.json();
