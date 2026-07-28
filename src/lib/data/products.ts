@@ -183,4 +183,4 @@ export function getColorHex(colorCode: string): string {
 }
 
 // Type exports
-export type { Brand, Collection, Product, ProductVariant, MaterialSpec, ColorOption, ProductImage } from '@/lib/types/database';
+export type { Brand, Collection, Product, ProductVariant, MaterialSpec, ColorOption, ProductImage } from '@/lib/types/database';// force redeploy
