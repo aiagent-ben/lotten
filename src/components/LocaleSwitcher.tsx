@@ -44,14 +44,14 @@ export function LocaleSwitcher() {
   return (
     <div className="relative" ref={ref}>
       <button
-        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-500 min-w-[110px] justify-between"
+        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-500 w-[160px] justify-between"
         onClick={() => setOpen(!open)}
         aria-label="Select language"
         aria-expanded={open}
         aria-haspopup="listbox"
       >
         <span className="text-lg flex-shrink-0">{localeLabels[currentLocale]?.flag || '🌐'}</span>
-        <span className="hidden sm:inline truncate max-w-[70px]">{localeLabels[currentLocale]?.label || currentLocale.toUpperCase()}</span>
+        <span className="hidden sm:inline truncate max-w-[84px]">{localeLabels[currentLocale]?.label || currentLocale.toUpperCase()}</span>
         <svg className={`w-4 h-4 transition-transform flex-shrink-0 ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
