@@ -15,6 +15,30 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen bg-white font-sans antialiased">
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-b border-gray-100">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <Link href="/" className="font-display text-2xl font-semibold text-gray-900 tracking-tight">
+              Lotten
+            </Link>
+            <div className="hidden md:flex items-center gap-8">
+              <Link href="/products" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Shop</Link>
+              <Link href="/collections" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Collections</Link>
+              <Link href="/about" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Our Story</Link>
+              <Link href="/contact" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Contact</Link>
+            </div>
+            <div className="flex items-center gap-4">
+              <Link href="/search" className="p-2 rounded-full hover:bg-gray-100 transition-colors" aria-label="Search">
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </nav>
+
       {/* Hero Section - Calm Editorial Style */}
       <section className="relative min-h-screen flex items-center pt-16 lg:pt-20">
         <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: 'url(/hero-furniture.jpg)', filter: 'brightness(0.4)' }} />
