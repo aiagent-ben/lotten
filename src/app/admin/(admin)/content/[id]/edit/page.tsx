@@ -5,6 +5,8 @@ export const metadata: Metadata = {
   title: 'Edit Content | Lotten Admin',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default function EditContentPage() {
   return <ContentForm isNew={false} />;
 }
