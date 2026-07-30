@@ -1,13 +1,13 @@
 import { createServiceClient } from '@/lib/db/client';
 import { cookies } from 'next/headers';
-import { 
-  generateQuote, 
-  sendQuote, 
-  reviseQuote, 
-  acceptQuote, 
+import {
+  generateQuote,
+  sendQuote,
+  reviseQuote,
+  acceptQuote,
   rejectQuote,
-  checkStockAvailability 
 } from '@/lib/actions/quote';
+import { checkStockAvailability } from '@/lib/actions/stock';
 
 const supabase = createServiceClient();
 

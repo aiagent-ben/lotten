@@ -179,15 +179,13 @@ export async function releaseQuoteReservations(
     let releasedCount = 0;
     
     for (const res of reservations) {
-      // Log release
+      // Log release (idempotent)
       await supabase
         .from('stock_reservation_release_log')
-        .insert({
+        .upsert({
           reservation_id: res.id,
           released_by: reason,
-        })
-        .onConflict('reservation_id')
-        .ignore();
+        }, { onConflict: 'reservation_id' });
       
       // Only proceed if log insert succeeded (idempotency)
       const { data: logCheck } = await supabase
@@ -301,12 +299,10 @@ export async function releaseExpiredReservations(): Promise<{ success: boolean; 
       // Log release
       await supabase
         .from('stock_reservation_release_log')
-        .insert({
+        .upsert({
           reservation_id: res.id,
           released_by: 'cron',
-        })
-        .onConflict('reservation_id')
-        .ignore();
+        }, { onConflict: 'reservation_id' });
       
       // Check if log was inserted (idempotency)
       const { data: logInserted } = await supabase

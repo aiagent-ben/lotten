@@ -31,7 +31,7 @@ export interface CreateInquiryResult {
   success: boolean;
   inquiry?: {
     id: string;
-    session_id: string;
+    session_id?: string;
     status: string;
     created_at: string;
   };
@@ -45,7 +45,7 @@ export async function createInquiry(customerId?: string): Promise<CreateInquiryR
     // Check if there's already a draft inquiry for this session
     const { data: existing } = await supabase
       .from('inquiries')
-      .select('id')
+      .select('id, session_id')
       .eq('session_id', sessionId)
       .eq('status', 'draft')
       .single();
@@ -58,21 +58,21 @@ export async function createInquiry(customerId?: string): Promise<CreateInquiryR
     expiresAt.setDate(expiresAt.getDate() + 30); // 30 days
     
     const { data, error } = await supabase
-      .from('inquiries')
-      .insert({
-        session_id: sessionId,
-        customer_id: customerId || null,
-        status: 'draft',
-        source_channel: 'web',
-        expires_at: expiresAt.toISOString(),
-      })
-      .select('id, session_id, status, created_at')
-      .single();
-    
-    if (error) throw error;
-    
-    return { success: true, inquiry: data };
-  } catch (error) {
+          .from('inquiries')
+          .insert({
+            session_id: sessionId,
+            customer_id: customerId || null,
+            status: 'draft',
+            source_channel: 'web',
+            expires_at: expiresAt.toISOString(),
+          })
+          .select('id, session_id, status, created_at')
+          .single();
+
+        if (error) throw error;
+
+        return { success: true, inquiry: { ...data, status: 'draft', created_at: data.created_at } };
+      } catch (error) {
     console.error('Error creating inquiry:', error);
     return { success: false, error: 'Failed to create inquiry' };
   }
