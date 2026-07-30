@@ -185,27 +185,24 @@ interface Brand {
 - [ ] **Loyalty program admin** (points rules, tiers, expiry)
 - [ ] **Loyalty program** (points earning/redemption, tiers, referral program)
 
-#### **Phase B: Public Catalog + Cart/Checkout (Week 3-5)**
+#### **Phase B: Public Catalog + Inquiry/Quote Flow (Week 3-6)**
 - [x] **Server-rendered catalog** with ISR (SEO, performance)
 - [x] **Product detail pages** with structured specs (dimensions, materials, finishes)
 - [x] **Collection browsing** with brand storytelling
 - [x] **Image optimization** (Next.js Image, WebP/AVIF, blur placeholders)
 - [x] **Recently viewed products** (cookie-based, 20 items, carousel on home/product page)
 
-#### **Phase X: Cart, Checkout & Customer Features (Deferred)**
-- [ ] **Cart + Checkout** (displayed price, discount code field, guest checkout, save for later)
-- [ ] **Mini cart drawer** (not full page redirect)
-- [ ] **Installment payments** (Atome, GrabPayLater, FPX)
-- [ ] **Customer authentication** (email/password, magic link, social login: Google, Apple)
-- [ ] **Guest checkout** (email + phone, optional account creation post-purchase)
-- [ ] **Customer dashboard** (order history, wishlist, recently viewed, loyalty points, profile, easy reorder)
-- [ ] **Wishlist / Save for later** (persistent, shareable, price drop alerts)
-- [ ] **Product reviews display** (stars, photos, verified purchase badge)
-- [ ] **Discount codes** (validation API, checkout UI, admin UI exists)
-- [ ] **Reviews & Q&A** (verified purchase, photos, helpful votes, seller response)
-- [ ] **Wishlist + save for later + alerts** (persistent, shareable, price drop/back-in-stock emails)
+#### **Phase B: Inquiry → Quote → Order System (New)**
+- [ ] **B8** **Inquiry Builder** (multi-item, configuration capture) — `components/InquiryBuilder.tsx`, `lib/actions/inquiry.ts` — Persists to DB, real-time pricing
+- [ ] **B9** **Quote Engine** (generation, versioning, PDF) — `lib/actions/quote.ts`, `app/api/v1/quotes/` — Versioned, stock reserved, PDF valid
+- [ ] **B10** **Stock Reservation** (TTL, cron release) — `lib/actions/stock.ts`, `supabase/functions/release-reservations` — No oversell, auto-release
+- [ ] **B11** **Customer Portal** (inquiries, quotes, orders) — `app/[locale]/inquiries/`, `app/[locale]/quotes/[id]/` — Accept/reject, download PDF, thread
+- [ ] **B12** **Admin Inquiry Management** — `app/admin/(admin)/inquiries/` — Kanban, assign rep, generate quote
+- [ ] **B13** **Admin Quote Management** — `app/admin/(admin)/quotes/` — Version diff, revise, send, convert
+- [ ] **B14** **Email Templates** (5 new) — `lib/emails/` — React Email, Resend, branded
+- [ ] **B15** **Analytics Funnel** (inquiry → quote → order) — `lib/analytics/engine.ts` — New event taxonomy, dashboards
 
-#### **Phase C: Discovery & Inspiration (Week 5-7)**
+#### **Phase C: Discovery & Inspiration (Week 6-8)**
 - [x] **Search & filter** (Meilisearch: collection, category, material, finish, dimensions, price, room type, style)
 - [x] **Lookbooks / room inspiration** (curated sets, shoppable hotspots, "shop the room")
 - [x] **Content hub** (care guides, styling tips, trend articles, lookbooks; MDX-based)
@@ -864,64 +861,69 @@ A1 (Supabase) → A2 (Clients) → A3 (Seed) → A4 (Auth)
 | **B5** `/collections/[slug]` Server Component | `app/collections/[slug]/page.tsx` | Filtered product grid |
 | **B6** `generateStaticParams` for dynamic routes | `app/products/[slug]/page.tsx`, `app/collections/[slug]/page.tsx` | Static params at build |
 | **B7** Next.js Image `remotePatterns` (R2 + hinlim.com) | `next.config.js` | Optimized images, WebP/AVIF |
-| **B8** Cart (Server Action + client state) | `lib/actions/cart.ts`, `components/CartDrawer.tsx` | Persists in session/cookie |
-| **B9** Checkout page (shipping, billing, discount code) | `app/checkout/page.tsx` | Creates `orders` record |
-| **B10** Discount code validation (Server Action) | `lib/actions/discounts.ts` | Applies percentage/fixed |
-| **B11** Order confirmation email (Resend) | `lib/email/order-confirmation.ts` | PDF attachment optional |
-| **B12** Customer auth (Supabase: email/password, magic link) | `lib/auth/customer.ts` | Sign up/in/out works |
-| **B13** Customer dashboard (orders, saved cart, profile) | `app/(dashboard)/page.tsx` | Protected by middleware |
-| **B14** Home page Server Component | `app/page.tsx` | Hero, featured collections/products |
+| **B8** **Inquiry Builder** (multi-item, config capture) | `components/InquiryBuilder.tsx`, `lib/actions/inquiry.ts` | Persists to DB, real-time pricing |
+| **B9** **Quote Engine** (generation, versioning, PDF) | `lib/actions/quote.ts`, `app/api/v1/quotes/` | Versioned, stock reserved, PDF valid |
+| **B10** **Stock Reservation** (TTL, cron release) | `lib/actions/stock.ts`, `supabase/functions/release-reservations` | No oversell, auto-release |
+| **B11** **Customer Portal** (inquiries, quotes, orders) | `app/[locale]/inquiries/`, `app/[locale]/quotes/[id]/` | Accept/reject, download PDF, thread |
+| **B12** **Admin Inquiry Management** | `app/admin/(admin)/inquiries/` | Kanban, assign rep, generate quote |
+| **B13** **Admin Quote Management** | `app/admin/(admin)/quotes/` | Version diff, revise, send, convert |
+| **B14** **Email Templates** (5 new) | `lib/emails/` | React Email, Resend, branded |
+| **B15** **Analytics Funnel** (inquiry → quote → order) | `lib/analytics/engine.ts` | New event taxonomy, dashboards |
 
 #### B.2 Key Decisions (Resolved)
 
 | Decision | Options | Recommendation | Status |
 |----------|---------|----------------|--------|
-| **Cart Persistence** | Cookie / Supabase `cart_items` table / Hybrid | **Hybrid** — anonymous cookie, merge to DB on login | ✅ Decided |
-| **Checkout Flow** | Single-page / Multi-step | **Multi-step** — Shipping → Billing → Review | ✅ Decided |
-| **Guest Checkout** | Required / Optional / No | **Optional** — allow guest, prompt to create account after | ✅ Decided |
-| **Payment** | Stripe now / Invoice later | **Invoice later** — order = invoice request (per Phase A) | ✅ Decided |
-| **Shipping Calculation** | Flat rate / Table rate / Carrier API | **Table rate** — weight bands × region; carrier API in Phase D | ✅ Decided |
-| **Tax Handling** | Fixed % / By region / Exempt | **Configurable** — admin sets default tax % in `site_settings`; VAT exempt field on customer | ✅ Decided |
-| **Order Number Format** | `ORD-YYYY-NNNNNN` / UUID / Custom | `ORD-YYYY-NNNNNN` (sequential per year) | ✅ Decided |
-| **Currency** | MYR only / Multi-currency | **MYR only** — per Phase A | ✅ Decided |
+| **Inquiry Persistence** | Cookie only / DB only / Hybrid | **Hybrid** — anonymous session_id → merge to customer on login | ⬜ |
+| **Quote Validity** | 14d / 30d / 60d / Custom | **30 days** — industry standard for furniture | ⬜ |
+| **Stock Reservation TTL** | Quote validity / Fixed 48h / Fixed 7d | **Quote validity** — reservation expires with quote | ⬜ |
+| **Deposit %** | 0% / 30% / 50% / 100% | **50%** — standard for custom furniture | ⬜ |
+| **Tiered Pricing** | None / Customer tier / Volume / Both | **Customer tier + volume** — trade/project discounts | ⬜ |
+| **Quote Revision Limit** | Unlimited / 3 / 5 | **3 revisions** — prevents endless negotiation | ⬜ |
+| **Auto-Convert on Accept** | Yes / No (admin review) | **Yes** — creates order, triggers deposit invoice | ⬜ |
+| **B2B Payment Terms** | Net-30 / Net-60 / Custom | **Net-30 default, configurable per tier** | ⬜ |
 | **Email Templates** | Resend + React Email / Plain / MJML | **React Email** — consistent with PDF styling | ✅ Decided |
-| **Stock Validation** | Add to cart / Checkout / Reserve on checkout | **Reserve on checkout** — decrement available, increment reserved | ✅ Decided |
-| **Min Order Quantity** | Cart / Checkout / Warning | **Enforce at checkout** — prevent submit if any line < MOQ | ✅ Decided |
-| **Discount Stacking** | Allow multiple / One per order | **One per order** — per Phase A | ✅ Decided |
-| **Cart Merge on Login** | Merge quantities / Replace | **Merge quantities** (sum quantities for same product/variant; cap at available stock) | ✅ Decided |
-| **Abandoned Cart** | Track + email / None | **No** (not in MVP scope) | ✅ Decided |
+| **Stock Validation** | Add to inquiry / Quote generation / Reserve on quote | **Reserve on quote** — decrement available, increment reserved | ⬜ |
+| **Min Order Quantity** | Inquiry / Quote / Warning | **Enforce at quote** — prevent submit if any line < MOQ | ⬜ |
+| **Discount Stacking** | Allow multiple / One per quote | **One per quote** — per Phase A | ⬜ |
+| **Inquiry Merge on Login** | Merge quantities / Replace | **Merge quantities** (sum for same product/variant; cap at available stock) | ⬜ |
+| **Abandoned Inquiry** | Track + email / None | **Track only** — nurture email in Phase C | ⬜ |
 | **Shipping Regions** | Global / Malaysia only | **Peninsular + East Malaysia** only; flat rate per state | ✅ Decided |
 | **Tax Display** | Inclusive / Exclusive | **Tax-inclusive** (MYR) | ✅ Decided |
-| **Order Confirmation PDF** | Yes / No | **No** (HTML email only) | ✅ Decided |
-| **Wishlist Separate from Cart** | Yes / No | **Yes** — separate wishlist (cookie + DB sync) | ✅ Decided |
+| **Quote Confirmation PDF** | Yes / No | **Yes** (React-PDF) | ⬜ |
+| **Wishlist Separate from Inquiry** | Yes / No | **Yes** — separate wishlist (cookie + DB sync) | ✅ Decided |
 | **Product Reviews/Q&A Timing** | Phase B / Phase C | **Phase C (active)** | ✅ Decided |
                               ↓
 B3, B5 (Dynamic routes) ← B6 (generateStaticParams)
                               ↓
-B8 (Cart) ← B1, B2 (product data)
+B8 (Inquiry Builder) ← B1, B2 (product data)
                               ↓
-B9 (Checkout) ← B8, B10 (discounts), B12 (auth)
+B9 (Quote Engine) ← B8, B10 (stock), B14 (email)
                               ↓
-B11 (Email) ← B9
-B13 (Dashboard) ← B12 (Auth)
+B11 (Customer Portal) ← B9
+B12 (Admin Inquiries) ← B8
+B13 (Admin Quotes) ← B9
+B14 (Email) ← B9
+B15 (Analytics) ← B8, B9
 ```
 
 **Critical Path:** B1 → B2/B4/B14 → B3/B5 → B6 → B8 → B9 → B11
 
 #### B.4 Expanded Acceptance Criteria
 
-- [ ] All public pages (`/`, `/products`, `/products/[slug]`, `/collections`, `/collections/[slug]`, `/checkout`) are Server Components with ISR (revalidate: 3600)
-- [ ] No `'use client'` in page components except `CartDrawer`, checkout form steps, search filters
+- [ ] All public pages (`/`, `/products`, `/products/[slug]`, `/collections`, `/collections/[slug]`) are Server Components with ISR (revalidate: 3600)
+- [ ] No `'use client'` in page components except `InquiryBuilder`, quote form steps, search filters
 - [ ] Product detail page includes JSON-LD `Product` structured data (name, price, currency, availability, sku, brand, image, description)
-- [ ] Cart persists across sessions (cookie for anonymous, DB for authenticated)
-- [ ] Cart drawer shows: product image, name, variant, price, quantity, line total, MOQ warning
-- [ ] Checkout: multi-step (Shipping → Billing → Review), validates each step
-- [ ] Discount code field at Review step; applies percentage/fixed; shows error if invalid/expired
-- [ ] Order creates `orders` + `order_items` records; decrements `stock_available`, increments `stock_reserved`
-- [ ] Order confirmation email sent via Resend (React Email template); includes order summary, shipping address, estimated ship date
-- [ ] Customer auth: signup (email/password + magic link), login, logout, password reset
-- [ ] Customer dashboard: order history (status, totals, items), saved cart, profile edit
-- [ ] Home page: hero, featured collections (4), featured products (8), trust badges, CTA
+- [ ] Inquiry persists across sessions (cookie for anonymous, DB for authenticated)
+- [ ] Inquiry Builder shows: product image, name, configuration (finish, dimensions, hardware, upholstery), price, quantity, line total, MOQ warning
+- [ ] Quote generation: validates stock, reserves inventory, generates PDF, emails customer
+- [ ] Quote versioning: revision creates new version with diff, preserves history
+- [ ] Stock reservation: decrements `stock_available`, increments `stock_reserved` on quote generation; auto-releases on expiry
+- [ ] Quote acceptance creates `orders` + `order_items` records; converts reservations to `converted` status
+- [ ] Quote sent/accepted/rejected emails sent via Resend (React Email templates)
+- [ ] Customer portal: inquiry list, quote detail (accept/reject/download PDF), negotiation thread
+- [ ] Admin: Inquiry kanban (draft→submitted→qualified→quoted), assign rep, generate quote
+- [ ] Admin: Quote version diff, revise pricing/terms, send, convert to order
 - [ ] Lighthouse Performance > 90 on all pages
 - [ ] Images served via Next.js Image Optimization (R2 for new uploads, hinlim.com for legacy)
 
@@ -930,12 +932,14 @@ B13 (Dashboard) ← B12 (Auth)
 | Area | Approach |
 |------|----------|
 | **Data Layer** | `lib/data/products.ts` — Server-only functions: `getProducts(filters)`, `getProduct(slug)`, `getCollections()`, `getCollection(slug)`; reads from **Supabase** via `createServiceClient()`, respects `site_settings` toggles |
-| **Cart** | `lib/actions/cart.ts` — Server Actions: `addToCart`, `updateQuantity`, `removeFromCart`, `getCart`; client state in `CartContext` + cookie sync |
-| **Checkout** | `app/checkout/page.tsx` — Server Component wrapper; each step = Client Component with form; Server Action on submit |
-| **Discount Validation** | `lib/actions/discounts.ts` — `validateDiscount(code, subtotal)` returns `{valid, discountAmount, error}` |
-| **Order Creation** | Server Action in checkout submit: transaction (orders + order_items + inventory update + analytics event) |
+| **Inquiry** | `lib/actions/inquiry.ts` — Server Actions: `createInquiry`, `addInquiryItem`, `updateInquiryItem`, `submitInquiry`; client state in `InquiryBuilder` + cookie sync for anonymous |
+| **Quote** | `lib/actions/quote.ts` — Server Actions: `generateQuote`, `reviseQuote`, `sendQuote`, `acceptQuote`, `rejectQuote`; versioning via `quote_versions` table |
+| **Stock Reservation** | `lib/actions/stock.ts` — `reserveStockForQuote`, `releaseExpiredReservations` (cron); uses `SELECT FOR UPDATE` for race condition safety |
+| **Discount Validation** | `lib/actions/discounts.ts` — `validateDiscount(code, subtotal, tier)` returns `{valid, discountAmount, error}` |
+| **Order Creation** | `acceptQuote` calls atomic `accept_quote` DB function: transaction (orders + order_items + inventory update + analytics event) |
 | **Auth** | Supabase SSR (`createServerClient` in middleware + Server Components); `lib/auth/customer.ts` helpers |
-| **Email** | `lib/email/order-confirmation.tsx` — React Email component; `lib/email/send.ts` — Resend wrapper |
+| **Email** | `lib/emails/` — 5 React Email components (inquiry-confirmation, quote-sent, quote-accepted, quote-rejected, invoice-payment-request); `lib/email/send.ts` — Resend wrapper |
+| **PDF Generation** | `lib/pdf/quote-pdf.ts` — React-PDF or Puppeteer; async generation, cached URL, regenerated on quote change |
 | **Images** | `next.config.js` → `remotePatterns`: R2 (`*.r2.cloudflarestorage.com`) + hinlim.com (`mm.hinlim.com`); sizes: 640, 750, 828, 1080, 1200, 1920 |
 | **SEO** | `generateMetadata` in each page; JSON-LD in `<script type="application/ld+json">` |
 
@@ -943,14 +947,21 @@ B13 (Dashboard) ← B12 (Auth)
 
 | # | Question | Context | Status |
 |---|----------|---------|--------|
-| 1 | **Cart merge on login** — Anonymous cart + existing user cart: merge quantities or replace? | Affects B8 | ✅ **Decided** — **Merge quantities** (sum quantities for same product/variant; cap at available stock) |
-| 2 | **Abandoned cart** — Track and email reminder? (If yes, schedule: 1hr, 24hr) | Affects B8, B11 | ✅ **Decided** — **No** (not in MVP scope) |
-| 3 | **Shipping regions** — Which countries/regions ship to? Flat rate table per region? | Affects B9 shipping calc | ✅ **Decided** — **Peninsular Malaysia + East Malaysia** only; flat rate per state |
-| 4 | **Tax display** — Show tax-inclusive or exclusive prices? (B2C typically inclusive) | Affects B9, pricing display | ✅ **Decided** — Tax-inclusive (MYR) |
-| 5 | **Order confirmation PDF** — Attach to email? (React-PDF) | Affects B11 | ✅ **Decided** — **No** (HTML email only) |
-|| **C6** Wishlist + save for later + alerts | Cookie→DB sync, shareable, price drop/back-in-stock emails | `components/Wishlist.tsx`, `lib/actions/wishlist.ts`, `lib/notifications/alerts.ts` | B12 (auth), B8 (cart) ||
-|| **C8** Content hub (care guides, styling tips, SEO) | MDX-based blog, categories, tags, related products | `app/blog/`, `lib/cms/`, `components/BlogPost.tsx` | Independent (can start anytime) ||
-|| **Phase X** Locale-prefixed internal links | Eliminate middleware 307 redirects by generating locale-aware hrefs in all Link components (`/products` → `/en/products`, etc.) | All `Link` components, new `lib/utils/localePath.ts` helper | Middleware locale detection, i18n routing ||
+| 1 | **Inquiry merge on login** — Anonymous inquiry + existing user inquiry: merge items or replace? | Affects B8 | ⬜ |
+| 2 | **Abandoned inquiry** — Track and nurture email? (If yes, schedule: 24hr, 72hr) | Affects B8, B14 | ⬜ |
+| 3 | **Quote revision limit** — How many revisions allowed? (3 recommended) | Affects B9 | ⬜ |
+| 4 | **Auto-convert on accept** — Immediately create order or admin review first? | Affects B9, B13 | ⬜ |
+| 5 | **Quote PDF generation** — React-PDF (lighter) or Puppeteer (pixel-perfect)? | Affects B9, B14 | ⬜ |
+| 6 | **Partial quote acceptance** — Allow customer to accept only some line items? | Affects B9, B11 | ⬜ |
+| 7 | **Shipping regions** — Which countries/regions ship to? Flat rate table per region? | Affects B9 shipping calc | ✅ **Decided** — **Peninsular Malaysia + East Malaysia** only; flat rate per state |
+| 8 | **Tax display** — Show tax-inclusive or exclusive prices? (B2C typically inclusive) | Affects B9, pricing display | ✅ **Decided** — Tax-inclusive (MYR) |
+| 9 | **Order confirmation PDF** — Attach to email? (React-PDF) | Affects B11 | ✅ **Decided** — **No** (HTML email only) |
+
+| Task | Status | Files |
+|------|--------|-------|
+| **C6** Wishlist + save for later + alerts | Cookie→DB sync, shareable, price drop/back-in-stock emails | `components/Wishlist.tsx`, `lib/actions/wishlist.ts`, `lib/notifications/alerts.ts` | B12 (auth), B8 (inquiry) |
+| **C8** Content hub (care guides, styling tips, SEO) | MDX-based blog, categories, tags, related products | `app/blog/`, `lib/cms/`, `components/BlogPost.tsx` | Independent (can start anytime) |
+| **Phase X** Locale-prefixed internal links | Eliminate middleware 307 redirects by generating locale-aware hrefs in all Link components (`/products` → `/en/products`, etc.) | All `Link` components, new `lib/utils/localePath.ts` helper | Middleware locale detection, i18n routing |
 
 > 🧭 **Audit note (2026-07-21):** Per critical path review, locale-prefix redundancy is **deferred** — all links currently resolve via middleware 307 redirect (functional, just sub-optimal). Global link migration mid-bugfix would inflate diff and risk new broken links. Revisit when performance budget demands it.
 

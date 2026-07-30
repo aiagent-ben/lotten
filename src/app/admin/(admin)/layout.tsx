@@ -8,7 +8,6 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
   Package,
-  ShoppingCart,
   Users,
   Settings,
   BarChart3,
@@ -16,13 +15,15 @@ import {
   Menu,
   X,
   FileText,
+  TicketPercent,
 } from 'lucide-react';
+
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Products', href: '/admin/products', icon: Package },
-  { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
+  { name: 'Orders', href: '/admin/orders', icon: Package },
   { name: 'Customers', href: '/admin/customers', icon: Users },
-  { name: 'Discounts', href: '/admin/discounts', icon: ShoppingCart },
+  { name: 'Discounts', href: '/admin/discounts', icon: TicketPercent },
   { name: 'Content', href: '/admin/content', icon: FileText },
   { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
   { name: 'Settings', href: '/admin/settings', icon: Settings },

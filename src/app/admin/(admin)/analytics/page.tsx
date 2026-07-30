@@ -137,7 +137,7 @@ async function fetchAnalytics() {
     .slice(0, 10);
 
   // Process funnel data
-  const funnelStages = ['view', 'add_to_cart', 'checkout_start', 'order_complete'];
+  const funnelStages = ['view', 'inquiry_started', 'quote_requested', 'quote_generated', 'quote_sent', 'quote_viewed', 'quote_accepted', 'quote_rejected', 'quote_expired', 'order_complete'];
   const funnelCounts: Record<string, number> = {};
   if (funnelData) {
     for (const event of funnelData) {
