@@ -9,6 +9,9 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
 
   // Detect locale from pathname and set html lang attribute
   useEffect(() => {
+    // Guard against null/undefined pathname
+    if (typeof pathname !== "string") return;
+    
     const segments = pathname.split("/").filter(Boolean);
     const locale = segments[0];
     

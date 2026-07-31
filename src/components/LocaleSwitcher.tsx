@@ -27,10 +27,12 @@ export function LocaleSwitcher() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Safe pathname getter
+  const pathName = pathname ?? '';
+
   const handleLocaleChange = (locale: string) => {
     setOpen(false);
-    // Extract the path without locale prefix
-    const segments = pathname.split('/').filter(Boolean);
+    const segments = pathName.split('/').filter(Boolean);
     if (locales.includes(segments[0] as any)) {
       segments.shift(); // Remove current locale
     }
@@ -39,7 +41,13 @@ export function LocaleSwitcher() {
   };
 
   // Detect current locale from pathname
-  const currentLocale = pathname.split('/')[1] || 'en';
+  const currentLocale = (pathname ?? '').split('/')[1] || 'en';
+
+  const localeLabels: Record<string, { label: string; flag: string }> = {
+    en: { label: 'English', flag: '🇺🇸' },
+    zh: { label: '中文', flag: '🇨🇳' },
+    my: { label: 'Bahasa', flag: '🇲🇾' },
+  };
 
   return (
     <div className="relative" ref={ref}>
@@ -64,9 +72,9 @@ export function LocaleSwitcher() {
               key={locale}
               onClick={() => handleLocaleChange(locale)}
               role="option"
-              aria-selected={locale === pathname.split('/')[1]}
+              aria-selected={locale === (pathname ?? '').split('/')[1]}
               className={`w-full text-left px-4 py-2 text-sm transition-colors ${
-                locale === pathname.split('/')[1] ? 'bg-amber-50 text-amber-700 font-medium' : 'text-gray-700 hover:bg-gray-50'
+                locale === (pathname ?? '').split('/')[1] ? 'bg-amber-50 text-amber-700 font-medium' : 'text-gray-700 hover:bg-gray-50'
               }`}
             >
               <span className="mr-2">{localeLabels[locale]?.flag}</span>

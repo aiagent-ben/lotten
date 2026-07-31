@@ -38,7 +38,7 @@ interface ContentFormProps {
 export function ContentForm({ isNew = true }: ContentFormProps) {
   const router = useRouter();
   const params = useParams();
-  const contentId = params.id as string;
+  const contentId = params?.id as string | undefined;
 
   const [formData, setFormData] = useState<ContentFormData>({
     title: '',

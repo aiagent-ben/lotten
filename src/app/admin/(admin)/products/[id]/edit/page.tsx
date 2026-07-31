@@ -94,7 +94,11 @@ interface ProductData {
 export default function EditProductPage() {
   const router = useRouter();
   const params = useParams();
-  const productId = params.id as string;
+  const productId = params?.id as string | undefined;
+
+  if (!productId) {
+    return <div>Loading...</div>;
+  }
   
   const [formData, setFormData] = useState<FormData>({
     article_no: '',
@@ -216,7 +220,7 @@ export default function EditProductPage() {
     setSaving(true);
     
     try {
-      const response = await fetch(`/api/admin/products/${params.id}`, {
+      const response = await fetch(`/api/admin/products/${productId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

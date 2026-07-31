@@ -74,9 +74,9 @@ export default function SearchPageClient() {
   // Initialize filters from URL params
   useEffect(() => {
     const newFilters: SearchFilters = { page: 1, limit: 20 };
-    const newQuery = searchParams.get('q') || '';
+    const newQuery = searchParams?.get('q') || '';
     
-    searchParams.forEach((value, key) => {
+    searchParams?.forEach((value, key) => {
       if (key === 'q') return;
       if (key === 'page') {
         newFilters.page = parseInt(value);
@@ -455,7 +455,7 @@ function ProductCard({ product }: { product: Product }) {
               </svg>
             </div>
           )}
-          
+         
           {/* Badges */}
           <div className="absolute top-3 left-3 right-3 flex flex-col gap-1.5">
             {product.is_new && (

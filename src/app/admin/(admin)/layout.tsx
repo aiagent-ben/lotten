@@ -31,7 +31,7 @@ const navigation = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? '';
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState<{ email: string } | null>(null);
 

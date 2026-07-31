@@ -30,7 +30,7 @@ export function ProductFilters({
   // Build a new URL string with the given key set/removed, dropping `page`.
   const buildUrl = useCallback(
     (key: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() || "");
       if (value) {
         params.set(key, value);
       } else {
@@ -44,10 +44,8 @@ export function ProductFilters({
     [searchParams]
   );
 
-  const handleCollectionChange = (value: string) =>
-    router.push(buildUrl("collection", value));
-  const handleCategoryChange = (value: string) =>
-    router.push(buildUrl("category", value));
+  const handleCollectionChange = (value: string) => router.push(buildUrl("collection", value));
+  const handleCategoryChange = (value: string) => router.push(buildUrl("category", value));
   const handleSortChange = (value: string) =>
     // `featured` is the default — represented by absence of the param.
     router.push(buildUrl("sort", value === "featured" ? "" : value));

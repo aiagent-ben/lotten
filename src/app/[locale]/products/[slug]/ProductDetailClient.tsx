@@ -408,16 +408,7 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
 
                 {/* CTA Buttons */}
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                  <button
-                    className="btn-primary btn-lg flex-1"
-                    disabled={product.stock_available <= 0}
-                  >
-                    {product.stock_available > 0 ? 'Add to Quote' : 'Out of Stock'}
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                  </button>
-                  <Link href="/contact" className="btn-outline btn-lg flex-1 text-center">
+                  <Link href="/contact" className="btn-primary btn-lg flex-1 text-center">
                     Enquire Now
                   </Link>
                 </div>
