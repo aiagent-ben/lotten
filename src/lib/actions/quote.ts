@@ -5,7 +5,14 @@ import { revalidatePath } from 'next/cache';
 import { randomUUID } from 'crypto';
 import { calculateQuotePrice, type PriceCalculationInput, type PriceCalculationOutput, type Configuration } from '@/lib/pricing/engine';
 
-const supabase = createServiceClient();
+let client: ReturnType<typeof createServiceClient> | null = null;
+
+function getSupabase() {
+  if (!client) {
+    client = createServiceClient();
+  }
+  return client;
+}
 
 function generateQuoteNumber(): string {
   const year = new Date().getFullYear();
@@ -44,7 +51,7 @@ export async function generateQuote(
   }
 ): Promise<GenerateQuoteResult> {
   try {
-    const { data: inquiry, error: inquiryError } = await supabase
+    const { data: inquiry, error: inquiryError } = await getSupabase()
       .from('inquiries')
       .select(`
         *,
@@ -88,7 +95,7 @@ export async function generateQuote(
     }
 
     // Check for existing draft quote
-    const { data: existingDraft } = await supabase
+    const { data: existingDraft } = await getSupabase()
       .from('quotes')
       .select('id')
       .eq('inquiry_id', inquiryId)
@@ -140,7 +147,7 @@ export async function generateQuote(
 
     // Get existing quote version or start at 1
     let version = 1;
-    const { data: existingQuotes } = await supabase
+    const { data: existingQuotes } = await getSupabase()
       .from('quotes')
       .select('version')
       .eq('inquiry_id', inquiryId)
@@ -154,7 +161,7 @@ export async function generateQuote(
     const quoteNumber = `Q-${new Date().getFullYear()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}-v${version}`;
 
     // Create quote
-    const { data: quote, error: quoteError } = await supabase
+    const { data: quote, error: quoteError } = await getSupabase()
       .from('quotes')
       .insert({
         inquiry_id: inquiryId,
@@ -185,7 +192,7 @@ export async function generateQuote(
       if (!pricingItem) continue;
 
       // Check available stock
-      const { data: stock } = await supabase
+      const { data: stock } = await getSupabase()
         .from('products')
         .select('stock_available, stock_reserved')
         .eq('id', item.product_id)
@@ -200,7 +207,7 @@ export async function generateQuote(
       const reservationExpires = new Date(validUntil);
       reservationExpires.setHours(reservationExpires.getHours() + 24);
 
-      const { data: reservation } = await supabase
+      const { data: reservation } = await getSupabase()
         .from('stock_reservations')
         .insert({
           quote_id: quote.id,
@@ -215,7 +222,7 @@ export async function generateQuote(
 
       // Decrement available, increment reserved
       if (stock) {
-        await supabase
+        await getSupabase()
           .from('products')
           .update({
             stock_available: stock.stock_available - item.quantity,
@@ -233,7 +240,7 @@ export async function generateQuote(
       const unitPrice = pricingItem?.unitPrice || item.unit_price_usd || 0;
       const lineTotal = unitPrice * item.quantity;
 
-      const { data: quoteItem } = await supabase
+      const { data: quoteItem } = await getSupabase()
         .from('quote_items')
         .insert({
           quote_id: quote.id,
@@ -251,7 +258,7 @@ export async function generateQuote(
 
       // Update reservation with quote_item_id
       if (quoteItem) {
-        await supabase
+        await getSupabase()
           .from('stock_reservations')
           .update({ quote_item_id: quoteItem.id })
           .eq('quote_id', quote.id)
@@ -262,7 +269,7 @@ export async function generateQuote(
     }
 
     // Create quote version snapshot
-    await supabase
+    await getSupabase()
       .from('quote_versions')
       .insert({
         quote_id: quote.id,
@@ -287,7 +294,7 @@ export async function generateQuote(
       });
 
     // Update inquiry status
-    await supabase
+    await getSupabase()
       .from('inquiries')
       .update({ status: 'quoted', quoted_at: new Date().toISOString() })
       .eq('id', inquiryId);
@@ -309,7 +316,7 @@ export interface SendQuoteResult {
 
 export async function sendQuote(quoteId: string, createdBy: string): Promise<SendQuoteResult> {
   try {
-    const { data: quote } = await supabase
+    const { data: quote } = await getSupabase()
       .from('quotes')
       .select('*, inquiry:inquiry_id (customer:customer_id (email, contact_name, company_name))')
       .eq('id', quoteId)
@@ -323,7 +330,7 @@ export async function sendQuote(quoteId: string, createdBy: string): Promise<Sen
     const pdfUrl = await generateQuotePdf(quote.id);
 
     // Update quote status
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('quotes')
       .update({
         status: 'sent',
@@ -336,7 +343,7 @@ export async function sendQuote(quoteId: string, createdBy: string): Promise<Sen
     if (error) throw error;
 
     // Create quote version for sent state
-    const { data: versions } = await supabase
+    const { data: versions } = await getSupabase()
       .from('quote_versions')
       .select('version')
       .eq('quote_id', quoteId)
@@ -345,7 +352,7 @@ export async function sendQuote(quoteId: string, createdBy: string): Promise<Sen
 
     const currentVersion = versions?.[0]?.version || 1;
 
-    await supabase
+    await getSupabase()
       .from('quote_versions')
       .insert({
         quote_id: quoteId,
@@ -380,7 +387,7 @@ export async function reviseQuote(
   }
 ): Promise<GenerateQuoteResult> {
   try {
-    const { data: quote } = await supabase
+    const { data: quote } = await getSupabase()
       .from('quotes')
       .select('*, inquiry:inquiry_id (id, inquiry_items (*))')
       .eq('id', quoteId)
@@ -427,7 +434,7 @@ export async function reviseQuote(
     validUntil.setDate(validUntil.getDate() + 30);
 
     // Create new quote record (immutable history)
-    const { data: newQuote, error } = await supabase
+    const { data: newQuote, error } = await getSupabase()
       .from('quotes')
       .insert({
         inquiry_id: quote.inquiry_id,
@@ -460,7 +467,7 @@ export async function reviseQuote(
     if (error) throw error;
 
     // Copy quote items
-    const { data: oldItems } = await supabase
+    const { data: oldItems } = await getSupabase()
       .from('quote_items')
       .select('*')
       .eq('quote_id', quoteId);
@@ -474,7 +481,7 @@ export async function reviseQuote(
         const newConfig = itemChange?.configuration || item.configuration;
         const newLineTotal = newUnitPrice * newQuantity;
 
-        await supabase
+        await getSupabase()
           .from('quote_items')
           .insert({
             quote_id: newQuote.id,
@@ -491,7 +498,7 @@ export async function reviseQuote(
     }
 
     // Create version snapshot
-    await supabase
+    await getSupabase()
       .from('quote_versions')
       .insert({
         quote_id: newQuote.id,
@@ -514,7 +521,7 @@ export async function reviseQuote(
 export async function acceptQuote(quoteId: string, customerId: string): Promise<{ success: boolean; orderId?: string; error?: string }> {
   try {
     // Use the atomic database function
-    const { data: orderId, error } = await supabase.rpc('accept_quote', {
+    const { data: orderId, error } = await getSupabase().rpc('accept_quote', {
       p_quote_id: quoteId,
       p_customer_id: customerId,
     });
@@ -552,7 +559,7 @@ export async function acceptQuote(quoteId: string, customerId: string): Promise<
 
 export async function rejectQuote(quoteId: string, customerId: string, reason: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const { data: quote } = await supabase
+    const { data: quote } = await getSupabase()
       .from('quotes')
       .select('inquiry_id, status, version')
       .eq('id', quoteId)
@@ -567,7 +574,7 @@ export async function rejectQuote(quoteId: string, customerId: string, reason: s
     }
 
     // Release stock reservations
-    const { data: reservations } = await supabase
+    const { data: reservations } = await getSupabase()
       .from('stock_reservations')
       .select('*')
       .eq('quote_id', quoteId)
@@ -575,12 +582,12 @@ export async function rejectQuote(quoteId: string, customerId: string, reason: s
 
     if (reservations) {
       for (const res of reservations) {
-        await supabase.rpc('release_reservation', { p_reservation_id: res.id, p_reason: 'quote_rejected' });
+        await getSupabase().rpc('release_reservation', { p_reservation_id: res.id, p_reason: 'quote_rejected' });
       }
     }
 
     // Update quote status
-    await supabase
+    await getSupabase()
       .from('quotes')
       .update({
         status: 'rejected',
@@ -590,13 +597,13 @@ export async function rejectQuote(quoteId: string, customerId: string, reason: s
       .eq('id', quoteId);
 
     // Update inquiry status
-    await supabase
+    await getSupabase()
       .from('inquiries')
       .update({ status: 'submitted' }) // Back to submitted for revision
       .eq('id', quote.inquiry_id);
 
     // Create version snapshot
-    await supabase
+    await getSupabase()
       .from('quote_versions')
       .insert({
         quote_id: quoteId,

@@ -14,7 +14,7 @@ const r2Client = new S3Client({
   },
 });
 
-const R2_BUCKET = process.env.R2_BUCKET!;
+const R2_BUCKET = process.env.R2_BUCKET_NAME!;
 const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL!;
 
 export async function generateUploadUrl(

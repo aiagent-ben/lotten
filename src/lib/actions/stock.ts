@@ -3,7 +3,14 @@
 import { createServiceClient } from '@/lib/db/client';
 import { revalidatePath } from 'next/cache';
 
-const supabase = createServiceClient();
+let client: ReturnType<typeof createServiceClient> | null = null;
+
+function getSupabase() {
+  if (!client) {
+    client = createServiceClient();
+  }
+  return client;
+}
 
 export interface ReserveStockResult {
   success: boolean;
@@ -19,7 +26,7 @@ export interface ReserveStockResult {
 export async function reserveStockForQuote(quoteId: string): Promise<ReserveStockResult> {
   try {
     // Get quote with items
-    const { data: quote, error: quoteError } = await supabase
+    const { data: quote, error: quoteError } = await getSupabase()
       .from('quotes')
       .select(`
         *,
@@ -50,7 +57,7 @@ export async function reserveStockForQuote(quoteId: string): Promise<ReserveStoc
     // Use transaction-like approach with SELECT FOR UPDATE
     for (const item of quote.quote_items) {
       // Lock the product row
-      const { data: product, error: lockError } = await supabase
+      const { data: product, error: lockError } = await getSupabase()
         .from('products')
         .select('id, stock_available, stock_reserved')
         .eq('id', item.product_id)
@@ -72,7 +79,7 @@ export async function reserveStockForQuote(quoteId: string): Promise<ReserveStoc
       }
       
       // Create reservation
-      const { data: reservation, error: resError } = await supabase
+      const { data: reservation, error: resError } = await getSupabase()
         .from('stock_reservations')
         .insert({
           quote_id: quoteId,
@@ -91,7 +98,7 @@ export async function reserveStockForQuote(quoteId: string): Promise<ReserveStoc
       }
       
       // Update product stock
-      const { error: stockError } = await supabase
+      const { error: stockError } = await getSupabase()
         .from('products')
         .update({
           stock_available: product.stock_available - item.quantity,
@@ -105,7 +112,7 @@ export async function reserveStockForQuote(quoteId: string): Promise<ReserveStoc
       }
       
       // Update quote_item with reservation_id
-      await supabase
+      await getSupabase()
         .from('quote_items')
         .update({ reservation_id: reservation.id })
         .eq('id', item.id);
@@ -129,7 +136,7 @@ export async function reserveStockForQuote(quoteId: string): Promise<ReserveStoc
 async function releaseReservations(quoteId: string, reason: string): Promise<void> {
   try {
     // Get all active reservations for this quote
-    const { data: reservations } = await supabase
+    const { data: reservations } = await getSupabase()
       .from('stock_reservations')
       .select('*')
       .eq('quote_id', quoteId)
@@ -139,7 +146,7 @@ async function releaseReservations(quoteId: string, reason: string): Promise<voi
     
     for (const res of reservations) {
       // Update reservation status
-      await supabase
+      await getSupabase()
         .from('stock_reservations')
         .update({
           status: 'released',
@@ -149,7 +156,7 @@ async function releaseReservations(quoteId: string, reason: string): Promise<voi
         .eq('id', res.id);
       
       // Return stock to available
-      await supabase.rpc('increment_product_stock', {
+      await getSupabase().rpc('increment_product_stock', {
         p_product_id: res.product_id,
         p_variant_id: res.variant_id,
         p_available_delta: res.quantity,
@@ -166,7 +173,7 @@ export async function releaseQuoteReservations(
   reason: 'quote_expired' | 'quote_rejected' | 'manual' = 'manual'
 ): Promise<{ success: boolean; released?: number; error?: string }> {
   try {
-    const { data: reservations } = await supabase
+    const { data: reservations } = await getSupabase()
       .from('stock_reservations')
       .select('*')
       .eq('quote_id', quoteId)
@@ -180,7 +187,7 @@ export async function releaseQuoteReservations(
     
     for (const res of reservations) {
       // Log release (idempotent)
-      await supabase
+      await getSupabase()
         .from('stock_reservation_release_log')
         .upsert({
           reservation_id: res.id,
@@ -188,7 +195,7 @@ export async function releaseQuoteReservations(
         }, { onConflict: 'reservation_id' });
       
       // Only proceed if log insert succeeded (idempotency)
-      const { data: logCheck } = await supabase
+      const { data: logCheck } = await getSupabase()
         .from('stock_reservation_release_log')
         .select('reservation_id')
         .eq('reservation_id', res.id)
@@ -197,7 +204,7 @@ export async function releaseQuoteReservations(
       if (!logCheck) continue; // Already processed
       
       // Update reservation
-      await supabase
+      await getSupabase()
         .from('stock_reservations')
         .update({
           status: 'released',
@@ -207,7 +214,7 @@ export async function releaseQuoteReservations(
         .eq('id', res.id);
       
       // Return stock
-      await supabase.rpc('increment_product_stock', {
+      await getSupabase().rpc('increment_product_stock', {
         p_product_id: res.product_id,
         p_variant_id: res.variant_id,
         p_available_delta: res.quantity,
@@ -218,7 +225,7 @@ export async function releaseQuoteReservations(
     }
     
     // Update quote status if still active
-    await supabase
+    await getSupabase()
       .from('quotes')
       .update({ status: 'expired' })
       .eq('id', quoteId)
@@ -235,7 +242,7 @@ export async function releaseQuoteReservations(
 
 export async function convertReservationsToOrder(quoteId: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const { data: reservations } = await supabase
+    const { data: reservations } = await getSupabase()
       .from('stock_reservations')
       .select('*')
       .eq('quote_id', quoteId)
@@ -246,7 +253,7 @@ export async function convertReservationsToOrder(quoteId: string): Promise<{ suc
     }
     
     for (const res of reservations) {
-      await supabase
+      await getSupabase()
         .from('stock_reservations')
         .update({
           status: 'converted',
@@ -256,7 +263,7 @@ export async function convertReservationsToOrder(quoteId: string): Promise<{ suc
       
       // Remove from reserved, keep available as is (already decremented on reservation)
       // The stock is now committed to the order
-      await supabase.rpc('increment_product_stock', {
+      await getSupabase().rpc('increment_product_stock', {
         p_product_id: res.product_id,
         p_variant_id: res.variant_id,
         p_available_delta: 0,
@@ -274,7 +281,7 @@ export async function convertReservationsToOrder(quoteId: string): Promise<{ suc
 // Cron job handler for expired reservations
 export async function releaseExpiredReservations(): Promise<{ success: boolean; released: number; error?: string }> {
   try {
-    const { data: expired } = await supabase
+    const { data: expired } = await getSupabase()
       .from('stock_reservations')
       .select('id, product_id, variant_id, quantity, quote_id')
       .eq('status', 'active')
@@ -288,7 +295,7 @@ export async function releaseExpiredReservations(): Promise<{ success: boolean; 
     
     for (const res of expired) {
       // Idempotency check
-      const { data: logCheck } = await supabase
+      const { data: logCheck } = await getSupabase()
         .from('stock_reservation_release_log')
         .select('reservation_id')
         .eq('reservation_id', res.id)
@@ -297,7 +304,7 @@ export async function releaseExpiredReservations(): Promise<{ success: boolean; 
       if (logCheck) continue;
       
       // Log release
-      await supabase
+      await getSupabase()
         .from('stock_reservation_release_log')
         .upsert({
           reservation_id: res.id,
@@ -305,7 +312,7 @@ export async function releaseExpiredReservations(): Promise<{ success: boolean; 
         }, { onConflict: 'reservation_id' });
       
       // Check if log was inserted (idempotency)
-      const { data: logInserted } = await supabase
+      const { data: logInserted } = await getSupabase()
         .from('stock_reservation_release_log')
         .select('reservation_id')
         .eq('reservation_id', res.id)
@@ -314,7 +321,7 @@ export async function releaseExpiredReservations(): Promise<{ success: boolean; 
       if (!logInserted) continue;
       
       // Update reservation
-      await supabase
+      await getSupabase()
         .from('stock_reservations')
         .update({
           status: 'expired',
@@ -324,7 +331,7 @@ export async function releaseExpiredReservations(): Promise<{ success: boolean; 
         .eq('id', res.id);
       
       // Return stock
-      await supabase.rpc('increment_product_stock', {
+      await getSupabase().rpc('increment_product_stock', {
         p_product_id: res.product_id,
         p_variant_id: res.variant_id,
         p_available_delta: res.quantity,
@@ -332,7 +339,7 @@ export async function releaseExpiredReservations(): Promise<{ success: boolean; 
       });
       
       // Update quote status
-      await supabase
+      await getSupabase()
         .from('quotes')
         .update({ status: 'expired' })
         .eq('id', res.quote_id)
@@ -357,7 +364,7 @@ export async function checkStockAvailability(
     let allAvailable = true;
     
     for (const item of items) {
-      const { data: product } = await supabase
+      const { data: product } = await getSupabase()
         .from('products')
         .select('stock_available')
         .eq('id', item.productId)
@@ -366,7 +373,7 @@ export async function checkStockAvailability(
       let available = product?.stock_available || 0;
       
       if (item.variantId) {
-        const { data: variant } = await supabase
+        const { data: variant } = await getSupabase()
           .from('product_variants')
           .select('stock_available')
           .eq('id', item.variantId)

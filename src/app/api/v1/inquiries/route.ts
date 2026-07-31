@@ -10,7 +10,14 @@ import {
   mergeInquiryOnLogin 
 } from '@/lib/actions/inquiry';
 
-const supabase = createServiceClient();
+let client: ReturnType<typeof createServiceClient> | null = null;
+
+function getSupabase() {
+  if (!client) {
+    client = createServiceClient();
+  }
+  return client;
+}
 
 const ANON_SESSION_COOKIE = 'lotten_anon_session';
 
@@ -40,7 +47,7 @@ export async function GET(request: Request) {
     
     if (sessionId) {
       // Get anonymous inquiry
-      const { data: inquiry } = await supabase
+      const { data: inquiry } = await getSupabase()
         .from('inquiries')
         .select(`
           *,
@@ -64,12 +71,12 @@ export async function GET(request: Request) {
     }
     
     // Authenticated user inquiries
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await getSupabase().auth.getUser();
     if (!user) {
       return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
     
-    const { data: customer } = await supabase
+    const { data: customer } = await getSupabase()
       .from('customers')
       .select('id')
       .eq('auth_user_id', user.id)
@@ -79,7 +86,7 @@ export async function GET(request: Request) {
       return Response.json({ success: false, error: 'Customer profile not found' }, { status: 404 });
     }
     
-    let query = supabase
+    let query = getSupabase()
       .from('inquiries')
       .select(`
         *,
@@ -165,7 +172,7 @@ export async function PATCH(request: Request) {
     if (action === 'update_inquiry') {
       // Update inquiry fields (notes, status, etc.)
       const { inquiryId, updates } = data;
-      const { error } = await supabase
+      const { error } = await getSupabase()
         .from('inquiries')
         .update(updates)
         .eq('id', inquiryId);

@@ -6,18 +6,13 @@ import { locales, defaultLocale } from '@/i18n/request';
 let cachedSettings: any = null;
 let cachedSettingsExpiresAt = 0;
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Handle locale prefix in URL
   const pathname = request.nextUrl.pathname;
 
   // Skip API routes - they should handle their own auth and not be redirected
   // Check both direct /api/ and locale-prefixed /xx/api/ paths
   if (pathname.startsWith('/api/') || pathname.match(/^\/[a-z]{2}\/api\//)) {
-    return NextResponse.next();
-  }
-
-  // Skip locale detection for API routes (double-check)
-  if (pathname.startsWith('/api/')) {
     return NextResponse.next();
   }
 
@@ -124,4 +119,4 @@ export const config = {
     '/api/:path*',
     '/((?!_next/static|_next/image|favicon.ico|site.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|webmanifest)$|api/).*)',
   ],
-};// Debug: API route check
+};

@@ -9,7 +9,14 @@ import {
 } from '@/lib/actions/quote';
 import { checkStockAvailability } from '@/lib/actions/stock';
 
-const supabase = createServiceClient();
+let client: ReturnType<typeof createServiceClient> | null = null;
+
+function getSupabase() {
+  if (!client) {
+    client = createServiceClient();
+  }
+  return client;
+}
 
 export async function GET(request: Request) {
   try {
@@ -20,7 +27,7 @@ export async function GET(request: Request) {
     
     // Get single quote with all details
     if (quoteId) {
-      const { data: quote, error } = await supabase
+      const { data: quote, error } = await getSupabase()
         .from('quotes')
         .select(`
           *,
@@ -52,7 +59,7 @@ export async function GET(request: Request) {
     
     // List quotes by inquiry
     if (inquiryId) {
-      const { data: quotes, error } = await supabase
+      const { data: quotes, error } = await getSupabase()
         .from('quotes')
         .select('*')
         .eq('inquiry_id', inquiryId)
@@ -64,30 +71,30 @@ export async function GET(request: Request) {
     }
     
     // Admin list with filters
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await getSupabase().auth.getUser();
     if (!user) {
       return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
     
-    const { data: isAdmin } = await supabase
+    const { data: isAdmin } = await getSupabase()
       .from('customers')
       .select('id')
       .eq('auth_user_id', user.id)
       .single();
     
     // Check admin role
-    const { data: role } = await supabase.auth.getUser();
+    const { data: role } = await getSupabase().auth.getUser();
     const isAdminUser = role.user?.user_metadata?.role === 'admin';
     
     if (!isAdminUser) {
       // Customer can only see their own quotes
-      const { data: customer } = await supabase
+      const { data: customer } = await getSupabase()
         .from('customers')
         .select('id')
         .eq('auth_user_id', user.id)
         .single();
       
-      let query = supabase
+      let query = getSupabase()
         .from('quotes')
         .select(`
           *,
@@ -107,7 +114,7 @@ export async function GET(request: Request) {
     }
     
     // Admin: full list with filters
-    let query = supabase
+    let query = getSupabase()
       .from('quotes')
       .select(`
         *,
@@ -137,7 +144,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { action, ...data } = body;
     
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await getSupabase().auth.getUser();
     if (!user) {
       return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
@@ -163,7 +170,7 @@ export async function POST(request: Request) {
       
       case 'accept': {
         const { quoteId } = data;
-        const { data: customer } = await supabase
+        const { data: customer } = await getSupabase()
           .from('customers')
           .select('id')
           .eq('auth_user_id', user.id)
@@ -179,7 +186,7 @@ export async function POST(request: Request) {
       
       case 'reject': {
         const { quoteId, reason } = data;
-        const { data: customer } = await supabase
+        const { data: customer } = await getSupabase()
           .from('customers')
           .select('id')
           .eq('auth_user_id', user.id)
@@ -213,7 +220,7 @@ export async function PATCH(request: Request) {
     const body = await request.json();
     const { action, ...data } = body;
     
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await getSupabase().auth.getUser();
     if (!user) {
       return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
@@ -221,7 +228,7 @@ export async function PATCH(request: Request) {
     if (action === 'update_status') {
       const { quoteId, status } = data;
       
-      const { data: quote } = await supabase
+      const { data: quote } = await getSupabase()
         .from('quotes')
         .select('id, status')
         .eq('id', quoteId)
@@ -232,7 +239,7 @@ export async function PATCH(request: Request) {
       }
       
       // Admin can update to any status
-      const { error } = await supabase
+      const { error } = await getSupabase()
         .from('quotes')
         .update({ status })
         .eq('id', quoteId);
@@ -245,7 +252,7 @@ export async function PATCH(request: Request) {
     if (action === 'extend_validity') {
       const { quoteId, days } = data;
       
-      const { data: quote } = await supabase
+      const { data: quote } = await getSupabase()
         .from('quotes')
         .select('valid_until')
         .eq('id', quoteId)
@@ -258,13 +265,13 @@ export async function PATCH(request: Request) {
       const newValidUntil = new Date(quote.valid_until);
       newValidUntil.setDate(newValidUntil.getDate() + (days || 30));
       
-      await supabase
+      await getSupabase()
         .from('quotes')
         .update({ valid_until: newValidUntil.toISOString() })
         .eq('id', quoteId);
       
       // Extend reservations
-      await supabase
+      await getSupabase()
         .from('stock_reservations')
         .update({ expires_at: newValidUntil.toISOString() })
         .eq('quote_id', quoteId)
@@ -289,12 +296,12 @@ export async function DELETE(request: Request) {
       return Response.json({ success: false, error: 'Quote ID required' }, { status: 400 });
     }
     
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await getSupabase().auth.getUser();
     if (!user) {
       return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
     
-    const { data: quote } = await supabase
+    const { data: quote } = await getSupabase()
       .from('quotes')
       .select('status')
       .eq('id', quoteId)
@@ -309,13 +316,13 @@ export async function DELETE(request: Request) {
     }
     
     // Release any reservations
-    await supabase
+    await getSupabase()
       .from('stock_reservations')
       .update({ status: 'released', released_at: new Date().toISOString(), released_reason: 'quote_deleted' })
       .eq('quote_id', quoteId);
     
     // Delete quote (cascades to items, versions, reservations)
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('quotes')
       .delete()
       .eq('id', quoteId);

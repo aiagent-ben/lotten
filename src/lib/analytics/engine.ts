@@ -51,7 +51,14 @@ export interface AnalyticsEngine {
   getProductRecommendations(productId: string, userId?: string): Promise<any[]>;
 }
 
-const supabase = createServiceClient();
+let client: ReturnType<typeof createServiceClient> | null = null;
+
+function getSupabase() {
+  if (!client) {
+    client = createServiceClient();
+  }
+  return client;
+}
 
 /**
  * Get conversion funnel data
@@ -63,7 +70,7 @@ export async function getConversionFunnel(
 ): Promise<ConversionFunnel> {
   if (funnelType === 'inquiry_to_order') {
     // Step 1: Inquiry started
-    const { count: inquiryStarted } = await supabase
+    const { count: inquiryStarted } = await getSupabase()
       .from('order_analytics')
       .select('*', { count: 'exact', head: true })
       .eq('event_type', 'inquiry_started')
@@ -71,7 +78,7 @@ export async function getConversionFunnel(
       .lte('created_at', endDate.toISOString());
 
     // Step 2: Quote requested
-    const { count: quoteRequested } = await supabase
+    const { count: quoteRequested } = await getSupabase()
       .from('order_analytics')
       .select('*', { count: 'exact', head: true })
       .eq('event_type', 'quote_requested')
@@ -79,7 +86,7 @@ export async function getConversionFunnel(
       .lte('created_at', endDate.toISOString());
 
     // Step 3: Quote sent
-    const { count: quotesSent } = await supabase
+    const { count: quotesSent } = await getSupabase()
       .from('order_analytics')
       .select('*', { count: 'exact', head: true })
       .eq('event_type', 'quote_sent')
@@ -87,7 +94,7 @@ export async function getConversionFunnel(
       .lte('created_at', endDate.toISOString());
 
     // Step 4: Quote viewed
-    const { count: quotesViewed } = await supabase
+    const { count: quotesViewed } = await getSupabase()
       .from('order_analytics')
       .select('*', { count: 'exact', head: true })
       .eq('event_type', 'quote_viewed')
@@ -95,7 +102,7 @@ export async function getConversionFunnel(
       .lte('created_at', endDate.toISOString());
 
     // Step 5: Quote accepted
-    const { count: quotesAccepted } = await supabase
+    const { count: quotesAccepted } = await getSupabase()
       .from('order_analytics')
       .select('*', { count: 'exact', head: true })
       .eq('event_type', 'quote_accepted')
@@ -103,7 +110,7 @@ export async function getConversionFunnel(
       .lte('created_at', endDate.toISOString());
 
     // Step 6: Order complete
-    const { count: orders } = await supabase
+    const { count: orders } = await getSupabase()
       .from('order_analytics')
       .select('*', { count: 'exact', head: true })
       .eq('event_type', 'order_complete')
@@ -139,7 +146,7 @@ export async function getConversionFunnel(
 
   if (funnelType === 'quote_to_order') {
     // Step 1: Quote generated
-    const { count: quotesGenerated } = await supabase
+    const { count: quotesGenerated } = await getSupabase()
       .from('order_analytics')
       .select('*', { count: 'exact', head: true })
       .eq('event_type', 'quote_generated')
@@ -147,7 +154,7 @@ export async function getConversionFunnel(
       .lte('created_at', endDate.toISOString());
 
     // Step 2: Quote sent
-    const { count: quotesSent } = await supabase
+    const { count: quotesSent } = await getSupabase()
       .from('order_analytics')
       .select('*', { count: 'exact', head: true })
       .eq('event_type', 'quote_sent')
@@ -155,7 +162,7 @@ export async function getConversionFunnel(
       .lte('created_at', endDate.toISOString());
 
     // Step 3: Quote viewed
-    const { count: quotesViewed } = await supabase
+    const { count: quotesViewed } = await getSupabase()
       .from('order_analytics')
       .select('*', { count: 'exact', head: true })
       .eq('event_type', 'quote_viewed')
@@ -163,7 +170,7 @@ export async function getConversionFunnel(
       .lte('created_at', endDate.toISOString());
 
     // Step 4: Quote accepted
-    const { count: quotesAccepted } = await supabase
+    const { count: quotesAccepted } = await getSupabase()
       .from('order_analytics')
       .select('*', { count: 'exact', head: true })
       .eq('event_type', 'quote_accepted')
@@ -171,7 +178,7 @@ export async function getConversionFunnel(
       .lte('created_at', endDate.toISOString());
 
     // Step 5: Quote rejected
-    const { count: quotesRejected } = await supabase
+    const { count: quotesRejected } = await getSupabase()
       .from('order_analytics')
       .select('*', { count: 'exact', head: true })
       .eq('event_type', 'quote_rejected')
@@ -179,7 +186,7 @@ export async function getConversionFunnel(
       .lte('created_at', endDate.toISOString());
 
     // Step 6: Quote expired
-    const { count: quotesExpired } = await supabase
+    const { count: quotesExpired } = await getSupabase()
       .from('order_analytics')
       .select('*', { count: 'exact', head: true })
       .eq('event_type', 'quote_expired')
@@ -187,7 +194,7 @@ export async function getConversionFunnel(
       .lte('created_at', endDate.toISOString());
 
     // Step 7: Order complete
-    const { count: orders } = await supabase
+    const { count: orders } = await getSupabase()
       .from('order_analytics')
       .select('*', { count: 'exact', head: true })
       .eq('event_type', 'order_complete')
@@ -224,7 +231,7 @@ export async function getConversionFunnel(
 
   // view_to_order funnel
   // Step 1: Product views
-  const { count: views } = await supabase
+  const { count: views } = await getSupabase()
     .from('order_analytics')
     .select('*', { count: 'exact', head: true })
     .eq('event_type', 'view')
@@ -232,7 +239,7 @@ export async function getConversionFunnel(
     .lte('created_at', endDate.toISOString());
 
   // Step 2: Inquiry started
-  const { count: inquiryStarted } = await supabase
+  const { count: inquiryStarted } = await getSupabase()
     .from('order_analytics')
     .select('*', { count: 'exact', head: true })
     .eq('event_type', 'inquiry_started')
@@ -240,7 +247,7 @@ export async function getConversionFunnel(
     .lte('created_at', endDate.toISOString());
 
   // Step 3: Quote requested
-  const { count: quoteRequested } = await supabase
+  const { count: quoteRequested } = await getSupabase()
     .from('order_analytics')
     .select('*', { count: 'exact', head: true })
     .eq('event_type', 'quote_requested')
@@ -248,7 +255,7 @@ export async function getConversionFunnel(
     .lte('created_at', endDate.toISOString());
 
   // Step 4: Quote sent
-  const { count: quotesSent } = await supabase
+  const { count: quotesSent } = await getSupabase()
     .from('order_analytics')
     .select('*', { count: 'exact', head: true })
     .eq('event_type', 'quote_sent')
@@ -256,7 +263,7 @@ export async function getConversionFunnel(
     .lte('created_at', endDate.toISOString());
 
   // Step 5: Quote viewed
-  const { count: quotesViewed } = await supabase
+  const { count: quotesViewed } = await getSupabase()
     .from('order_analytics')
     .select('*', { count: 'exact', head: true })
     .eq('event_type', 'quote_viewed')
@@ -264,7 +271,7 @@ export async function getConversionFunnel(
     .lte('created_at', endDate.toISOString());
 
   // Step 6: Quote accepted
-  const { count: quotesAccepted } = await supabase
+  const { count: quotesAccepted } = await getSupabase()
     .from('order_analytics')
     .select('*', { count: 'exact', head: true })
     .eq('event_type', 'quote_accepted')
@@ -272,7 +279,7 @@ export async function getConversionFunnel(
     .lte('created_at', endDate.toISOString());
 
   // Step 7: Order complete
-  const { count: orders } = await supabase
+  const { count: orders } = await getSupabase()
     .from('order_analytics')
     .select('*', { count: 'exact', head: true })
     .eq('event_type', 'order_complete')
@@ -324,7 +331,7 @@ export async function getCohortAnalysis(
   }
 
   // Get all orders in the period
-  const { data: orders, error } = await supabase
+  const { data: orders, error } = await getSupabase()
     .from('orders')
     .select('id, customer_id, total_usd, created_at')
     .gte('created_at', startDate.toISOString())
@@ -419,7 +426,7 @@ export async function getRevenueMetrics(
   startDate: Date,
   endDate: Date
 ): Promise<RevenueMetrics> {
-  const { data: orders, error } = await supabase
+  const { data: orders, error } = await getSupabase()
     .from('orders')
     .select('id, total_usd, created_at, customer_id, shipping_address')
     .gte('created_at', startDate.toISOString())
@@ -461,7 +468,7 @@ export async function getRevenueMetrics(
   }
 
   // Revenue by category (from order items)
-  const { data: orderItems } = await supabase
+  const { data: orderItems } = await getSupabase()
     .from('order_items')
     .select('order_id, product_id, quantity, unit_price_usd, line_total_usd')
     .in('order_id', ordersData.map(o => o.id));
@@ -469,14 +476,14 @@ export async function getRevenueMetrics(
   const revenueByCategory = new Map<string, number>();
   if (orderItems) {
     for (const item of orderItems) {
-      const { data: product } = await supabase
+      const { data: product } = await getSupabase()
         .from('products')
         .select('collection_id')
         .eq('id', item.product_id)
         .single();
 
       if (product) {
-        const { data: collection } = await supabase
+        const { data: collection } = await getSupabase()
           .from('collections')
           .select('name')
           .eq('id', product.collection_id)
@@ -520,7 +527,7 @@ export async function getTopProducts(
   }
 
   // Get views from analytics
-  const { data: views } = await supabase
+  const { data: views } = await getSupabase()
     .from('order_analytics')
     .select('product_id, event_type')
     .eq('event_type', 'view')
@@ -528,7 +535,7 @@ export async function getTopProducts(
     .lte('created_at', endDate.toISOString());
 
   // Get orders
-  const { data: orders } = await supabase
+  const { data: orders } = await getSupabase()
     .from('order_analytics')
     .select('product_id, event_type, value_usd')
     .eq('event_type', 'order_complete')
@@ -562,7 +569,7 @@ export async function getTopProducts(
   const allProductIds = new Set([...viewsByProduct.keys(), ...ordersByProduct.keys()]);
 
   // Fetch product details
-  const { data: products } = await supabase
+  const { data: products } = await getSupabase()
     .from('products')
     .select('id, name, slug, price_usd, images:product_images!product_id(url, alt_text, is_primary)')
     .in('id', Array.from(allProductIds));
@@ -605,7 +612,7 @@ export async function trackEvent(
   properties: Record<string, any>
 ): Promise<void> {
   try {
-    await supabase.from('order_analytics').insert({
+    await getSupabase().from('order_analytics').insert({
       event_type: eventType,
       product_id: properties.productId,
       customer_id: properties.customerId,
@@ -629,7 +636,7 @@ export async function getProductRecommendations(
 ): Promise<any[]> {
   // Get co-purchased products
   // First get order IDs that contain this product
-  const { data: orderIdsData } = await supabase
+  const { data: orderIdsData } = await getSupabase()
     .from('order_items')
     .select('order_id')
     .eq('product_id', productId);
@@ -637,7 +644,7 @@ export async function getProductRecommendations(
   const orderIds = orderIdsData?.map(item => item.order_id) || [];
 
   // Get co-purchased products
-  const { data: coPurchased } = await supabase
+  const { data: coPurchased } = await getSupabase()
     .from('order_items')
     .select('product_id, order_id')
     .neq('product_id', productId)
@@ -659,7 +666,7 @@ export async function getProductRecommendations(
     .map(([productId]) => productId);
 
   // Get product details
-  const { data: products } = await supabase
+  const { data: products } = await getSupabase()
     .from('products')
     .select('id, name, slug, price_usd, stock_available, images:product_images!product_id(url, alt_text, is_primary)')
     .in('id', topCoPurchased)

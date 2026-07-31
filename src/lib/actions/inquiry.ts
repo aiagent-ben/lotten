@@ -5,7 +5,14 @@ import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { randomUUID } from 'crypto';
 
-const supabase = createServiceClient();
+let client: ReturnType<typeof createServiceClient> | null = null;
+
+function getSupabase() {
+  if (!client) {
+    client = createServiceClient();
+  }
+  return client;
+}
 
 const ANON_SESSION_COOKIE = 'lotten_anon_session';
 
@@ -43,7 +50,7 @@ export async function createInquiry(customerId?: string): Promise<CreateInquiryR
     const sessionId = await getOrCreateAnonSession();
     
     // Check if there's already a draft inquiry for this session
-    const { data: existing } = await supabase
+    const { data: existing } = await getSupabase()
       .from('inquiries')
       .select('id, session_id')
       .eq('session_id', sessionId)
@@ -57,7 +64,7 @@ export async function createInquiry(customerId?: string): Promise<CreateInquiryR
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 30); // 30 days
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
           .from('inquiries')
           .insert({
             session_id: sessionId,
@@ -102,7 +109,7 @@ export async function addInquiryItem(
 ): Promise<AddInquiryItemResult> {
   try {
     // Verify inquiry exists and is in draft status
-    const { data: inquiry, error: inquiryError } = await supabase
+    const { data: inquiry, error: inquiryError } = await getSupabase()
       .from('inquiries')
       .select('status')
       .eq('id', inquiryId)
@@ -117,7 +124,7 @@ export async function addInquiryItem(
     }
     
     // Get product base price
-    const { data: product, error: productError } = await supabase
+    const { data: product, error: productError } = await getSupabase()
       .from('products')
       .select('price_usd, configuration_schema')
       .eq('id', productId)
@@ -142,7 +149,7 @@ export async function addInquiryItem(
     // Get variant price if applicable
     let basePrice = product.price_usd;
     if (variantId) {
-      const { data: variant } = await supabase
+      const { data: variant } = await getSupabase()
         .from('product_variants')
         .select('price_usd')
         .eq('id', variantId)
@@ -156,7 +163,7 @@ export async function addInquiryItem(
     const lineTotal = unitPrice * quantity;
     
     // Get max sort_order
-    const { data: maxSort } = await supabase
+    const { data: maxSort } = await getSupabase()
       .from('inquiry_items')
       .select('sort_order')
       .eq('inquiry_id', inquiryId)
@@ -165,7 +172,7 @@ export async function addInquiryItem(
     
     const nextSort = (maxSort?.[0]?.sort_order ?? -1) + 1;
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('inquiry_items')
       .insert({
         inquiry_id: inquiryId,
@@ -201,7 +208,7 @@ export async function updateInquiryItem(
   updates: { quantity?: number; configuration?: Record<string, unknown>; notes?: string }
 ): Promise<UpdateInquiryItemResult> {
   try {
-    const { data: item, error: itemError } = await supabase
+    const { data: item, error: itemError } = await getSupabase()
       .from('inquiry_items')
       .select('inquiry_id, quantity, unit_price_usd, configuration')
       .eq('id', itemId)
@@ -212,7 +219,7 @@ export async function updateInquiryItem(
     }
     
     // Check inquiry is still draft
-    const { data: inquiry } = await supabase
+    const { data: inquiry } = await getSupabase()
       .from('inquiries')
       .select('status')
       .eq('id', item.inquiry_id)
@@ -240,7 +247,7 @@ export async function updateInquiryItem(
       updateData.notes = updates.notes;
     }
     
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('inquiry_items')
       .update(updateData)
       .eq('id', itemId);
@@ -258,7 +265,7 @@ export async function updateInquiryItem(
 
 export async function removeInquiryItem(itemId: string): Promise<UpdateInquiryItemResult> {
   try {
-    const { data: item } = await supabase
+    const { data: item } = await getSupabase()
       .from('inquiry_items')
       .select('inquiry_id')
       .eq('id', itemId)
@@ -268,7 +275,7 @@ export async function removeInquiryItem(itemId: string): Promise<UpdateInquiryIt
       return { success: false, error: 'Item not found' };
     }
     
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('inquiry_items')
       .delete()
       .eq('id', itemId);
@@ -286,7 +293,7 @@ export async function removeInquiryItem(itemId: string): Promise<UpdateInquiryIt
 
 export async function submitInquiry(inquiryId: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const { data: inquiry, error: inquiryError } = await supabase
+    const { data: inquiry, error: inquiryError } = await getSupabase()
       .from('inquiries')
       .select('status, customer_id')
       .eq('id', inquiryId)
@@ -301,7 +308,7 @@ export async function submitInquiry(inquiryId: string): Promise<{ success: boole
     }
     
     // Check has at least one item
-    const { count } = await supabase
+    const { count } = await getSupabase()
       .from('inquiry_items')
       .select('*', { count: 'exact', head: true })
       .eq('inquiry_id', inquiryId);
@@ -310,7 +317,7 @@ export async function submitInquiry(inquiryId: string): Promise<{ success: boole
       return { success: false, error: 'Cannot submit empty inquiry' };
     }
     
-    const { error } = await supabase
+    const { error } = await getSupabase()
       .from('inquiries')
       .update({ status: 'submitted', submitted_at: new Date().toISOString() })
       .eq('id', inquiryId);
@@ -332,7 +339,7 @@ export async function submitInquiry(inquiryId: string): Promise<{ success: boole
 export async function mergeInquiryOnLogin(sessionId: string, customerId: string): Promise<{ success: boolean; error?: string }> {
   try {
     // Find anonymous draft inquiry
-    const { data: anonInquiry } = await supabase
+    const { data: anonInquiry } = await getSupabase()
       .from('inquiries')
       .select('id')
       .eq('session_id', sessionId)
@@ -344,7 +351,7 @@ export async function mergeInquiryOnLogin(sessionId: string, customerId: string)
     }
     
     // Check if customer already has a draft inquiry
-    const { data: customerDraft } = await supabase
+    const { data: customerDraft } = await getSupabase()
       .from('inquiries')
       .select('id')
       .eq('customer_id', customerId)
@@ -353,7 +360,7 @@ export async function mergeInquiryOnLogin(sessionId: string, customerId: string)
     
     if (customerDraft) {
       // Merge items from anon into customer draft
-      const { data: anonItems } = await supabase
+      const { data: anonItems } = await getSupabase()
         .from('inquiry_items')
         .select('*')
         .eq('inquiry_id', anonInquiry.id);
@@ -361,7 +368,7 @@ export async function mergeInquiryOnLogin(sessionId: string, customerId: string)
       if (anonItems && anonItems.length > 0) {
         for (const item of anonItems) {
           // Check for duplicate product/variant in customer draft
-          const { data: existing } = await supabase
+          const { data: existing } = await getSupabase()
             .from('inquiry_items')
             .select('id, quantity')
             .eq('inquiry_id', customerDraft.id)
@@ -371,13 +378,13 @@ export async function mergeInquiryOnLogin(sessionId: string, customerId: string)
           
           if (existing) {
             // Merge quantities
-            await supabase
+            await getSupabase()
               .from('inquiry_items')
               .update({ quantity: existing.quantity + item.quantity })
               .eq('id', existing.id);
           } else {
             // Copy item to customer draft
-            await supabase
+            await getSupabase()
               .from('inquiry_items')
               .insert({
                 inquiry_id: customerDraft.id,
@@ -395,10 +402,10 @@ export async function mergeInquiryOnLogin(sessionId: string, customerId: string)
       }
       
       // Delete anon inquiry
-      await supabase.from('inquiries').delete().eq('id', anonInquiry.id);
+      await getSupabase().from('inquiries').delete().eq('id', anonInquiry.id);
     } else {
       // Reassign anon inquiry to customer
-      await supabase
+      await getSupabase()
         .from('inquiries')
         .update({ customer_id: customerId })
         .eq('id', anonInquiry.id);

@@ -2,7 +2,14 @@
 
 import { createServiceClient } from '@/lib/db/client';
 
-const supabase = createServiceClient();
+let client: ReturnType<typeof createServiceClient> | null = null;
+
+function getSupabase() {
+  if (!client) {
+    client = createServiceClient();
+  }
+  return client;
+}
 
 export interface Configuration {
   finish?: string;
@@ -64,7 +71,7 @@ export async function calculateQuotePrice(input: PriceCalculationInput): Promise
 
   for (const item of input.items) {
     // Get product base price and config schema
-    const { data: product } = await supabase
+    const { data: product } = await getSupabase()
       .from('products')
       .select('id, price_usd, lead_time_weeks, stock_available, configuration_schema, standard_dimensions, finish_multipliers')
       .eq('id', item.productId)
@@ -85,7 +92,7 @@ export async function calculateQuotePrice(input: PriceCalculationInput): Promise
     // Get variant price if applicable
     let basePrice = product.price_usd;
     if (item.variantId) {
-      const { data: variant } = await supabase
+      const { data: variant } = await getSupabase()
         .from('product_variants')
         .select('price_usd')
         .eq('id', item.variantId)
@@ -144,7 +151,7 @@ export async function calculateQuotePrice(input: PriceCalculationInput): Promise
   // Apply discount code if provided
   let discountCodeInfo = null;
   if (input.discountCode) {
-    const { data: discount } = await supabase
+    const { data: discount } = await getSupabase()
       .from('discount_codes')
       .select('type, value')
       .eq('code', input.discountCode)
@@ -240,7 +247,7 @@ async function calculateConfigModifiers(
 }
 
 async function getTierDiscountPercent(tier: 'retail' | 'trade' | 'project' | 'vip'): Promise<number> {
-  const { data: tierData } = await supabase
+  const { data: tierData } = await getSupabase()
     .from('customer_tiers')
     .select('discount_percent')
     .eq('name', tier)
@@ -299,7 +306,7 @@ async function calculateShipping(
 }
 
 export async function getProductConfigurationSchema(productId: string) {
-  const { data: schema } = await supabase
+  const { data: schema } = await getSupabase()
     .from('product_configuration_schemas')
     .select('schema')
     .eq('product_id', productId)
