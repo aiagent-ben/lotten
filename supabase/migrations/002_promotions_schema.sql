@@ -212,9 +212,9 @@ CREATE POLICY "Service role full access to customer_segment_memberships" ON cust
 -- Function to validate promotion applicability
 CREATE OR REPLACE FUNCTION validate_promotion(
   p_promotion_id UUID,
-  p_customer_id UUID DEFAULT NULL,
   p_cart_items JSONB,
   p_cart_total DECIMAL(12,2),
+  p_customer_id UUID DEFAULT NULL,
   p_currency TEXT DEFAULT 'USD'
 ) RETURNS TABLE (
   valid BOOLEAN,
@@ -226,6 +226,17 @@ DECLARE
   promo RECORD;
   condition_check BOOLEAN;
   action_result JSONB;
+  customer_usage INT;
+  order_count INT;
+  has_collection BOOLEAN;
+  has_product BOOLEAN;
+  has_segment BOOLEAN;
+  has_excluded BOOLEAN;
+  item JSONB;
+  product_collection UUID;
+  computed_discount DECIMAL(12,2) := 0;
+  action_type TEXT;
+  action_value DECIMAL(12,2);
 BEGIN
   -- Fetch promotion
   SELECT * INTO promo FROM promotions WHERE id = p_promotion_id;
@@ -259,8 +270,7 @@ BEGIN
   
   -- Check per-customer usage
   IF p_customer_id IS NOT NULL AND promo.usage_limit_per_customer IS NOT NULL THEN
-    DECLARE customer_usage INT;
-    SELECT COUNT(*) INTO customer_usage 
+    SELECT COUNT(*) INTO customer_usage
     FROM promotion_usages 
     WHERE promotion_id = p_promotion_id AND customer_id = p_customer_id;
     
@@ -293,7 +303,6 @@ BEGIN
   
   -- First order only
   IF (promo.conditions->>'first_order_only')::BOOLEAN = true AND p_customer_id IS NOT NULL THEN
-    DECLARE order_count INT;
     SELECT COUNT(*) INTO order_count FROM orders WHERE customer_id = p_customer_id;
     IF order_count > 0 THEN
       condition_check := false;
@@ -304,11 +313,9 @@ BEGIN
   
   -- Collections check
   IF promo.conditions->'collections' IS NOT NULL AND jsonb_array_length(promo.conditions->'collections') > 0 THEN
-    DECLARE has_collection BOOLEAN := false;
-    DECLARE item JSONB;
+    has_collection := false;
     FOR item IN SELECT * FROM jsonb_array_elements(p_cart_items)
     LOOP
-      DECLARE product_collection UUID;
       SELECT collection_id INTO product_collection FROM products WHERE id = (item->>'product_id')::UUID;
       IF product_collection = ANY((promo.conditions->'collections')::UUID[]) THEN
         has_collection := true;
@@ -324,8 +331,7 @@ BEGIN
   
   -- Products check
   IF promo.conditions->'products' IS NOT NULL AND jsonb_array_length(promo.conditions->'products') > 0 THEN
-    DECLARE has_product BOOLEAN := false;
-    DECLARE item JSONB;
+    has_product := false;
     FOR item IN SELECT * FROM jsonb_array_elements(p_cart_items)
     LOOP
       IF (item->>'product_id')::UUID = ANY((promo.conditions->'products')::UUID[]) THEN
@@ -342,7 +348,6 @@ BEGIN
   
   -- Customer segments check
   IF promo.conditions->'customer_segments' IS NOT NULL AND jsonb_array_length(promo.conditions->'customer_segments') > 0 AND p_customer_id IS NOT NULL THEN
-    DECLARE has_segment BOOLEAN := false;
     SELECT EXISTS (
       SELECT 1 FROM customer_segment_memberships csm
       JOIN customer_segments cs ON csm.segment_id = cs.id
@@ -367,8 +372,7 @@ BEGIN
   
   -- Excluded products check
   IF promo.conditions->'excluded_products' IS NOT NULL AND jsonb_array_length(promo.conditions->'excluded_products') > 0 THEN
-    DECLARE has_excluded BOOLEAN := false;
-    DECLARE item JSONB;
+    has_excluded := false;
     FOR item IN SELECT * FROM jsonb_array_elements(p_cart_items)
     LOOP
       IF (item->>'product_id')::UUID = ANY((promo.conditions->'excluded_products')::UUID[]) THEN
@@ -384,47 +388,46 @@ BEGIN
   END IF;
   
   -- Calculate discount based on action type
-  DECLARE discount_amount DECIMAL(12,2) := 0;
-  DECLARE action_type TEXT := promo.actions->>'type';
-  DECLARE action_value DECIMAL(12,2) := (promo.actions->>'value')::DECIMAL;
-  
+  action_type := promo.actions->>'type';
+  action_value := (promo.actions->>'value')::DECIMAL;
+
   CASE action_type
     WHEN 'percentage_off' THEN
-      discount_amount := p_cart_total * action_value / 100;
+      computed_discount := p_cart_total * action_value / 100;
       IF promo.actions->>'max_discount' IS NOT NULL THEN
-        discount_amount := LEAST(discount_amount, (promo.actions->>'max_discount')::DECIMAL);
+        computed_discount := LEAST(computed_discount, (promo.actions->>'max_discount')::DECIMAL);
       END IF;
-    
+
     WHEN 'fixed_off' THEN
-      discount_amount := action_value;
-    
+      computed_discount := action_value;
+
     WHEN 'free_shipping' THEN
       -- Shipping discount handled at order level
-      discount_amount := 0;
-    
+      computed_discount := 0;
+
     WHEN 'free_product' THEN
       -- Free product discount handled at line item level
-      discount_amount := 0;
-    
+      computed_discount := 0;
+
     WHEN 'buy_x_get_y' THEN
       -- Complex logic for BxGy handled separately
-      discount_amount := 0;
-    
+      computed_discount := 0;
+
     WHEN 'bundle_discount' THEN
       -- Bundle discount handled separately
-      discount_amount := 0;
+      computed_discount := 0;
   END CASE;
-  
-  RETURN QUERY SELECT true, discount_amount, promo.actions, NULL;
+
+  RETURN QUERY SELECT true, computed_discount, promo.actions, NULL;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to record promotion usage
 CREATE OR REPLACE FUNCTION record_promotion_usage(
   p_promotion_id UUID,
+  p_discount_amount DECIMAL(12,2),
   p_customer_id UUID DEFAULT NULL,
   p_order_id UUID DEFAULT NULL,
-  p_discount_amount DECIMAL(12,2),
   p_currency TEXT DEFAULT 'USD',
   p_metadata JSONB DEFAULT '{}'
 ) RETURNS VOID AS $$

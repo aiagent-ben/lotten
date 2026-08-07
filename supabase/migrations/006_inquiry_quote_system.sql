@@ -296,7 +296,11 @@ ALTER TABLE quote_items
 -- TABLE: orders
 -- Actual orders (from quote conversion or direct)
 -- Separate from quotes — incompatible column sets
+-- Replaces the cart-era orders/order_items tables from 001_initial_schema.sql
 -- ============================================================================
+DROP TABLE IF EXISTS order_items CASCADE;
+DROP TABLE IF EXISTS orders CASCADE;
+
 CREATE TABLE orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   quote_id UUID REFERENCES quotes(id) ON DELETE SET NULL,  -- NULL = direct order

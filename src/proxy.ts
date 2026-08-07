@@ -6,14 +6,72 @@ import { locales, defaultLocale } from '@/i18n/request';
 let cachedSettings: any = null;
 let cachedSettingsExpiresAt = 0;
 
+function getSupabaseClient(request: NextRequest, response: { current: NextResponse }) {
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
+          cookiesToSet.forEach(({ name, value }: { name: string; value: string; options: CookieOptions }) => request.cookies.set(name, value));
+          response.current = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }: { name: string; value: string; options: CookieOptions }) =>
+            response.current.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+}
+
+// Admin lives outside the [locale] tree (src/app/admin), so it's handled
+// separately and is never redirected to a locale-prefixed URL.
+async function handleAdminAuth(request: NextRequest, pathname: string) {
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.next();
+  }
+
+  const response = { current: NextResponse.next({ request }) };
+  const supabase = getSupabaseClient(request, response);
+
+  // Login page must stay reachable to unauthenticated users, otherwise
+  // the redirect-to-login below would redirect to itself forever.
+  if (pathname === '/admin/login') {
+    return response.current;
+  }
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    const loginUrl = new URL('/admin/login', request.url);
+    loginUrl.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  const { data: profile } = await supabase
+    .from('customers')
+    .select('is_active')
+    .eq('auth_user_id', user.id)
+    .single();
+
+  if (!profile || !profile.is_active) {
+    await supabase.auth.signOut();
+    const loginUrl = new URL('/admin/login', request.url);
+    loginUrl.searchParams.set('error', 'Access denied');
+    return NextResponse.redirect(loginUrl);
+  }
+
+  return response.current;
+}
+
 export async function proxy(request: NextRequest) {
-  // Handle locale prefix in URL
   const pathname = request.nextUrl.pathname;
 
-  // Skip API routes - they should handle their own auth and not be redirected
-  // Check both direct /api/ and locale-prefixed /xx/api/ paths
-  if (pathname.startsWith('/api/') || pathname.match(/^\/[a-z]{2}\/api\//)) {
-    return NextResponse.next();
+  if (pathname.startsWith('/admin') || pathname.startsWith('/api/')) {
+    return handleAdminAuth(request, pathname);
   }
 
   const pathnameHasLocale = locales.some(
@@ -28,89 +86,36 @@ export async function proxy(request: NextRequest) {
     );
   }
 
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
-          cookiesToSet.forEach(({ name, value, options }: { name: string; value: string; options: CookieOptions }) => request.cookies.set(name, value));
-          supabaseResponse = NextResponse.next({
-            request,
-          });
-          cookiesToSet.forEach(({ name, value, options }: { name: string; value: string; options: CookieOptions }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
-        },
-      },
-    }
-  );
-
-  // Check if this is an admin route (after locale)
-  const isAdminRoute = locales.some(
-    (locale) => pathname.startsWith(`/${locale}/admin`)
-  );
+  const response = { current: NextResponse.next({ request }) };
+  const supabase = getSupabaseClient(request, response);
 
   // Refresh session if expired - required for Server Components
-  const { data: { user } } = await supabase.auth.getUser();
+  await supabase.auth.getUser();
 
-  if (isAdminRoute) {
-    if (!user) {
-      // Redirect to login if not authenticated
-      const loginUrl = new URL(`/${defaultLocale}/admin/login`, request.url);
-      loginUrl.searchParams.set('redirect', pathname);
-      return NextResponse.redirect(loginUrl);
-    }
+  // Maintenance mode check
+  const isMaintenancePage = locales.some(locale =>
+    pathname.startsWith(`/${locale}/maintenance`)
+  );
 
-    // Check if user has admin role
-    const { data: profile } = await supabase
-      .from('customers')
-      .select('is_active')
-      .eq('auth_user_id', user.id)
+  // Cache maintenance mode check
+  let settings = cachedSettings;
+  if (!settings || cachedSettingsExpiresAt < Date.now()) {
+    const { data } = await supabase
+      .from('site_settings')
+      .select('settings')
+      .eq('id', 1)
       .single();
-
-    if (!profile || !profile.is_active) {
-      // Sign out and redirect
-      await supabase.auth.signOut();
-      const loginUrl = new URL(`/${defaultLocale}/admin/login`, request.url);
-      loginUrl.searchParams.set('error', 'Access denied');
-      return NextResponse.redirect(loginUrl);
-    }
+    settings = data?.settings ?? null;
+    cachedSettings = settings;
+    cachedSettingsExpiresAt = Date.now() + 30_000; // 30 seconds
   }
 
-  // Maintenance mode check for non-admin routes
-  if (!isAdminRoute && !pathname.startsWith(`/${defaultLocale}/api`)) {
-    const isMaintenancePage = locales.some(locale =>
-      pathname.startsWith(`/${locale}/maintenance`)
-    );
-    
-    // Cache maintenance mode check
-    let settings = cachedSettings;
-    if (!settings || cachedSettingsExpiresAt < Date.now()) {
-      const { data } = await supabase
-        .from('site_settings')
-        .select('settings')
-        .eq('id', 1)
-        .single();
-      settings = data?.settings ?? null;
-      cachedSettings = settings;
-      cachedSettingsExpiresAt = Date.now() + 30_000; // 30 seconds
-    }
-
-    if (settings?.maintenance_mode && !isMaintenancePage) {
-      const maintenanceUrl = new URL(`/${defaultLocale}/maintenance`, request.url);
-      return NextResponse.rewrite(maintenanceUrl);
-    }
+  if (settings?.maintenance_mode && !isMaintenancePage) {
+    const maintenanceUrl = new URL(`/${defaultLocale}/maintenance`, request.url);
+    return NextResponse.rewrite(maintenanceUrl);
   }
 
-  return supabaseResponse;
+  return response.current;
 }
 
 export const config = {
