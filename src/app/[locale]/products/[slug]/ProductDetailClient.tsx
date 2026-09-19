@@ -447,14 +447,14 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <nav className="mb-8" aria-label="Product details tabs">
-              <ul className="flex flex-wrap gap-4 border-b border-gray-200" role="tablist">
+              <ul className="flex flex-wrap gap-6 border-b border-gray-200" role="tablist">
                 <li>
                   <button 
                     role="tab" 
                     aria-selected={activeTab === 'description'}
                     onClick={() => setActiveTab('description')}
                     className={cn(
-                      'font-medium pb-4 border-b-2 transition-colors',
+                      'font-medium pb-4 border-b-2 -mb-px transition-colors cursor-pointer',
                       activeTab === 'description'
                         ? 'text-amber-700 border-amber-700'
                         : 'text-gray-500 hover:text-gray-900 border-transparent hover:border-gray-300'
@@ -469,7 +469,7 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                     aria-selected={activeTab === 'specifications'}
                     onClick={() => setActiveTab('specifications')}
                     className={cn(
-                      'font-medium pb-4 border-b-2 transition-colors',
+                      'font-medium pb-4 border-b-2 -mb-px transition-colors cursor-pointer',
                       activeTab === 'specifications'
                         ? 'text-amber-700 border-amber-700'
                         : 'text-gray-500 hover:text-gray-900 border-transparent hover:border-gray-300'
@@ -484,7 +484,7 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                     aria-selected={activeTab === 'materials'}
                     onClick={() => setActiveTab('materials')}
                     className={cn(
-                      'font-medium pb-4 border-b-2 transition-colors',
+                      'font-medium pb-4 border-b-2 -mb-px transition-colors cursor-pointer',
                       activeTab === 'materials'
                         ? 'text-amber-700 border-amber-700'
                         : 'text-gray-500 hover:text-gray-900 border-transparent hover:border-gray-300'
@@ -499,7 +499,7 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                     aria-selected={activeTab === 'dimensions'}
                     onClick={() => setActiveTab('dimensions')}
                     className={cn(
-                      'font-medium pb-4 border-b-2 transition-colors',
+                      'font-medium pb-4 border-b-2 -mb-px transition-colors cursor-pointer',
                       activeTab === 'dimensions'
                         ? 'text-amber-700 border-amber-700'
                         : 'text-gray-500 hover:text-gray-900 border-transparent hover:border-gray-300'
@@ -613,71 +613,109 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
             )}
 
             {activeTab === 'dimensions' && (
-              <div className="space-y-8">
-                <h2 className="heading-2 text-gray-900">Dimensions</h2>
-                
-                {product.width_mm || product.depth_mm || product.height_mm ? (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-white p-6 rounded-xl border border-gray-100 text-center">
-                      <p className="caption text-gray-500">Width</p>
-                      <p className="heading-2 font-bold text-gray-900">{product.width_mm} mm</p>
+              <div className="space-y-10 max-w-5xl">
+                <div>
+                  <h2 className="heading-2 text-stone-900">Dimensions & Specifications</h2>
+                  <p className="text-sm text-stone-500 mt-1">
+                    Precise product measurements and packaging specifications.
+                  </p>
+                </div>
+
+                {/* Section 1: In-Room Product Dimensions */}
+                <div className="space-y-4">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-stone-500">
+                    Product Dimensions
+                  </h3>
+                  
+                  {product.width_mm || product.depth_mm || product.height_mm || product.weight_kg ? (
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                      {product.width_mm && (
+                        <div className="bg-white p-5 rounded-xl border border-stone-200/90 shadow-xs hover:border-amber-600/40 transition-colors">
+                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">Width</p>
+                          <p className="font-sans font-semibold text-2xl text-stone-900 mt-1.5 tabular-nums">
+                            {product.width_mm} <span className="text-sm font-normal text-stone-500">mm</span>
+                          </p>
+                          <p className="text-xs text-stone-400 mt-0.5 tabular-nums">
+                            {(product.width_mm / 25.4).toFixed(1)} in
+                          </p>
+                        </div>
+                      )}
+                      {product.depth_mm && (
+                        <div className="bg-white p-5 rounded-xl border border-stone-200/90 shadow-xs hover:border-amber-600/40 transition-colors">
+                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">Depth</p>
+                          <p className="font-sans font-semibold text-2xl text-stone-900 mt-1.5 tabular-nums">
+                            {product.depth_mm} <span className="text-sm font-normal text-stone-500">mm</span>
+                          </p>
+                          <p className="text-xs text-stone-400 mt-0.5 tabular-nums">
+                            {(product.depth_mm / 25.4).toFixed(1)} in
+                          </p>
+                        </div>
+                      )}
+                      {product.height_mm && (
+                        <div className="bg-white p-5 rounded-xl border border-stone-200/90 shadow-xs hover:border-amber-600/40 transition-colors">
+                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">Height</p>
+                          <p className="font-sans font-semibold text-2xl text-stone-900 mt-1.5 tabular-nums">
+                            {product.height_mm} <span className="text-sm font-normal text-stone-500">mm</span>
+                          </p>
+                          <p className="text-xs text-stone-400 mt-0.5 tabular-nums">
+                            {(product.height_mm / 25.4).toFixed(1)} in
+                          </p>
+                        </div>
+                      )}
+                      {product.weight_kg && (
+                        <div className="bg-white p-5 rounded-xl border border-stone-200/90 shadow-xs hover:border-amber-600/40 transition-colors">
+                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">Weight</p>
+                          <p className="font-sans font-semibold text-2xl text-stone-900 mt-1.5 tabular-nums">
+                            {product.weight_kg} <span className="text-sm font-normal text-stone-500">kg</span>
+                          </p>
+                          <p className="text-xs text-stone-400 mt-0.5 tabular-nums">
+                            {(product.weight_kg * 2.20462).toFixed(1)} lbs
+                          </p>
+                        </div>
+                      )}
                     </div>
-                    <div className="bg-white p-6 rounded-xl border border-gray-100 text-center">
-                      <p className="caption text-gray-500">Depth</p>
-                      <p className="heading-2 font-bold text-gray-900">{product.depth_mm} mm</p>
+                  ) : (
+                    <p className="text-sm text-stone-500">Dimensions not specified.</p>
+                  )}
+                </div>
+
+                {/* Section 2: Packaging & Shipping Specifications */}
+                {(product.carton_length_mm || product.carton_width_mm || product.carton_height_mm || product.volume_m3 || product.pack_type) && (
+                  <div className="space-y-4 pt-4 border-t border-stone-200/60">
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-stone-500">
+                      Packaging & Logistics
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {(product.carton_length_mm || product.carton_width_mm || product.carton_height_mm) && (
+                        <div className="bg-white p-5 rounded-xl border border-stone-200/90 shadow-xs">
+                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">Carton Dimensions</p>
+                          <p className="font-sans font-semibold text-lg text-stone-900 mt-1.5 tabular-nums">
+                            {product.carton_length_mm || '—'} × {product.carton_width_mm || '—'} × {product.carton_height_mm || '—'} <span className="text-xs font-normal text-stone-500">mm</span>
+                          </p>
+                          <p className="text-xs text-stone-400 mt-0.5">Length × Width × Height</p>
+                        </div>
+                      )}
+                      {product.volume_m3 && (
+                        <div className="bg-white p-5 rounded-xl border border-stone-200/90 shadow-xs">
+                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">Shipping Volume</p>
+                          <p className="font-sans font-semibold text-lg text-stone-900 mt-1.5 tabular-nums">
+                            {product.volume_m3} <span className="text-xs font-normal text-stone-500">m³ (CBM)</span>
+                          </p>
+                          <p className="text-xs text-stone-400 mt-0.5">Cubic meters per carton</p>
+                        </div>
+                      )}
+                      {product.pack_type && (
+                        <div className="bg-white p-5 rounded-xl border border-stone-200/90 shadow-xs">
+                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">Packaging Type</p>
+                          <p className="font-sans font-semibold text-lg text-stone-900 mt-1.5">
+                            {product.pack_type}
+                          </p>
+                          <p className="text-xs text-stone-400 mt-0.5">Standard export packing</p>
+                        </div>
+                      )}
                     </div>
-                    <div className="bg-white p-6 rounded-xl border border-gray-100 text-center">
-                      <p className="caption text-gray-500">Height</p>
-                      <p className="heading-2 font-bold text-gray-900">{product.height_mm} mm</p>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-gray-500">Dimensions not specified.</p>
-                )}
-
-                {product.weight_kg && (
-                  <div className="bg-white p-6 rounded-xl border border-gray-100 text-center max-w-md mx-auto">
-                    <p className="caption text-gray-500">Weight</p>
-                    <p className="heading-2 font-bold text-gray-900">{product.weight_kg} kg</p>
                   </div>
                 )}
-
-                {product.volume_m3 && (
-                  <div className="bg-white p-6 rounded-xl border border-gray-100 text-center max-w-md mx-auto">
-                    <p className="caption text-gray-500">Volume</p>
-                    <p className="heading-2 font-bold text-gray-900">{product.volume_m3} m³</p>
-                  </div>
-                )}
-
-                {product.pack_type && (
-                  <div className="bg-white p-6 rounded-xl border border-gray-100 text-center max-w-md mx-auto">
-                    <p className="caption text-gray-500">Packaging</p>
-                    <p className="heading-3 font-bold text-gray-900">{product.pack_type}</p>
-                  </div>
-                )}
-
-                {product.carton_length_mm || product.carton_width_mm || product.carton_height_mm ? (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {product.carton_length_mm && (
-                      <div className="bg-white p-6 rounded-xl border border-gray-100 text-center">
-                        <p className="caption text-gray-500">Carton Length</p>
-                        <p className="heading-2 font-bold text-gray-900">{product.carton_length_mm} mm</p>
-                      </div>
-                    )}
-                    {product.carton_width_mm && (
-                      <div className="bg-white p-6 rounded-xl border border-gray-100 text-center">
-                        <p className="caption text-gray-500">Carton Width</p>
-                        <p className="heading-2 font-bold text-gray-900">{product.carton_width_mm} mm</p>
-                      </div>
-                    )}
-                    {product.carton_height_mm && (
-                      <div className="bg-white p-6 rounded-xl border border-gray-100 text-center">
-                        <p className="caption text-gray-500">Carton Height</p>
-                        <p className="heading-2 font-bold text-gray-900">{product.carton_height_mm} mm</p>
-                      </div>
-                    )}
-                  </div>
-                ) : null}
               </div>
             )}
 

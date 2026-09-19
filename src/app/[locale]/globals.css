@@ -187,6 +187,15 @@ body {
 }
 
 .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
   background-color: var(--primary);
   color: var(--primary-foreground);
 }
@@ -196,6 +205,15 @@ body {
 }
 
 .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
   background-color: var(--secondary);
   color: var(--secondary-foreground);
 }

@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getAllActiveProducts, getCollectionBySlug, formatPrice, getCollections } from '@/lib/data/products';
+import { CANONICAL_CATEGORIES } from '@/lib/constants/categories';
 import { cn } from '@/lib/utils';
 import ProductsPageClient from './ProductsPageClient';
 import { ProductFilters } from './ProductFilters';
@@ -50,9 +51,25 @@ export default async function ProductsPage({ searchParams }: Props) {
     products = products.filter(p => p.is_bestseller);
   } else if (categoryFilter) {
     const target = categoryFilter.toLowerCase();
-    products = products.filter(p =>
-      p.categories?.some(c => c.toLowerCase() === target || c.toLowerCase().includes(target))
+    const categoryConfig = CANONICAL_CATEGORIES.find(
+      (c) => c.name.toLowerCase() === target || c.slug.toLowerCase() === target
     );
+    const searchTerms = [
+      target,
+      ...(categoryConfig?.aliases?.map((a) => a.toLowerCase()) || []),
+    ];
+
+    products = products.filter((p) => {
+      // 1. Check structured categories array
+      const inCategories = p.categories?.some((c) =>
+        searchTerms.some((term) => c.toLowerCase() === term || c.toLowerCase().includes(term))
+      );
+      if (inCategories) return true;
+
+      // 2. Fallback to product name matching for un-migrated products
+      const nameLower = p.name.toLowerCase();
+      return searchTerms.some((term) => nameLower.includes(term));
+    });
   }
 
   // Sort products
@@ -134,13 +151,28 @@ export default async function ProductsPage({ searchParams }: Props) {
       <section className="py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {paginatedProducts.length === 0 ? (
-            <div className="text-center py-20">
-              <svg className="mx-auto h-16 w-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-              <h2 className="heading-3 text-gray-900 mt-4">No products found</h2>
-              <p className="body text-gray-600 mt-2">Try adjusting your filters or browse all collections.</p>
-              <Link href="/products" className="btn-primary mt-6 inline-flex">View All Products</Link>
+            <div className="text-center py-20 max-w-md mx-auto">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-50 flex items-center justify-center text-amber-800">
+                <svg className="w-8 h-8 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+              <h2 className="heading-3 text-stone-900 mt-2">No products found</h2>
+              <p className="body text-stone-600 mt-2">
+                {categoryFilter || collectionFilter
+                  ? "We couldn't find any products matching your current filters. Try resetting them or explore the complete collection."
+                  : "Try adjusting your filters or browse all collections."}
+              </p>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                {(categoryFilter || collectionFilter) && (
+                  <Link href="/products" className="btn btn-primary px-5 py-2.5 rounded-lg shadow-xs hover:shadow transition-all">
+                    Clear Filters
+                  </Link>
+                )}
+                <Link href="/products" className="btn btn-outline px-5 py-2.5 rounded-lg border-stone-200 hover:bg-stone-50 transition-colors">
+                  View All Products
+                </Link>
+              </div>
             </div>
           ) : (
             <>
