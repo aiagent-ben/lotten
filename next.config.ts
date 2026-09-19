@@ -10,10 +10,6 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev',
       },
-      {
-        protocol: 'https',
-        hostname: 'mm.hinlim.com',
-      },
     ],
     formats: ['image/avif', 'image/webp'],
   },

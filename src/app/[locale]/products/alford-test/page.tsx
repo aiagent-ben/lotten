@@ -39,25 +39,25 @@ export default async function AlfordTestPage({ params }: Props) {
       {
         "code": "1802",
         "name": "LIGHT TENNESSEE WALNUT",
-        "swatch_url": "https://mm.hinlim.com/cache/b2bfs/color/1802 LIGHT TENNESSEE WALNUT-30x30.jpg",
+        "swatch_url": "",
         "alt": "1802 LIGHT TENNESSEE WALNUT"
       }
     ],
     "product_gallery": [
       {
-        "src": "https://mm.hinlim.com/cache/b2bfs/product/145144/145144-1500x1500.jpg",
+        "src": "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/145144/145144-alford-counter-table-1802-solid/0.webp",
         "parent_class": "thumbnail"
       },
       {
-        "src": "https://mm.hinlim.com/cache/b2bfs/product/145144/145144_2-1500x1500.jpg",
+        "src": "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/145144/145144-alford-counter-table-1802-solid/1.webp",
         "parent_class": "thumbnail"
       },
       {
-        "src": "https://mm.hinlim.com/cache/b2bfs/product/145144/145144_3-1500x1500.jpg",
+        "src": "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/145144/145144-alford-counter-table-1802-solid/2.webp",
         "parent_class": "thumbnail"
       },
       {
-        "src": "https://mm.hinlim.com/cache/b2bfs/product/145144/145144_s1-1500x1500.jpg",
+        "src": "https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/145144/145144-alford-counter-table-1802-solid/3.webp",
         "parent_class": "thumbnail"
       }
     ],

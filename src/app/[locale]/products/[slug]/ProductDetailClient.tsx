@@ -303,14 +303,12 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                           key={`${color.code}-${index}`}
                           className="flex items-center gap-2 px-3 py-1 rounded-lg border border-gray-200 bg-white text-sm"
                         >
-                          {/* Color swatch image from source */}
-                          <img
-                            src={`https://mm.hinlim.com/cache/b2bfs/color/${color.code} ${color.name}-30x30.jpg`}
-                            alt={`${color.name} (${color.code})`}
-                            className="w-6 h-6 rounded border border-gray-300 flex-shrink-0"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = 'none';
-                            }}
+                          {/* Color swatch dot using hex value from database */}
+                          <span
+                            className="w-4 h-4 rounded-full border border-gray-300 flex-shrink-0 shadow-xs"
+                            style={{ backgroundColor: color.hex || '#d1d5db' }}
+                            title={color.name}
+                            aria-hidden="true"
                           />
                           <span className="font-medium text-gray-900">{color.name}</span>
                           <span className="text-xs text-gray-500 font-mono">#{color.code}</span>

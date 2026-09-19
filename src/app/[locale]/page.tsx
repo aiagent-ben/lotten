@@ -107,7 +107,7 @@ export default async function HomePage() {
             <Link href="/collections/breda" className="collection-card group relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-500 animate-slide-up">
               <div className="relative aspect-[4/3] overflow-hidden">
                 <Image
-                  src="https://mm.hinlim.com/cache/b2bfs/product/335048/335048-550x500.jpg"
+                  src="https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/335048/335048-breda-1-5m-tv-cabinet-109167/0.webp"
                   alt="Breda Collection - TV cabinets and sideboards in warm walnut and natural finishes"
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -140,7 +140,7 @@ export default async function HomePage() {
             <Link href="/collections/dover" className="collection-card group relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-500 animate-slide-up" style={{ animationDelay: '100ms' }}>
               <div className="relative aspect-[4/3] overflow-hidden">
                 <Image
-                  src="https://mm.hinlim.com/cache/b2bfs/product/346036/346036-550x500.jpg"
+                  src="https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/346036/346036-dover-1-8m-sideboard-109113/0.webp"
                   alt="Dover Collection - Complete living room sets with coffee tables, consoles and desks"
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -173,7 +173,7 @@ export default async function HomePage() {
             <Link href="/collections/castor" className="collection-card group relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-500 animate-slide-up" style={{ animationDelay: '200ms' }}>
               <div className="relative aspect-[4/3] overflow-hidden">
                 <Image
-                  src="https://mm.hinlim.com/cache/b2bfs/product/335043/335043-550x500.jpg"
+                  src="https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/335043/335043-castor-1-5m-tv-cabinet-1141021325/0.webp"
                   alt="Castor Collection - Minimalist three-tone entertainment centers"
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -307,9 +307,10 @@ export default async function HomePage() {
             </div>
             <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
               <Image
-                src="https://mm.hinlim.com/cache/b2bfs/product/335048/335048-550x500.jpg"
+                src="https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/335048/335048-breda-1-5m-tv-cabinet-109167/0.webp"
                 alt="Lotten workshop - craftsmen working on Malaysian Oak furniture"
                 fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
                 className="w-full h-full object-cover"
                 priority
               />

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/Logo";
 
 /**
  * Site-wide footer — rendered by `[locale]/layout.tsx` so every route
@@ -15,9 +16,10 @@ export function Footer() {
           <div className="md:col-span-2">
             <Link
               href="/"
-              className="font-display text-2xl font-semibold text-white mb-4 block"
+              className="mb-4 block"
+              aria-label="Lotten Home"
             >
-              Lotten
+              <Logo variant="full" className="h-9 w-auto text-white" />
             </Link>
             <p className="text-sm text-gray-500 max-w-sm leading-relaxed">
               Curated Malaysian Oak furniture for modern homes. Direct from

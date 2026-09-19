@@ -3,6 +3,7 @@
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/Logo";
 
 export function Header() {
   return (
@@ -10,8 +11,8 @@ export function Header() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2" aria-label="Lotten Home">
-            <span className="font-display text-xl font-semibold text-gray-900">Lotten</span>
+          <Link href="/" className="flex items-center" aria-label="Lotten Home">
+            <Logo variant="full" className="h-8 w-auto text-gray-900" />
           </Link>
 
           {/* Desktop Navigation */}
