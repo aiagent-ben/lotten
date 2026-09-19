@@ -5,6 +5,7 @@ import { MaterialSpecEditor } from '@/components/admin/MaterialSpecEditor';
 import { ColorOptionEditor } from '@/components/admin/ColorOptionEditor';
 import { ImageUploader } from '@/components/admin/ImageUploader';
 import { ProductVariantEditor } from '@/components/admin/ProductVariantEditor';
+import { CategoryTagPicker } from '@/components/admin/CategoryTagPicker';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { formatPrice } from '@/lib/utils';
@@ -38,6 +39,7 @@ interface FormData {
   is_new: boolean;
   is_bestseller: boolean;
   sort_order: string;
+  categories: string[];
   materials: string;
   colors: string;
   variants: string;
@@ -86,6 +88,7 @@ interface ProductData {
   is_new: boolean;
   is_bestseller: boolean;
   sort_order: number;
+  categories: string[] | null;
   collections: { id: string; name: string; slug: string } | null;
   images: { id: string; url: string; alt_text: string | null; sort_order: number; is_primary: boolean }[];
   variants: { id: string; article_no: string; name: string; slug: string; price_usd: number; stock_available: number; variant_attributes: Record<string, string> }[];
@@ -128,6 +131,7 @@ export default function EditProductPage() {
     is_new: false,
     is_bestseller: false,
     sort_order: '0',
+    categories: [],
     materials: JSON.stringify([
       { part: '', material: '', finish: '', code: '' },
     ], null, 2),
@@ -188,6 +192,7 @@ export default function EditProductPage() {
             is_new: product.is_new,
             is_bestseller: product.is_bestseller,
             sort_order: product.sort_order.toString(),
+            categories: product.categories || [],
             materials: JSON.stringify(product.materials || [], null, 2),
             colors: JSON.stringify(product.colors || [], null, 2),
             variants: JSON.stringify(initialVariants, null, 2),
@@ -331,6 +336,13 @@ export default function EditProductPage() {
                   ))}
                 </select>
               </div>
+            </div>
+
+            <div className="pt-1">
+              <CategoryTagPicker
+                categories={formData.categories}
+                onChange={(categories) => setFormData(prev => ({ ...prev, categories }))}
+              />
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -105,6 +105,7 @@ export interface Product {
   sort_order: number;
   created_at: string;
   updated_at: string;
+  categories?: string[] | null;
   collection?: Collection;
   images?: ProductImage[];
   product_images?: ProductImage[];

@@ -11,7 +11,6 @@ export async function GET(request: NextRequest) {
   const { data: brands, error } = await supabase
     .from('brands')
     .select('id, name, slug')
-    .eq('is_active', true)
     .order('sort_order');
     
   if (error) {

@@ -43,11 +43,16 @@ export default async function ProductsPage({ searchParams }: Props) {
     products = products.filter(p => p.collection_id === collectionFilter);
   }
 
-  // Filter by category (new, bestseller)
+  // Filter by category (new, bestseller, or specific category tag)
   if (categoryFilter === 'new') {
     products = products.filter(p => p.is_new);
   } else if (categoryFilter === 'bestseller') {
     products = products.filter(p => p.is_bestseller);
+  } else if (categoryFilter) {
+    const target = categoryFilter.toLowerCase();
+    products = products.filter(p =>
+      p.categories?.some(c => c.toLowerCase() === target || c.toLowerCase().includes(target))
+    );
   }
 
   // Sort products

@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/db/client';
 import { verifyAdminAuth } from '@/lib/auth/admin';
+import { normalizeCategories } from '@/lib/categories';
 
 export async function GET(
   request: NextRequest,
@@ -78,6 +79,7 @@ export async function PUT(
       is_new: body.is_new,
       is_bestseller: body.is_bestseller,
       sort_order: parseInt(body.sort_order),
+      categories: normalizeCategories(body.categories),
       updated_at: new Date().toISOString(),
     })
     .eq('id', productId)
@@ -86,6 +88,52 @@ export async function PUT(
     
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  // Synchronize images if provided
+  if (body.images !== undefined) {
+    const images = typeof body.images === 'string' ? JSON.parse(body.images) : body.images;
+    if (Array.isArray(images)) {
+      await supabase.from('product_images').delete().eq('product_id', productId);
+      if (images.length > 0) {
+        await supabase.from('product_images').insert(
+          images.map((img: any, idx: number) => ({
+            product_id: productId,
+            url: img.url,
+            alt_text: img.alt_text || body.name,
+            sort_order: img.sort_order ?? idx,
+            is_primary: img.is_primary ?? idx === 0,
+            width: img.width || null,
+            height: img.height || null,
+          }))
+        );
+      }
+    }
+  }
+
+  // Synchronize variants if provided
+  if (body.variants !== undefined) {
+    const variants = typeof body.variants === 'string' ? JSON.parse(body.variants) : body.variants;
+    if (Array.isArray(variants)) {
+      await supabase.from('product_variants').delete().eq('product_id', productId);
+      if (variants.length > 0) {
+        await supabase.from('product_variants').insert(
+          variants.map((v: any, idx: number) => ({
+            product_id: productId,
+            article_no: v.article_no || `${body.article_no}-${idx + 1}`,
+            name: v.name || `${body.name} Variant ${idx + 1}`,
+            slug: v.slug || `${body.slug}-v${idx + 1}`,
+            price_usd: parseFloat(v.price_usd) || parseFloat(body.price_usd),
+            stock_available: parseInt(v.stock_available) || 0,
+            stock_reserved: 0,
+            stock_incoming: 0,
+            variant_attributes: v.variant_attributes || {},
+            is_active: v.is_active !== false,
+            sort_order: idx,
+          }))
+        );
+      }
+    }
   }
   
   return NextResponse.json({ data });

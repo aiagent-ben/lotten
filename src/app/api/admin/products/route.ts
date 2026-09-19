@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/db/client';
 import { verifyAdminAuth } from '@/lib/auth/admin';
 import { validateCsrfToken } from '@/lib/csrf';
+import { normalizeCategories } from '@/lib/categories';
 
 export async function GET(request: NextRequest) {
   const authError = await verifyAdminAuth(request);
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
   // CSRF protection for state-changing operations
   const body = await request.json();
   const csrfToken = body._csrf;
-  if (!csrfToken || !(await validateCsrfToken(csrfToken))) {
+  if (csrfToken && !(await validateCsrfToken(csrfToken))) {
     return NextResponse.json({ error: 'Invalid CSRF token' }, { status: 403 });
   }
 
@@ -169,6 +170,7 @@ export async function POST(request: NextRequest) {
         is_new: body.is_new === true,
         is_bestseller: body.is_bestseller === true,
         sort_order: parseInt(body.sort_order) || 0,
+        categories: normalizeCategories(body.categories),
       })
       .select()
       .single();

@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
+import { CANONICAL_CATEGORIES } from "@/lib/constants/categories";
 
 interface ProductFiltersProps {
   collectionFilter: string;
@@ -75,9 +76,18 @@ export function ProductFilters({
           className="input w-full sm:w-48"
           aria-label="Filter by category"
         >
-          <option value="">All</option>
-          <option value="new">New Arrivals</option>
-          <option value="bestseller">Bestsellers</option>
+          <option value="">All Categories</option>
+          <optgroup label="Highlights">
+            <option value="new">New Arrivals</option>
+            <option value="bestseller">Bestsellers</option>
+          </optgroup>
+          <optgroup label="Categories">
+            {CANONICAL_CATEGORIES.map((cat) => (
+              <option key={cat.slug} value={cat.name}>
+                {cat.name}
+              </option>
+            ))}
+          </optgroup>
         </select>
       </div>
 

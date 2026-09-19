@@ -5,6 +5,7 @@ import { RichTextEditor } from '@/components/admin/RichTextEditor';
 import { MaterialSpecEditor } from '@/components/admin/MaterialSpecEditor';
 import { ColorOptionEditor } from '@/components/admin/ColorOptionEditor';
 import { ProductVariantEditor } from '@/components/admin/ProductVariantEditor';
+import { CategoryTagPicker } from '@/components/admin/CategoryTagPicker';
 import { useState, useEffect } from 'react';
 
 interface FormData {
@@ -44,6 +45,7 @@ interface FormData {
   is_new: boolean;
   is_bestseller: boolean;
   sort_order: string;
+  categories: string[];
 
   // Materials & Colors
   materials: string;
@@ -92,6 +94,7 @@ export default function NewProductPage() {
     is_new: false,
     is_bestseller: false,
     sort_order: '0',
+    categories: [],
     materials: JSON.stringify([
       { part: '', material: '', finish: '', code: '' },
     ], null, 2),
@@ -260,6 +263,13 @@ export default function NewProductPage() {
                   ))}
                 </select>
               </div>
+            </div>
+
+            <div className="pt-1">
+              <CategoryTagPicker
+                categories={formData.categories}
+                onChange={(categories) => setFormData(prev => ({ ...prev, categories }))}
+              />
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
