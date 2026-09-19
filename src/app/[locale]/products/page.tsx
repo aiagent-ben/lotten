@@ -104,10 +104,12 @@ export default async function ProductsPage({ searchParams }: Props) {
   // Get collection for filter display
   const collection = collectionFilter ? await getCollectionBySlug(collectionFilter) : null;
 
-  // Transform collections for ProductFilters component
+  // Transform collections for ProductFilters component (only collections with active products, sorted A-Z)
+  const activeCollectionIds = new Set(productsData.map(p => p.collection_id).filter(Boolean));
   const filterCollections = allCollections
-    .filter(c => c.is_active)
-    .map(c => ({ id: c.id, name: c.name }));
+    .filter(c => c.is_active && activeCollectionIds.has(c.id))
+    .map(c => ({ id: c.id, name: c.name }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   // Helper function to get collection name from collection_id (uses dynamic data)
   function getCollectionName(collectionId: string): string {

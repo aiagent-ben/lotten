@@ -64,7 +64,7 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
   const { addToRecentlyViewed, recentlyViewed } = useRecentlyViewed();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [selectedFinish, setSelectedFinish] = useState<{ code: string; name: string; hex: string; part: string } | null>(product.colors?.[0] || null);
-  const [activeTab, setActiveTab] = useState<'description' | 'specifications' | 'materials' | 'dimensions'>('description');
+  const [activeTab, setActiveTab] = useState<'description' | 'dimensions' | 'materials'>('description');
   const thumbnailRef = useRef<HTMLDivElement>(null);
 
   // Track recently viewed
@@ -156,7 +156,7 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
     scrollThumbnailIntoView(selectedIndex);
   }, [selectedIndex, scrollThumbnailIntoView]);
 
-  // Parse specifications
+  // Parse specifications for quick-specs summary strip
   const specs = parseSpecifications(product);
 
   // Recently viewed (excluding current product)
@@ -466,16 +466,16 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                 <li>
                   <button 
                     role="tab" 
-                    aria-selected={activeTab === 'specifications'}
-                    onClick={() => setActiveTab('specifications')}
+                    aria-selected={activeTab === 'dimensions'}
+                    onClick={() => setActiveTab('dimensions')}
                     className={cn(
                       'font-medium pb-4 border-b-2 -mb-px transition-colors cursor-pointer',
-                      activeTab === 'specifications'
+                      activeTab === 'dimensions'
                         ? 'text-amber-700 border-amber-700'
                         : 'text-gray-500 hover:text-gray-900 border-transparent hover:border-gray-300'
                     )}
                   >
-                    Specifications
+                    Dimensions & Specifications
                   </button>
                 </li>
                 <li>
@@ -493,21 +493,6 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                     Materials & Finishes
                   </button>
                 </li>
-                <li>
-                  <button 
-                    role="tab" 
-                    aria-selected={activeTab === 'dimensions'}
-                    onClick={() => setActiveTab('dimensions')}
-                    className={cn(
-                      'font-medium pb-4 border-b-2 -mb-px transition-colors cursor-pointer',
-                      activeTab === 'dimensions'
-                        ? 'text-amber-700 border-amber-700'
-                        : 'text-gray-500 hover:text-gray-900 border-transparent hover:border-gray-300'
-                    )}
-                  >
-                    Dimensions
-                  </button>
-                </li>
               </ul>
             </nav>
 
@@ -521,49 +506,6 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
               </div>
             )}
 
-            {activeTab === 'specifications' && (
-              <div className="space-y-8">
-                <h2 className="heading-2 text-gray-900">Specifications</h2>
-                <dl className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {specs.dimensions && (
-                    <>
-                      <dt className="text-gray-500">Dimensions</dt>
-                      <dd className="font-medium text-gray-900">{specs.dimensions}</dd>
-                    </>
-                  )}
-                  {specs.weight && (
-                    <>
-                      <dt className="text-gray-500">Weight</dt>
-                      <dd className="font-medium text-gray-900">{specs.weight} kg</dd>
-                    </>
-                  )}
-                  {specs.volume && (
-                    <>
-                      <dt className="text-gray-500">Volume</dt>
-                      <dd className="font-medium text-gray-900">{specs.volume} m³</dd>
-                    </>
-                  )}
-                  {specs.packType && (
-                    <>
-                      <dt className="text-gray-500">Packaging</dt>
-                      <dd className="font-medium text-gray-900">{specs.packType}</dd>
-                    </>
-                  )}
-                  {product.lead_time_weeks && (
-                    <>
-                      <dt className="text-gray-500">Lead Time</dt>
-                      <dd className="font-medium text-gray-900">{product.lead_time_weeks} weeks</dd>
-                    </>
-                  )}
-                  {product.moq && (
-                    <>
-                      <dt className="text-gray-500">MOQ</dt>
-                      <dd className="font-medium text-gray-900">{product.moq}</dd>
-                    </>
-                  )}
-                </dl>
-              </div>
-            )}
 
             {activeTab === 'materials' && (
               <div className="space-y-8">
@@ -716,6 +658,35 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                     </div>
                   </div>
                 )}
+
+                {/* Section 3: Supply & Ordering */}
+                {(product.lead_time_weeks || product.moq) && (
+                  <div className="space-y-4 pt-4 border-t border-stone-200/60">
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-stone-500">
+                      Supply & Ordering
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {product.lead_time_weeks && (
+                        <div className="bg-white p-5 rounded-xl border border-stone-200/90 shadow-xs">
+                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">Lead Time</p>
+                          <p className="font-sans font-semibold text-lg text-stone-900 mt-1.5 tabular-nums">
+                            {product.lead_time_weeks} <span className="text-xs font-normal text-stone-500">weeks</span>
+                          </p>
+                          <p className="text-xs text-stone-400 mt-0.5">Production & dispatch timeline</p>
+                        </div>
+                      )}
+                      {product.moq && (
+                        <div className="bg-white p-5 rounded-xl border border-stone-200/90 shadow-xs">
+                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">Minimum Order Quantity (MOQ)</p>
+                          <p className="font-sans font-semibold text-lg text-stone-900 mt-1.5 tabular-nums">
+                            {product.moq} <span className="text-xs font-normal text-stone-500">{product.moq === 1 ? 'unit' : 'units'}</span>
+                          </p>
+                          <p className="text-xs text-stone-400 mt-0.5">Minimum commercial batch size</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -788,11 +759,10 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
   );
 }
 
-// Helper function to parse specifications from product data
+// Helper function to parse specifications for the quick specs summary strip
 function parseSpecifications(product: any): { dimensions?: string; weight?: string; volume?: string; packType?: string } {
   const specs: { dimensions?: string; weight?: string; volume?: string; packType?: string } = {};
-  
-  // Build dimensions string
+
   const dims: string[] = [];
   if (product.width_mm) dims.push(`W${product.width_mm}mm`);
   if (product.depth_mm) dims.push(`D${product.depth_mm}mm`);
