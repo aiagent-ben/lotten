@@ -99,7 +99,8 @@ export async function getProductsByCollection(collectionId: string): Promise<Pro
 export async function getFeaturedProducts(limit?: number): Promise<Product[]> {
   const products = await fetchProducts();
   const featured = products.filter(p => p.is_active && (p.is_new || p.is_bestseller));
-  return limit ? featured.slice(0, limit) : featured;
+  const result = featured.length > 0 ? featured : products.filter(p => p.is_active);
+  return limit ? result.slice(0, limit) : result;
 }
 
 export async function getAllProducts(): Promise<Product[]> {

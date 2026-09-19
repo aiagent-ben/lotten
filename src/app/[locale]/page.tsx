@@ -5,6 +5,8 @@ import { getFeaturedProducts, getAllActiveProducts, getCollectionBySlug } from '
 import { formatPrice } from '@/lib/utils';
 import NewsletterForm from '@/components/NewsletterForm';
 import { getCollectionName } from '@/lib/collections';
+import { Factory, TreePine, ShieldCheck } from 'lucide-react';
+
 export const metadata: Metadata = {
   title: 'Lotten — Curated Malaysian Oak Furniture',
   description: 'Curated Malaysian Oak furniture for modern homes — direct from manufacturer to your door.',
@@ -16,10 +18,10 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen bg-white font-sans antialiased">
       {/* Hero Section - Calm Editorial Style */}
-      <section className="relative min-h-screen flex items-center pt-16 lg:pt-20">
+      <section className="relative min-h-[calc(100vh-4rem)] flex items-center">
         <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: 'url(/hero-furniture.jpg)', filter: 'brightness(0.4)' }} />
         <div className="absolute inset-0 bg-gradient-to-r from-amber-900/95 via-amber-900/80 to-transparent" />
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
           <div className="max-w-3xl animate-slide-up">
             <span className="inline-block px-4 py-1.5 rounded-full bg-amber-600/20 text-amber-100 text-sm font-medium mb-8 tracking-wide backdrop-blur-sm border border-amber-400/30">
               Direct from Manufacturer
@@ -49,46 +51,26 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
-
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce" aria-hidden="true">
-          <svg className="w-6 h-6" style={{ color: 'rgba(255,255,255,0.5)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-          </svg>
-        </div>
       </section>
 
       {/* Trust Badges */}
       <section className="py-12 bg-white border-y border-gray-100">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 max-w-4xl mx-auto gap-8 text-center">
             <div className="py-4">
-              <svg className="mx-auto h-10 w-10 text-amber-700 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
-              </svg>
+              <Factory className="mx-auto h-9 w-9 text-amber-700 mb-3" strokeWidth={1.5} />
+              <h3 className="font-medium text-gray-900 mb-1">Direct from Workshop</h3>
+              <p className="text-sm text-gray-500">No middlemen, honest factory pricing</p>
+            </div>
+            <div className="py-4">
+              <TreePine className="mx-auto h-9 w-9 text-amber-700 mb-3" strokeWidth={1.5} />
+              <h3 className="font-medium text-gray-900 mb-1">Solid Malaysian Oak</h3>
+              <p className="text-sm text-gray-500">100% sustainably sourced timber</p>
+            </div>
+            <div className="py-4">
+              <ShieldCheck className="mx-auto h-9 w-9 text-amber-700 mb-3" strokeWidth={1.5} />
               <h3 className="font-medium text-gray-900 mb-1">Quality Guaranteed</h3>
-              <p className="text-sm text-gray-500">Premium Malaysian Oak</p>
-            </div>
-            <div className="py-4">
-              <svg className="mx-auto h-10 w-10 text-amber-700 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-              </svg>
-              <h3 className="font-medium text-gray-900 mb-1">Secure Payment</h3>
-              <p className="text-sm text-gray-500">Encrypted checkout</p>
-            </div>
-            <div className="py-4">
-              <svg className="mx-auto h-10 w-10 text-amber-700 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-              <h3 className="font-medium text-gray-900 mb-1">Nationwide Delivery</h3>
-              <p className="text-sm text-gray-500">Peninsular & East Malaysia</p>
-            </div>
-            <div className="py-4">
-              <svg className="mx-auto h-10 w-10 text-amber-700 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <h3 className="font-medium text-gray-900 mb-1">30-Day Returns</h3>
-              <p className="text-sm text-gray-500">Hassle-free</p>
+              <p className="text-sm text-gray-500">Heirloom standards, built to last</p>
             </div>
           </div>
         </div>
