@@ -118,18 +118,18 @@ export default async function ProductsPage({ searchParams }: Props) {
   }
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-background">
       {/* Page Header */}
-      <section className="py-16 bg-gray-50 border-b border-gray-100">
+      <section className="py-16 bg-stone-100/50 border-b border-stone-200">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="heading-1 text-gray-900 mb-4">All Products</h1>
-            <p className="body-lg text-gray-600">
+            <h1 className="heading-1 text-stone-900 mb-4">All Products</h1>
+            <p className="body-lg text-stone-600">
               Discover our complete range of premium Malaysian Oak furniture, 
               handcrafted for modern living spaces.
             </p>
             {collection && (
-              <p className="body text-amber-700 mt-4 font-medium">
+              <p className="body text-amber-800 mt-4 font-medium">
                 Showing {products.length} product{products.length !== 1 ? 's' : ''} in {collection.name}
               </p>
             )}
@@ -138,7 +138,7 @@ export default async function ProductsPage({ searchParams }: Props) {
       </section>
 
       {/* Filters & Toolbar */}
-      <section className="py-8 border-b border-gray-100">
+      <section className="py-8 border-b border-stone-200">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <ProductFilters
             collectionFilter={collectionFilter}
@@ -185,7 +185,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                   return (
                     <article 
                       key={product.id} 
-                      className="product-card group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                      className="product-card group bg-white rounded-xl border border-stone-200 overflow-hidden hover:shadow-lg transition-shadow duration-300"
                       role="listitem"
                     >
                       <Link 
@@ -194,7 +194,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                         aria-label={`View ${product.name}`}
                       >
                         {/* Product Image */}
-                        <div className="relative aspect-[4/3] overflow-hidden bg-gray-50">
+                        <div className="relative aspect-[4/3] overflow-hidden bg-stone-100">
                           {primaryImage ? (
                             <Image
                               src={primaryImage.url}
@@ -206,7 +206,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                              <svg className="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-16 h-16 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                               </svg>
                             </div>
@@ -225,13 +225,13 @@ export default async function ProductsPage({ searchParams }: Props) {
 
                         {/* Product Info */}
                         <div className="p-4">
-                          <p className="caption text-amber-700 font-medium mb-1">
+                          <p className="caption text-amber-800 font-medium mb-1">
                             {getCollectionName(product.collection_id)}
                           </p>
-                          <h3 className="product-card-title font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-amber-700 transition-colors">
+                          <h3 className="product-card-title font-semibold text-stone-900 mb-2 line-clamp-2 group-hover:text-primary transition-colors">
                             {product.name}
                           </h3>
-                          <p className="product-card-price text-lg font-bold text-gray-900">
+                          <p className="product-card-price text-lg font-bold text-stone-900 tabular-nums">
                             {formatPrice(product.price_usd)}
                           </p>
                         </div>
@@ -244,14 +244,14 @@ export default async function ProductsPage({ searchParams }: Props) {
               {/* Pagination */}
               {totalPages > 1 && (
                 <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-stone-600">
                     Showing {(page - 1) * perPage + 1} to {Math.min(page * perPage, products.length)} of {products.length} products
                   </p>
                   <nav className="flex items-center gap-2" aria-label="Pagination">
                     {page > 1 && (
                       <Link
                         href={`/products?page=${page - 1}${collectionFilter ? `&collection=${collectionFilter}` : ''}${categoryFilter ? `&category=${categoryFilter}` : ''}${sortFilter !== 'featured' ? `&sort=${sortFilter}` : ''}`}
-                        className="btn-outline btn-sm"
+                        className="btn btn-outline btn-sm"
                         aria-label="Previous page"
                       >
                         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -279,8 +279,8 @@ export default async function ProductsPage({ searchParams }: Props) {
                             className={cn(
                               'w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors',
                               page === pageNum
-                                ? 'bg-amber-700 text-white'
-                                : 'text-gray-600 hover:bg-gray-100'
+                                ? 'bg-amber-900 text-white shadow-xs'
+                                : 'text-stone-600 hover:bg-stone-100'
                             )}
                             aria-label={`Page ${pageNum}`}
                             aria-current={page === pageNum ? 'page' : undefined}
@@ -293,7 +293,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                     {page < totalPages && (
                       <Link
                         href={`/products?page=${page + 1}${collectionFilter ? `&collection=${collectionFilter}` : ''}${categoryFilter ? `&category=${categoryFilter}` : ''}${sortFilter !== 'featured' ? `&sort=${sortFilter}` : ''}`}
-                        className="btn-outline btn-sm"
+                        className="btn btn-outline btn-sm"
                         aria-label="Next page"
                       >
                         Next
@@ -313,12 +313,12 @@ export default async function ProductsPage({ searchParams }: Props) {
       {/* CTA Section */}
       <section className="py-16 bg-amber-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="heading-2 text-gray-900 mb-4">Can&apos;t Find What You&apos;re Looking For?</h2>
-          <p className="body-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+          <h2 className="heading-2 text-stone-900 mb-4">Can&apos;t Find What You&apos;re Looking For?</h2>
+          <p className="body-lg text-stone-600 mb-8 max-w-2xl mx-auto">
             We have more products available in our showroom. Contact our team for custom orders 
             or to inquire about upcoming collections.
           </p>
-          <Link href="/contact" className="btn-primary btn-lg bg-amber-600 hover:bg-amber-700">
+          <Link href="/contact" className="btn btn-primary btn-lg">
             Contact Us
           </Link>
         </div>

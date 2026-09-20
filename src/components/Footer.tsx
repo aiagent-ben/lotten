@@ -10,7 +10,7 @@ import { Logo } from "@/components/Logo";
  */
 export function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-400 py-16">
+    <footer className="bg-stone-900 text-stone-400 py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
           <div className="col-span-2 md:col-span-1">
@@ -21,7 +21,7 @@ export function Footer() {
             >
               <Logo variant="full" className="h-9 w-auto text-white" />
             </Link>
-            <p className="text-sm text-gray-500 max-w-sm leading-relaxed">
+            <p className="text-sm text-stone-400 max-w-sm leading-relaxed">
               Curated Malaysian Oak furniture for modern homes. Direct from
               manufacturer to your door — honest pricing, exceptional quality.
             </p>
@@ -120,8 +120,8 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-gray-500">
+        <div className="border-t border-stone-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-stone-500">
             © {new Date().getFullYear()} Lotten. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
@@ -129,7 +129,7 @@ export function Footer() {
               href="https://instagram.com/lotten"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-400 hover:text-white transition-colors"
+              className="text-stone-400 hover:text-white transition-colors"
               aria-label="Instagram"
             >
               <svg
@@ -144,7 +144,7 @@ export function Footer() {
               href="https://facebook.com/lotten"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-400 hover:text-white transition-colors"
+              className="text-stone-400 hover:text-white transition-colors"
               aria-label="Facebook"
             >
               <svg
@@ -159,7 +159,7 @@ export function Footer() {
               href="https://pinterest.com/lotten"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-400 hover:text-white transition-colors"
+              className="text-stone-400 hover:text-white transition-colors"
               aria-label="Pinterest"
             >
               <svg

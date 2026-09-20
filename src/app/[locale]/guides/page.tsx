@@ -53,12 +53,12 @@ export default async function GuidesPage({ searchParams }: PageProps) {
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 lg:px-8 lg:py-16">
       <header className="mb-12">
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 text-primary-700 rounded-full text-sm font-medium mb-6">
-          <BookOpen className="w-4 h-4" />
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-900 border border-amber-200 rounded-full text-sm font-medium mb-6">
+          <BookOpen className="w-4 h-4 text-amber-700" />
           Care Guides
         </div>
-        <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Furniture Care Guides</h1>
-        <p className="text-xl text-gray-600 max-w-2xl">
+        <h1 className="text-4xl lg:text-5xl font-bold text-stone-900 mb-4">Furniture Care Guides</h1>
+        <p className="text-xl text-stone-600 max-w-2xl">
           Expert advice to keep your Malaysian Oak furniture looking beautiful for generations.
         </p>
       </header>
@@ -72,17 +72,17 @@ export default async function GuidesPage({ searchParams }: PageProps) {
               href={`/guides?category=${encodeURIComponent(cat.slug)}`}
               className={`p-6 rounded-xl border-2 transition-all ${
                 category === cat.slug
-                  ? 'border-primary-500 bg-primary-50'
-                  : 'border-gray-200 hover:border-primary-300 hover:bg-gray-50'
+                  ? 'border-amber-600 bg-amber-50/70 shadow-xs'
+                  : 'border-stone-200 hover:border-amber-300 hover:bg-stone-50'
               }`}
             >
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                  <cat.icon className="w-5 h-5 text-primary-600" />
+                <div className="w-10 h-10 bg-amber-100/80 rounded-lg flex items-center justify-center">
+                  <cat.icon className="w-5 h-5 text-amber-800" />
                 </div>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-1">{cat.name}</h3>
-              <p className="text-sm text-gray-500">{cat.description}</p>
+              <h3 className="font-semibold text-stone-900 mb-1">{cat.name}</h3>
+              <p className="text-sm text-stone-500">{cat.description}</p>
             </Link>
           ))}
         </div>
@@ -95,13 +95,13 @@ export default async function GuidesPage({ searchParams }: PageProps) {
             {/* Categories Filter */}
             {categories.length > 0 && (
               <div>
-                <h3 className="font-semibold text-gray-900 mb-4">Categories</h3>
+                <h3 className="font-semibold text-stone-900 mb-4">Categories</h3>
                 <ul className="space-y-2">
                   <li>
                     <Link 
                       href="/guides" 
                       className={`block px-3 py-2 rounded-lg text-sm transition-colors ${
-                        !category ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-50'
+                        !category ? 'bg-amber-50 text-amber-900 font-medium' : 'text-stone-600 hover:bg-stone-50'
                       }`}
                     >
                       All Guides
@@ -112,7 +112,7 @@ export default async function GuidesPage({ searchParams }: PageProps) {
                       <Link 
                         href={`/guides?category=${encodeURIComponent(cat)}`} 
                         className={`block px-3 py-2 rounded-lg text-sm transition-colors ${
-                          category === cat ? 'bg-primary-50 text-primary-700' : 'text-gray-600 hover:bg-gray-50'
+                          category === cat ? 'bg-amber-50 text-amber-900 font-medium' : 'text-stone-600 hover:bg-stone-50'
                         }`}
                       >
                         {cat}
@@ -124,12 +124,12 @@ export default async function GuidesPage({ searchParams }: PageProps) {
             )}
 
             {/* Quick Tips Box */}
-            <div className="bg-primary-50 border border-primary-100 rounded-xl p-6">
-              <h4 className="font-semibold text-primary-900 mb-3 flex items-center gap-2">
-                <Sparkles className="w-5 h-5" />
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
+              <h4 className="font-semibold text-amber-950 mb-3 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-amber-700" />
                 Quick Tip
               </h4>
-              <p className="text-sm text-primary-700">
+              <p className="text-sm text-amber-800 leading-relaxed">
                 Dust weekly with a soft, dry microfiber cloth. Avoid harsh chemicals — a damp cloth with mild soap is all you need for deeper cleaning.
               </p>
             </div>
@@ -140,15 +140,15 @@ export default async function GuidesPage({ searchParams }: PageProps) {
         <main className="flex-1">
           {guides.length === 0 ? (
             <div className="text-center py-16">
-              <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-medium text-gray-900 mb-2">No guides found</h3>
-              <p className="text-gray-600">Try adjusting your filters or search terms.</p>
+              <BookOpen className="w-12 h-12 text-stone-300 mx-auto mb-4" />
+              <h3 className="text-xl font-medium text-stone-900 mb-2">No guides found</h3>
+              <p className="text-stone-600">Try adjusting your filters or search terms.</p>
             </div>
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 {guides.map((guide) => (
-                  <article key={guide.id} className="card group overflow-hidden">
+                  <article key={guide.id} className="card group overflow-hidden border border-stone-200 hover:border-amber-200 transition-colors">
                     <Link href={`/guides/${guide.slug}`} className="block">
                       {guide.featured_image_url && (
                         <figure className="relative aspect-[4/3] overflow-hidden">
@@ -161,7 +161,7 @@ export default async function GuidesPage({ searchParams }: PageProps) {
                           />
                           {guide.category && (
                             <div className="absolute top-3 left-3">
-                              <span className="px-2 py-1 text-xs bg-white/90 text-gray-900 rounded-full backdrop-blur-sm">
+                              <span className="px-2.5 py-1 text-xs bg-white/95 text-stone-900 font-medium rounded-full shadow-xs backdrop-blur-sm">
                                 {guide.category}
                               </span>
                             </div>
@@ -171,42 +171,42 @@ export default async function GuidesPage({ searchParams }: PageProps) {
                       <div className="p-6">
                         <div className="flex flex-wrap gap-2 mb-3">
                           {guide.category && (
-                            <span className="px-2 py-1 text-xs bg-primary-100 text-primary-700 rounded-full">
+                            <span className="px-2.5 py-0.5 text-xs bg-amber-50 text-amber-900 font-medium border border-amber-200 rounded-full">
                               {guide.category}
                             </span>
                           )}
                           {guide.tags.slice(0, 3).map((tag) => (
-                            <span key={tag} className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">
+                            <span key={tag} className="px-2.5 py-0.5 text-xs bg-stone-100 text-stone-700 font-medium rounded-full">
                               {tag}
                             </span>
                           ))}
                           {guide.tags.length > 3 && (
-                            <span className="px-2 py-1 text-xs bg-gray-100 text-gray-500 rounded-full">
+                            <span className="px-2.5 py-0.5 text-xs bg-stone-100 text-stone-500 font-medium rounded-full">
                               +{guide.tags.length - 3}
                             </span>
                           )}
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary-600 transition-colors mb-2 line-clamp-2">
+                        <h3 className="text-lg font-semibold text-stone-900 group-hover:text-primary transition-colors mb-2 line-clamp-2">
                           {guide.title}
                         </h3>
                         {guide.excerpt && (
-                          <p className="text-gray-600 text-sm line-clamp-3 mb-4">
+                          <p className="text-stone-600 text-sm line-clamp-3 mb-4 leading-relaxed">
                             {guide.excerpt}
                           </p>
                         )}
                       </div>
                     </Link>
-                    <div className="px-6 pb-6 border-t border-gray-100">
-                      <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500">
+                    <div className="px-6 pb-6 border-t border-stone-100">
+                      <div className="flex flex-wrap items-center gap-4 text-xs text-stone-500">
                         {guide.published_at && (
                           <time dateTime={guide.published_at} className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
+                            <Calendar className="w-3.5 h-3.5 text-stone-400" />
                             {format(new Date(guide.published_at), 'MMM d, yyyy')}
                           </time>
                         )}
                         {guide.read_time_minutes && (
                           <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
+                            <Clock className="w-3.5 h-3.5 text-stone-400" />
                             {guide.read_time_minutes} min
                           </span>
                         )}
@@ -222,18 +222,18 @@ export default async function GuidesPage({ searchParams }: PageProps) {
                   {page > 1 && (
                     <Link 
                       href={`/guides?page=${page - 1}${category ? `&category=${encodeURIComponent(category)}` : ''}${tag ? `&tag=${encodeURIComponent(tag)}` : ''}`}
-                      className="btn-outline btn-sm"
+                      className="btn btn-outline btn-sm"
                     >
                       Previous
                     </Link>
                   )}
-                  <span className="px-4 text-sm text-gray-600">
+                  <span className="px-4 text-sm text-stone-600 tabular-nums">
                     Page {page} of {totalPages}
                   </span>
                   {page < totalPages && (
                     <Link 
                       href={`/guides?page=${page + 1}${category ? `&category=${encodeURIComponent(category)}` : ''}${tag ? `&tag=${encodeURIComponent(tag)}` : ''}`}
-                      className="btn-outline btn-sm"
+                      className="btn btn-outline btn-sm"
                     >
                       Next
                     </Link>

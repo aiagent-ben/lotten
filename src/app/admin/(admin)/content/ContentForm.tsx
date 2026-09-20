@@ -346,9 +346,9 @@ export function ContentForm({ isNew = true }: ContentFormProps) {
               name="excerpt"
               value={formData.excerpt}
               onChange={handleChange}
-              rows={3}
+              rows={4}
               placeholder="Brief summary for cards and SEO (max 300 chars)"
-              className="input mt-1"
+              className="textarea input mt-1 min-h-[6.5rem]"
               maxLength={300}
             />
           </div>
@@ -460,9 +460,9 @@ export function ContentForm({ isNew = true }: ContentFormProps) {
               <textarea
                 value={formData.hotspots}
                 onChange={handleHotspotsChange}
-                rows={6}
+                rows={8}
                 placeholder='[{"productId": "prod-123", "x": 50, "y": 30, "label": "Sofa", "tooltip": "Breda 3-Seater"}]'
-                className="input mt-1 font-mono text-sm"
+                className="textarea input mt-1 font-mono text-sm min-h-[9rem]"
               />
               <p className="caption text-gray-500 mt-1">For lookbooks - clickable product hotspots on image</p>
             </div>
@@ -506,9 +506,9 @@ export function ContentForm({ isNew = true }: ContentFormProps) {
                 name="seo_description"
                 value={formData.seo_description}
                 onChange={handleChange}
-                rows={3}
+                rows={4}
                 placeholder="Defaults to excerpt"
-                className="input mt-1"
+                className="textarea input mt-1 min-h-[6.5rem]"
                 maxLength={160}
               />
               <p className="caption text-gray-500 mt-1">Max 160 characters</p>

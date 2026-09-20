@@ -133,20 +133,20 @@ export default async function GuidePage({ params }: PageProps) {
         {html}
       </div>
 
-      <footer className="mt-16 pt-8 border-t border-gray-200">
+      <footer className="mt-16 pt-8 border-t border-stone-200">
         <nav className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <Link href="/guides" className="btn-secondary">
+          <Link href="/guides" className="btn btn-secondary">
             <ChevronLeft className="w-4 h-4 mr-2" />
             All Care Guides
           </Link>
           
-          <div className="flex items-center gap-4 text-sm text-gray-500">
+          <div className="flex items-center gap-4 text-sm text-stone-500">
             <span>Found this helpful?</span>
-            <button className="btn-outline btn-sm flex items-center gap-2">
+            <button className="btn btn-outline btn-sm flex items-center gap-2">
               <Sparkles className="w-4 h-4" />
               Save Guide
             </button>
-            <button className="btn-outline btn-sm flex items-center gap-2">
+            <button className="btn btn-outline btn-sm flex items-center gap-2">
               <ArrowRight className="w-4 h-4" />
               Share
             </button>

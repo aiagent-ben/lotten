@@ -318,10 +318,10 @@ export default async function CollectionDetailPage({ params }: Props) {
             {collection.name} collection in person.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/contact" className="btn-primary btn-lg bg-amber-600 hover:bg-amber-500 w-full sm:w-auto">
+            <Link href="/contact" className="btn btn-primary btn-lg bg-amber-600 hover:bg-amber-500 text-white w-full sm:w-auto">
               Contact Us
             </Link>
-            <Link href="/products" className="btn-outline btn-lg border-amber-300/50 text-amber-100 hover:bg-amber-100/10 w-full sm:w-auto">
+            <Link href="/products" className="btn btn-lg bg-white/10 hover:bg-white/20 text-white border border-white/30 backdrop-blur-sm transition-all w-full sm:w-auto">
               Browse All Products
             </Link>
           </div>

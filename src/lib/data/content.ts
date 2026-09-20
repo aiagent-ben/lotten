@@ -43,6 +43,8 @@ interface ContentListParams {
   search?: string;
   category?: string;
   tag?: string;
+  room_type?: string;
+  style?: string;
   featured?: boolean;
   limit?: number;
 }
@@ -131,6 +133,12 @@ export async function getContentList(params: ContentListParams = {}): Promise<Co
   }
   if (tag) {
     query = query.contains('tags', [tag]);
+  }
+  if (params.room_type) {
+    query = query.eq('room_type', params.room_type);
+  }
+  if (params.style) {
+    query = query.contains('style_tags', [params.style]);
   }
   if (featured !== undefined) {
     query = query.eq('is_featured', featured);

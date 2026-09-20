@@ -152,3 +152,115 @@ Empty states must guide the user back to discovery rather than leaving them at a
 
 * Tab navigation underlines must align seamlessly with the container border. Use `-mb-px` on the active button so the active border (`border-b-2 border-amber-700`) overlaps and aligns flush with the container's bottom border (`border-b border-stone-200`).
 * Avoid layout shift on hover; transitions should be limited to `color`, `border-color`, and `background-color` over `150ms-200ms ease`.
+
+---
+
+## 8. UI Primitives & Component API
+
+To prevent class-omission bugs (such as writing `btn-primary` without the `.btn` base utility) and ensure consistent accessibility, use the standardized UI primitives in `src/components/ui/`:
+
+### 8.1 `<Button />` (`src/components/ui/Button.tsx`)
+A polymorphic forwardRef component powered by `@radix-ui/react-slot`.
+
+```tsx
+import { Button } from "@/components/ui/Button";
+import Link from "next/link";
+
+// 1. Standard button action
+<Button variant="primary" size="lg" onClick={handleCheckout}>
+  Place Order
+</Button>
+
+// 2. Next.js Link polymorphism with asChild
+<Button asChild variant="outline" size="default">
+  <Link href="/products">Browse All Products</Link>
+</Button>
+
+// 3. Compact icon or table action
+<Button variant="ghost" size="icon" aria-label="Edit item">
+  <PencilIcon className="w-4 h-4" />
+</Button>
+```
+
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `variant` | `'primary' \| 'secondary' \| 'outline' \| 'ghost' \| 'destructive'` | `'primary'` | Visual style mapped to brand tokens. |
+| `size` | `'default' \| 'sm' \| 'lg' \| 'icon'` | `'default'` | Touch target sizing (`h-11`, `h-9`, `h-12`, `h-10 w-10`). |
+| `asChild` | `boolean` | `false` | When true, renders child component (e.g. Next `<Link>`) while applying classes. |
+
+### 8.2 `<Select />` (`src/components/ui/Select.tsx`)
+A styled form select wrapper ensuring WCAG touch targets, stone borders, and amber focus rings:
+
+```tsx
+import { Select } from "@/components/ui/Select";
+
+<Select
+  value={selectedCategory}
+  onChange={(e) => setSelectedCategory(e.target.value)}
+  wrapperClassName="w-full sm:w-64"
+>
+  <option value="">All Categories</option>
+  <option value="dining">Dining Tables</option>
+  <option value="chairs">Dining Chairs</option>
+</Select>
+```
+
+### 8.3 `<Badge />` (`src/components/ui/Badge.tsx`)
+Status pills and category tags:
+
+```tsx
+import { Badge } from "@/components/ui/Badge";
+
+<Badge variant="amber">Solid Oak</Badge>
+<Badge variant="success">In Stock</Badge>
+<Badge variant="stone">Archived</Badge>
+```
+
+---
+
+## 9. Dark Mode System
+
+Lotten adheres to a warm Japandi dark palette. Stark pure blacks (`#000000`) and cool blue-grays (`slate-*`, `zinc-*`) are strictly prohibited.
+
+### 9.1 Dark Token Mapping
+Tokens in `globals.css` dynamically update under `.dark`:
+
+| Token | Light Value | Dark Value | Tailored Use |
+| :--- | :--- | :--- | :--- |
+| `--background` | `#fafafa` (off-white) | `#1c1917` (`stone-900`) | Deep charcoal wood tone background |
+| `--card` | `#ffffff` | `#1c1917` (`stone-900`) | Slightly elevated panel surface |
+| `--border` | `#e7e5e4` (`stone-200`) | `#44403c` (`stone-700`) | Warm stone borders |
+| `--foreground` | `#1a1a1a` | `#fafaf9` (`stone-50`) | High-contrast warm off-white text |
+| `--muted-foreground` | `#78716c` (`stone-500`) | `#a8a29e` (`stone-400`) | Muted metadata and captions |
+| `--primary` | `#78350f` (`amber-900`) | `#fde68a` (`amber-200`) | Lighter warm amber for dark contrast |
+| `--secondary` | `#fef3e2` (`amber-50`) | `#44403c` (`stone-700`) | Subtle dark chips and secondary fills |
+
+### 9.2 Dark Mode Coding Rules
+* Prefer token-based classes (`bg-background text-foreground border-border`) over hardcoded color utilities.
+* When adding explicit dark overrides, pair `stone` classes (e.g. `border-stone-200 dark:border-stone-700`, `text-stone-900 dark:text-stone-100`).
+* Never introduce `dark:bg-gray-950` or `dark:text-gray-100`.
+
+---
+
+## 10. Admin Layout & Data Table Standards
+
+Administrative backoffices must share the same artisanal Japandi ethos as the public storefront, avoiding clunky default dashboard styling.
+
+### 10.1 Data Tables
+1. **Header Row**:
+   * Style: `text-xs font-semibold tracking-wider text-stone-500 uppercase bg-stone-50/80 border-b border-stone-200`.
+   * Padding: `px-4 py-3.5`.
+2. **Body Rows**:
+   * Borders: `border-b border-stone-100 last:border-none`.
+   * Hover: `hover:bg-stone-50/60 transition-colors`.
+   * Padding: `px-4 py-4 text-sm text-stone-800`.
+3. **Data Formatting**:
+   * SKUs and Model Codes: `font-mono text-xs text-stone-600 font-medium`.
+   * Prices & Quantities: `font-sans font-medium text-stone-900 tabular-nums text-right`.
+   * Status Badges: Use `<Badge variant="success | warning | stone">`.
+
+### 10.2 Table Toolbar & Actions
+* Search inputs and filters must align on a single baseline with `gap-3`.
+* Action buttons inside table rows must use `<Button variant="ghost" size="sm">` or `<Button variant="outline" size="icon">` with accessible `aria-label` tags.
+* Delete and destructive actions must use `variant="destructive"` with confirmation modals.
+

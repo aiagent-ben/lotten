@@ -22,7 +22,7 @@ export default async function HomePage() {
   const recentPosts = contentResult.data;
 
   return (
-    <main className="min-h-screen bg-white font-sans antialiased">
+    <main className="min-h-screen bg-background font-sans antialiased">
       {/* Hero Section - Calm Editorial Style */}
       <section className="relative min-h-[calc(100vh-4rem)] flex items-center">
         <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: 'url(/hero-furniture.jpg)', filter: 'brightness(0.4)' }} />
@@ -41,7 +41,7 @@ export default async function HomePage() {
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 href="/products"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-amber-600 hover:bg-amber-500 text-white font-medium rounded-lg transition-all duration-200"
+                className="btn btn-primary btn-lg"
               >
                 Shop Collection
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,7 +50,7 @@ export default async function HomePage() {
               </Link>
               <Link
                 href="/collections"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-medium rounded-lg border border-white/20 transition-all duration-200 backdrop-blur-sm"
+                className="btn btn-lg bg-white/10 hover:bg-white/20 text-white border border-white/30 backdrop-blur-sm transition-all"
               >
                 Browse Collections
               </Link>
@@ -60,39 +60,39 @@ export default async function HomePage() {
       </section>
 
       {/* Trust Badges */}
-      <section className="py-12 bg-white border-y border-gray-100">
+      <section className="py-12 bg-card border-y border-stone-200">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 max-w-4xl mx-auto gap-8 text-center">
             <div className="py-4">
               <Factory className="mx-auto h-9 w-9 text-amber-700 mb-3" strokeWidth={1.5} />
-              <h3 className="font-medium text-gray-900 mb-1">Direct from Workshop</h3>
-              <p className="text-sm text-gray-500">No middlemen, honest factory pricing</p>
+              <h3 className="font-medium text-stone-900 mb-1">Direct from Workshop</h3>
+              <p className="text-sm text-stone-600">No middlemen, honest factory pricing</p>
             </div>
             <div className="py-4">
               <TreePine className="mx-auto h-9 w-9 text-amber-700 mb-3" strokeWidth={1.5} />
-              <h3 className="font-medium text-gray-900 mb-1">Solid Malaysian Oak</h3>
-              <p className="text-sm text-gray-500">100% sustainably sourced timber</p>
+              <h3 className="font-medium text-stone-900 mb-1">Solid Malaysian Oak</h3>
+              <p className="text-sm text-stone-600">100% sustainably sourced timber</p>
             </div>
             <div className="py-4">
               <ShieldCheck className="mx-auto h-9 w-9 text-amber-700 mb-3" strokeWidth={1.5} />
-              <h3 className="font-medium text-gray-900 mb-1">Quality Guaranteed</h3>
-              <p className="text-sm text-gray-500">Heirloom standards, built to last</p>
+              <h3 className="font-medium text-stone-900 mb-1">Quality Guaranteed</h3>
+              <p className="text-sm text-stone-600">Heirloom standards, built to last</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Featured Collections - Editorial Style */}
-      <section className="py-20 lg:py-28 bg-gray-50">
+      <section className="py-20 lg:py-28 bg-stone-100/50 border-b border-stone-200">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16 animate-slide-up">
-            <h2 className="font-display text-4xl sm:text-5xl font-semibold text-gray-900 mb-4">Our Collections</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">Each collection tells a story of craftsmanship, material, and design philosophy — curated for the way you live.</p>
+            <h2 className="font-display text-4xl sm:text-5xl font-semibold text-stone-900 mb-4">Our Collections</h2>
+            <p className="text-lg text-stone-600 max-w-2xl mx-auto">Each collection tells a story of craftsmanship, material, and design philosophy — curated for the way you live.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Breda */}
-            <Link href="/collections/breda" className="collection-card group relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-500 animate-slide-up">
+            <Link href="/collections/breda" className="collection-card group relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-500 animate-slide-up border border-stone-200">
               <div className="relative aspect-[4/3] overflow-hidden">
                 <Image
                   src="https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/335048/335048-breda-1-5m-tv-cabinet-109167/0.webp"
@@ -104,7 +104,7 @@ export default async function HomePage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-tr from-amber-600/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="collection-overlay absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                  <span className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg">
+                  <span className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-stone-900 font-semibold rounded-lg hover:bg-stone-100 transition-colors shadow-lg">
                     Explore Breda
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -113,31 +113,32 @@ export default async function HomePage() {
                 </div>
               </div>
               <div className="p-6">
-                <span className="inline-block px-3 py-1 text-xs font-medium text-amber-700 bg-amber-50 rounded-full mb-3">NestHouZ</span>
-                <h3 className="font-display text-2xl font-semibold text-gray-900 mb-2">Breda</h3>
-                <p className="text-gray-600 mb-4">Working desks, TV cabinets and sideboards in warm Walnut/Natural combinations.</p>
+                <span className="inline-block px-3 py-1 text-xs font-medium text-amber-900 bg-amber-50 rounded-full mb-3 border border-amber-200">Malaysian Oak</span>
+                <h3 className="font-display text-2xl font-semibold text-stone-900 mb-2">Breda</h3>
+                <p className="text-stone-600 mb-4">Working desks, TV cabinets and sideboards in warm Walnut/Natural combinations.</p>
                 <div className="flex flex-wrap gap-1.5 mb-4">
-                  <span className="px-2 py-1 text-xs font-medium rounded bg-amber-100 text-amber-700">Cocoa</span>
-                  <span className="px-2 py-1 text-xs font-medium rounded bg-amber-100 text-amber-700">White Marble</span>
+                  <span className="px-2 py-1 text-xs font-medium rounded bg-stone-100 text-stone-700">Walnut</span>
+                  <span className="px-2 py-1 text-xs font-medium rounded bg-stone-100 text-stone-700">Natural</span>
+                  <span className="px-2 py-1 text-xs font-medium rounded bg-stone-100 text-stone-700">White Marble</span>
                 </div>
-                <span className="text-sm font-medium text-amber-700 hover:text-amber-900 inline-flex items-center gap-1 transition-colors">View 7 products →</span>
+                <span className="text-sm font-medium text-amber-700 hover:text-amber-800 inline-flex items-center gap-1 transition-colors">View 8 products →</span>
               </div>
             </Link>
 
             {/* Dover */}
-            <Link href="/collections/dover" className="collection-card group relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-500 animate-slide-up" style={{ animationDelay: '100ms' }}>
+            <Link href="/collections/dover" className="collection-card group relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-500 animate-slide-up border border-stone-200">
               <div className="relative aspect-[4/3] overflow-hidden">
                 <Image
-                  src="https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/346036/346036-dover-1-8m-sideboard-109113/0.webp"
-                  alt="Dover Collection - Complete living room sets with coffee tables, consoles and desks"
+                  src="https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/335070/335070-dover-coffee-table-113/0.webp"
+                  alt="Dover Collection - Modern coffee tables and living room furniture"
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-gradient-to-tr from-rose-600/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-tr from-amber-600/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="collection-overlay absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                  <span className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg">
+                  <span className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-stone-900 font-semibold rounded-lg hover:bg-stone-100 transition-colors shadow-lg">
                     Explore Dover
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -146,31 +147,31 @@ export default async function HomePage() {
                 </div>
               </div>
               <div className="p-6">
-                <span className="inline-block px-3 py-1 text-xs font-medium text-rose-700 bg-rose-50 rounded-full mb-3">NestHouZ</span>
-                <h3 className="font-display text-2xl font-semibold text-gray-900 mb-2">Dover</h3>
-                <p className="text-gray-600 mb-4">Complete living room collections with coffee, console, side tables and desks.</p>
+                <span className="inline-block px-3 py-1 text-xs font-medium text-amber-900 bg-amber-50 rounded-full mb-3 border border-amber-200">Malaysian Oak</span>
+                <h3 className="font-display text-2xl font-semibold text-stone-900 mb-2">Dover</h3>
+                <p className="text-stone-600 mb-4">Complete living room collections with coffee, console, side tables and desks.</p>
                 <div className="flex flex-wrap gap-1.5 mb-4">
-                  <span className="px-2 py-1 text-xs font-medium rounded bg-rose-100 text-rose-700">Walnut</span>
-                  <span className="px-2 py-1 text-xs font-medium rounded bg-rose-100 text-rose-700">Cocoa</span>
+                  <span className="px-2 py-1 text-xs font-medium rounded bg-stone-100 text-stone-700">Walnut</span>
+                  <span className="px-2 py-1 text-xs font-medium rounded bg-stone-100 text-stone-700">Natural</span>
                 </div>
-                <span className="text-sm font-medium text-rose-600 hover:text-rose-700 inline-flex items-center gap-1 transition-colors">View 8 products →</span>
+                <span className="text-sm font-medium text-amber-700 hover:text-amber-800 inline-flex items-center gap-1 transition-colors">View 6 products →</span>
               </div>
             </Link>
 
             {/* Castor */}
-            <Link href="/collections/castor" className="collection-card group relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-500 animate-slide-up" style={{ animationDelay: '200ms' }}>
+            <Link href="/collections/castor" className="collection-card group relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-500 animate-slide-up border border-stone-200">
               <div className="relative aspect-[4/3] overflow-hidden">
                 <Image
-                  src="https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/335043/335043-castor-1-5m-tv-cabinet-1141021325/0.webp"
-                  alt="Castor Collection - Minimalist three-tone entertainment centers"
+                  src="https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/335003/335003-castor-1-8m-tv-cabinet-1141021325/0.webp"
+                  alt="Castor Collection - Contemporary TV cabinets and entertainment units"
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-gradient-to-tr from-purple-600/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-tr from-amber-600/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="collection-overlay absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                  <span className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg">
+                  <span className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-stone-900 font-semibold rounded-lg hover:bg-stone-100 transition-colors shadow-lg">
                     Explore Castor
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -180,8 +181,8 @@ export default async function HomePage() {
               </div>
               <div className="p-6">
                 <span className="inline-block px-3 py-1 text-xs font-medium text-purple-700 bg-purple-50 rounded-full mb-3">Luooma</span>
-                <h3 className="font-display text-2xl font-semibold text-gray-900 mb-2">Castor</h3>
-                <p className="text-gray-600 mb-4">Minimalist three-tone finish combinations for modern entertainment centers.</p>
+                <h3 className="font-display text-2xl font-semibold text-stone-900 mb-2">Castor</h3>
+                <p className="text-stone-600 mb-4">Minimalist three-tone finish combinations for modern entertainment centers.</p>
                 <div className="flex flex-wrap gap-1.5 mb-4">
                   <span className="px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-700">Black</span>
                   <span className="px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-700">Natural</span>
@@ -193,7 +194,7 @@ export default async function HomePage() {
           </div>
 
           <div className="text-center mt-12 animate-slide-up">
-            <Link href="/collections" className="inline-flex items-center gap-2 px-8 py-4 bg-white border-2 border-gray-200 text-gray-900 font-semibold rounded-lg hover:bg-gray-50 hover:border-amber-300 transition-all">
+            <Link href="/collections" className="btn btn-outline btn-lg">
               View All 19 Collections
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -204,12 +205,12 @@ export default async function HomePage() {
       </section>
 
       {/* Featured Products */}
-      <section className="py-20 lg:py-28 bg-white">
+      <section className="py-20 lg:py-28 bg-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 animate-slide-up">
             <div>
-              <h2 className="font-display text-4xl sm:text-5xl font-semibold text-gray-900 mb-2">Featured Products</h2>
-              <p className="text-lg text-gray-600">Handpicked bestsellers and new arrivals</p>
+              <h2 className="font-display text-4xl sm:text-5xl font-semibold text-stone-900 mb-2">Featured Products</h2>
+              <p className="text-lg text-stone-600">Handpicked bestsellers and new arrivals</p>
             </div>
             <Link
               href="/products"
@@ -226,11 +227,11 @@ export default async function HomePage() {
                 <Link
                   key={product.id}
                   href={`/products/${product.slug}`}
-                  className="group relative bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                  className="group relative bg-white rounded-xl border border-stone-200 overflow-hidden hover:shadow-lg transition-shadow duration-300"
                   role="listitem"
                   aria-label={`View ${product.name}`}
                 >
-                  <div className="relative aspect-square overflow-hidden bg-gray-50">
+                  <div className="relative aspect-square overflow-hidden bg-stone-100">
                     {primaryImage ? (
                       <Image
                         src={primaryImage.url}
@@ -242,7 +243,7 @@ export default async function HomePage() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-12 h-12 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                       </div>
@@ -250,23 +251,23 @@ export default async function HomePage() {
                     {/* Badges */}
                     <div className="absolute top-3 left-3 flex flex-col gap-1.5">
                       {product.is_new && (
-                        <span className="px-2 py-1 text-xs font-medium text-white bg-amber-600 rounded">New</span>
+                        <span className="px-2.5 py-0.5 text-xs font-medium text-amber-900 bg-amber-50 border border-amber-200 rounded-full shadow-xs">New</span>
                       )}
                       {product.is_bestseller && (
-                        <span className="px-2 py-1 text-xs font-medium text-white bg-black/70 rounded">Bestseller</span>
+                        <span className="px-2.5 py-0.5 text-xs font-medium text-stone-900 bg-white/90 border border-stone-200 rounded-full shadow-xs backdrop-blur-xs">Bestseller</span>
                       )}
                     </div>
                   </div>
 
                   <div className="p-5">
-                    <p className="text-xs font-medium text-amber-700 uppercase tracking-wide mb-1">
+                    <p className="text-xs font-medium text-amber-800 uppercase tracking-wide mb-1">
                       {getCollectionName(product.collection_id)}
                     </p>
-                    <h3 className="font-medium text-gray-900 mb-1.5 line-clamp-1 group-hover:text-amber-700 transition-colors">
+                    <h3 className="font-medium text-stone-900 mb-1.5 line-clamp-1 group-hover:text-primary transition-colors">
                       {product.name}
                     </h3>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-bold text-gray-900">
+                      <span className="text-2xl font-bold text-stone-900 tabular-nums">
                         {formatPrice(product.price_usd)}
                       </span>
                     </div>
@@ -279,21 +280,21 @@ export default async function HomePage() {
       </section>
 
       {/* Brand Story */}
-      <section className="py-20 lg:py-28 bg-gray-50">
+      <section className="py-20 lg:py-28 bg-stone-100/50 border-y border-stone-200">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
             <div>
-              <span className="inline-block px-4 py-1.5 rounded-full bg-amber-600/10 text-amber-700 text-sm font-medium mb-6">Our Philosophy</span>
-              <h2 className="font-display text-4xl sm:text-5xl font-semibold text-gray-900 mb-6 leading-tight">Crafted with Intention,<br />Priced with Integrity</h2>
-              <div className="space-y-4 text-gray-600">
+              <span className="inline-block px-4 py-1.5 rounded-full bg-amber-600/10 text-amber-800 text-sm font-medium mb-6 border border-amber-200">Our Philosophy</span>
+              <h2 className="font-display text-4xl sm:text-5xl font-semibold text-stone-900 mb-6 leading-tight">Crafted with Intention,<br />Priced with Integrity</h2>
+              <div className="space-y-4 text-stone-600">
                 <p className="text-lg leading-relaxed">Every piece of Lotten furniture begins in our Malaysian workshop, where sustainably sourced oak meets generations of woodworking expertise. We control the entire journey — from timber selection to final finish — so you receive heirloom-quality furniture without the showroom markup.</p>
                 <p className="text-lg leading-relaxed">No middlemen. No inflated prices. Just honest craftsmanship delivered direct to your home.</p>
               </div>
-              <Link href="/about" className="inline-flex items-center gap-2 mt-8 px-6 py-3 bg-amber-700 hover:bg-amber-800 text-white font-medium rounded-lg transition-colors">
-                Read Our Story <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+              <Link href="/about" className="btn btn-primary mt-8">
+                Read Our Story <svg className="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
               </Link>
             </div>
-            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden">
+            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-stone-200">
               <Image
                 src="https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/335048/335048-breda-1-5m-tv-cabinet-109167/0.webp"
                 alt="Lotten workshop - craftsmen working on Malaysian Oak furniture"
@@ -309,24 +310,24 @@ export default async function HomePage() {
 
       {/* Latest Stories & Inspiration */}
       {recentPosts.length > 0 && (
-        <section className="py-20 lg:py-28 bg-white border-t border-gray-100">
+        <section className="py-20 lg:py-28 bg-background border-t border-stone-200">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 animate-slide-up">
               <div>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-800 text-xs font-semibold tracking-wide uppercase mb-3">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-200 text-xs font-semibold tracking-wide uppercase mb-3">
                   <BookOpen className="w-3.5 h-3.5" />
                   Journal & Care Guides
                 </span>
-                <h2 className="font-display text-4xl sm:text-5xl font-semibold text-gray-900 mb-2">
+                <h2 className="font-display text-4xl sm:text-5xl font-semibold text-stone-900 mb-2">
                   Stories, Guides & Inspiration
                 </h2>
-                <p className="text-lg text-gray-600 max-w-xl">
+                <p className="text-lg text-stone-600 max-w-xl">
                   Explore styling advice, timber care wisdom, and design philosophy direct from our craftspeople.
                 </p>
               </div>
               <Link
                 href="/blog"
-                className="mt-4 sm:mt-0 text-sm font-semibold text-amber-700 hover:text-amber-800 inline-flex items-center gap-1.5 transition-colors group"
+                className="mt-4 sm:mt-0 text-sm font-semibold text-amber-800 hover:text-amber-900 inline-flex items-center gap-1.5 transition-colors group"
               >
                 View all articles
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -355,9 +356,9 @@ export default async function HomePage() {
                   <Link
                     key={post.id}
                     href={href}
-                    className="group flex flex-col bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:border-amber-200/60 transition-all duration-300"
+                    className="group flex flex-col bg-white rounded-2xl border border-stone-200 overflow-hidden hover:shadow-xl hover:border-amber-300 transition-all duration-300"
                   >
-                    <div className="relative aspect-[16/10] bg-gray-100 overflow-hidden">
+                    <div className="relative aspect-[16/10] bg-stone-100 overflow-hidden">
                       {post.featured_image_url ? (
                         <Image
                           src={post.featured_image_url}
@@ -373,7 +374,7 @@ export default async function HomePage() {
                         </div>
                       )}
                       <div className="absolute top-3 left-3 flex gap-2">
-                        <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-white/90 text-gray-800 backdrop-blur-sm shadow-sm">
+                        <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-white/90 text-stone-800 border border-stone-200 backdrop-blur-sm shadow-xs">
                           {post.category ? post.category.replace(/-/g, ' ') : typeBadge}
                         </span>
                       </div>
@@ -381,7 +382,7 @@ export default async function HomePage() {
 
                     <div className="p-6 flex-1 flex flex-col justify-between">
                       <div>
-                        <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
+                        <div className="flex items-center gap-3 text-xs text-stone-500 mb-3">
                           {post.published_at && (
                             <span className="flex items-center gap-1">
                               <Calendar className="w-3.5 h-3.5" />
@@ -395,17 +396,17 @@ export default async function HomePage() {
                             </span>
                           )}
                         </div>
-                        <h3 className="font-display text-xl font-semibold text-gray-900 mb-2.5 line-clamp-2 group-hover:text-amber-700 transition-colors">
+                        <h3 className="font-display text-xl font-semibold text-stone-900 mb-2.5 line-clamp-2 group-hover:text-primary transition-colors">
                           {post.title}
                         </h3>
                         {post.excerpt && (
-                          <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed mb-4">
+                          <p className="text-sm text-stone-600 line-clamp-2 leading-relaxed mb-4">
                             {post.excerpt}
                           </p>
                         )}
                       </div>
 
-                      <div className="pt-4 border-t border-gray-50 flex items-center text-sm font-semibold text-amber-700 group-hover:text-amber-800">
+                      <div className="pt-4 border-t border-stone-100 flex items-center text-sm font-semibold text-amber-800 group-hover:text-amber-900">
                         Read Story
                         <ArrowRight className="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-1" />
                       </div>

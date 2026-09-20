@@ -83,9 +83,9 @@ export default async function PagePage({ params }: PageProps) {
         {html}
       </div>
 
-      <footer className="mt-16 pt-8 border-t border-gray-200">
+      <footer className="mt-16 pt-8 border-t border-stone-200">
         <nav className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <Link href="/" className="btn-secondary">
+          <Link href="/" className="btn btn-secondary">
             <ChevronLeft className="w-4 h-4 mr-2" />
             Back to Home
           </Link>

@@ -83,7 +83,7 @@ export async function getAllActiveProducts(): Promise<Product[]> {
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
   const products = await fetchProducts();
-  return products.find(p => p.slug === slug) || null;
+  return products.find(p => p.slug === slug || p.id === slug) || null;
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
