@@ -23,6 +23,12 @@ export function Header() {
             <Link href="/collections" className="text-sm font-medium text-gray-700 hover:text-amber-700 transition-colors">
               Collections
             </Link>
+            <Link href="/lookbooks" className="text-sm font-medium text-gray-700 hover:text-amber-700 transition-colors">
+              Lookbooks
+            </Link>
+            <Link href="/blog" className="text-sm font-medium text-gray-700 hover:text-amber-700 transition-colors">
+              Journal
+            </Link>
             <Link href="/about" className="text-sm font-medium text-gray-700 hover:text-amber-700 transition-colors">
               About
             </Link>

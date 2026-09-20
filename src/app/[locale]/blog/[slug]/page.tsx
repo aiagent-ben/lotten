@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getContentBySlug, getStaticParamsForType, compileContentMDX, incrementViewCount } from '@/lib/data/content';
-import { MDXRemote } from 'next-mdx-remote/rsc';
 import Image from 'next/image';
 import { format } from 'date-fns';
 import Link from 'next/link';
@@ -125,7 +124,7 @@ export default async function BlogPostPage({ params }: PageProps) {
       )}
 
       <div className="prose prose-lg prose-gray max-w-none dark:prose-invert">
-        <MDXRemote source={html} />
+        {html}
       </div>
 
       <footer className="mt-16 pt-8 border-t border-gray-200">

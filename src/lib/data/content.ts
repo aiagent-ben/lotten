@@ -65,19 +65,19 @@ function mapContentFromDB(data: any): ContentPost {
     slug: data.slug,
     title: data.title,
     excerpt: data.excerpt,
-    body_mdx: data.content_mdx,
-    body_html: data.content_html,
+    body_mdx: data.body_mdx || data.content_mdx || '',
+    body_html: data.content_html || null,
     featured_image_url: data.featured_image_url,
     featured_image_alt: data.featured_image_alt,
     type: data.type,
     status: data.status,
-    category: data.category,
-    tags: data.tags || [],
+    category: data.category || (Array.isArray(data.categories) && data.categories[0]?.name) || null,
+    tags: Array.isArray(data.tags) ? data.tags : [],
     published_at: data.published_at,
     scheduled_at: data.scheduled_at,
-    meta_title: data.meta_title,
-    meta_description: data.meta_description,
-    og_image_url: data.og_image_url,
+    meta_title: data.seo_title || data.meta_title || data.title,
+    meta_description: data.seo_description || data.meta_description || data.excerpt,
+    og_image_url: data.seo_og_image || data.og_image_url || data.featured_image_url,
     canonical_url: data.canonical_url,
     read_time_minutes: data.read_time_minutes,
     view_count: data.view_count || 0,
@@ -86,9 +86,9 @@ function mapContentFromDB(data: any): ContentPost {
     updated_at: data.updated_at,
     author_id: data.author_id,
     room_type: data.room_type || null,
-    style_tags: data.style_tags || [],
-    featured_products: data.featured_products || [],
-    hotspots: data.hotspots || [],
+    style_tags: Array.isArray(data.style_tags) ? data.style_tags : [],
+    featured_products: Array.isArray(data.featured_products) ? data.featured_products : [],
+    hotspots: Array.isArray(data.hotspots) ? data.hotspots : [],
     template: data.template || 'default',
   };
 }
@@ -112,7 +112,7 @@ export async function getContentList(params: ContentListParams = {}): Promise<Co
   } = params;
 
   let query = supabase
-    .from('content_posts')
+    .from('content_pages')
     .select('*', { count: 'exact' })
     .order('published_at', { ascending: false });
 
@@ -166,7 +166,7 @@ export async function getContentBySlug(slug: string, type?: 'blog' | 'guide' | '
   const supabase = await getSupabase();
 
   let query = supabase
-    .from('content_posts')
+    .from('content_pages')
     .select('*')
     .eq('slug', slug)
     .eq('status', 'published');
@@ -175,7 +175,7 @@ export async function getContentBySlug(slug: string, type?: 'blog' | 'guide' | '
     query = query.eq('type', type);
   }
 
-  const { data, error } = await query.single();
+  const { data, error } = await query.maybeSingle();
 
   if (error || !data) {
     return null;
@@ -188,10 +188,10 @@ export async function getContentById(id: string): Promise<ContentPost | null> {
   const supabase = await getSupabase();
 
   const { data, error } = await supabase
-    .from('content_posts')
+    .from('content_pages')
     .select('*')
     .eq('id', id)
-    .single();
+    .maybeSingle();
 
   if (error || !data) {
     return null;
@@ -218,7 +218,7 @@ export async function getRelatedContent(contentId: string, type: 'blog' | 'guide
   }
 
   const { data, error } = await supabase
-    .from('content_posts')
+    .from('content_pages')
     .select('*')
     .eq('type', type)
     .eq('status', 'published')
@@ -239,10 +239,10 @@ export async function getContentCategories(type?: 'blog' | 'guide' | 'lookbook')
   const supabase = await getSupabase();
 
   let query = supabase
-    .from('content_categories')
-    .select('name')
-    .eq('is_active', true)
-    .order('sort_order');
+    .from('content_pages')
+    .select('category')
+    .eq('status', 'published')
+    .not('category', 'is', null);
 
   if (type) {
     query = query.eq('type', type);
@@ -250,28 +250,63 @@ export async function getContentCategories(type?: 'blog' | 'guide' | 'lookbook')
 
   const { data, error } = await query;
 
-  if (error) {
-    console.error('Error fetching categories:', error);
-    return [];
+  if (error || !data || data.length === 0) {
+    let catQuery = supabase
+      .from('content_categories')
+      .select('name')
+      .eq('is_active', true)
+      .order('sort_order');
+
+    if (type) {
+      catQuery = catQuery.eq('type', type);
+    }
+
+    const { data: catData, error: catError } = await catQuery;
+    if (catError) {
+      console.error('Error fetching categories:', catError);
+      return [];
+    }
+    return (catData || []).map((c) => c.name);
   }
 
-  return (data || []).map((c) => c.name);
+  const set = new Set<string>();
+  data.forEach((c: any) => {
+    if (c.category) set.add(c.category);
+  });
+  return Array.from(set);
 }
 
 export async function getAllTags(): Promise<string[]> {
   const supabase = await getSupabase();
 
   const { data, error } = await supabase
-    .from('content_tags')
-    .select('name')
-    .order('name');
+    .from('content_pages')
+    .select('tags')
+    .eq('status', 'published');
 
-  if (error) {
-    console.error('Error fetching tags:', error);
-    return [];
+  if (error || !data || data.length === 0) {
+    const { data: tagData, error: tagError } = await supabase
+      .from('content_tags')
+      .select('name')
+      .order('name');
+
+    if (tagError) {
+      console.error('Error fetching tags:', tagError);
+      return [];
+    }
+
+    return (tagData || []).map((t) => t.name);
   }
 
-  return (data || []).map((t) => t.name);
+  const set = new Set<string>();
+  data.forEach((item: any) => {
+    if (Array.isArray(item.tags)) {
+      item.tags.forEach((t: string) => {
+        if (t) set.add(t);
+      });
+    }
+  });
+  return Array.from(set);
 }
 
 export async function incrementViewCount(id: string): Promise<void> {
@@ -295,7 +330,7 @@ export async function getStaticParamsForType(type: 'blog' | 'guide' | 'lookbook'
   const supabase = await getSupabase();
 
   const { data, error } = await supabase
-    .from('content_posts')
+    .from('content_pages')
     .select('slug')
     .eq('type', type)
     .eq('status', 'published');

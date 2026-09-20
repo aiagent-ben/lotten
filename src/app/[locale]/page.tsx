@@ -2,10 +2,12 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getFeaturedProducts, getAllActiveProducts, getCollectionBySlug } from '@/lib/data/products';
+import { getContentList } from '@/lib/data/content';
 import { formatPrice } from '@/lib/utils';
+import { format } from 'date-fns';
 import NewsletterForm from '@/components/NewsletterForm';
 import { getCollectionName } from '@/lib/collections';
-import { Factory, TreePine, ShieldCheck } from 'lucide-react';
+import { Factory, TreePine, ShieldCheck, BookOpen, ArrowRight, Clock, Calendar } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Lotten — Curated Malaysian Oak Furniture',
@@ -13,7 +15,11 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const featuredProducts = await getFeaturedProducts(8);
+  const [featuredProducts, contentResult] = await Promise.all([
+    getFeaturedProducts(8),
+    getContentList({ status: 'published', limit: 3 }),
+  ]);
+  const recentPosts = contentResult.data;
 
   return (
     <main className="min-h-screen bg-white font-sans antialiased">
@@ -300,6 +306,117 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Latest Stories & Inspiration */}
+      {recentPosts.length > 0 && (
+        <section className="py-20 lg:py-28 bg-white border-t border-gray-100">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 animate-slide-up">
+              <div>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-800 text-xs font-semibold tracking-wide uppercase mb-3">
+                  <BookOpen className="w-3.5 h-3.5" />
+                  Journal & Care Guides
+                </span>
+                <h2 className="font-display text-4xl sm:text-5xl font-semibold text-gray-900 mb-2">
+                  Stories, Guides & Inspiration
+                </h2>
+                <p className="text-lg text-gray-600 max-w-xl">
+                  Explore styling advice, timber care wisdom, and design philosophy direct from our craftspeople.
+                </p>
+              </div>
+              <Link
+                href="/blog"
+                className="mt-4 sm:mt-0 text-sm font-semibold text-amber-700 hover:text-amber-800 inline-flex items-center gap-1.5 transition-colors group"
+              >
+                View all articles
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {recentPosts.map((post) => {
+                const href = post.type === 'guide'
+                  ? `/guides/${post.slug}`
+                  : post.type === 'lookbook'
+                  ? `/lookbooks/${post.slug}`
+                  : post.type === 'page'
+                  ? `/${post.slug}`
+                  : `/blog/${post.slug}`;
+
+                const typeBadge = post.type === 'guide'
+                  ? 'Care Guide'
+                  : post.type === 'lookbook'
+                  ? 'Lookbook'
+                  : post.type === 'page'
+                  ? 'Page'
+                  : 'Article';
+
+                return (
+                  <Link
+                    key={post.id}
+                    href={href}
+                    className="group flex flex-col bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:border-amber-200/60 transition-all duration-300"
+                  >
+                    <div className="relative aspect-[16/10] bg-gray-100 overflow-hidden">
+                      {post.featured_image_url ? (
+                        <Image
+                          src={post.featured_image_url}
+                          alt={post.featured_image_alt || post.title}
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          className="object-cover transition-transform duration-700 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50/50">
+                          <BookOpen className="w-12 h-12 text-amber-300/80 group-hover:scale-110 transition-transform duration-300" />
+                        </div>
+                      )}
+                      <div className="absolute top-3 left-3 flex gap-2">
+                        <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-white/90 text-gray-800 backdrop-blur-sm shadow-sm">
+                          {post.category ? post.category.replace(/-/g, ' ') : typeBadge}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="p-6 flex-1 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
+                          {post.published_at && (
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3.5 h-3.5" />
+                              {format(new Date(post.published_at), 'MMM d, yyyy')}
+                            </span>
+                          )}
+                          {post.read_time_minutes && (
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3.5 h-3.5" />
+                              {post.read_time_minutes} min read
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="font-display text-xl font-semibold text-gray-900 mb-2.5 line-clamp-2 group-hover:text-amber-700 transition-colors">
+                          {post.title}
+                        </h3>
+                        {post.excerpt && (
+                          <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed mb-4">
+                            {post.excerpt}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="pt-4 border-t border-gray-50 flex items-center text-sm font-semibold text-amber-700 group-hover:text-amber-800">
+                        Read Story
+                        <ArrowRight className="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-1" />
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Newsletter */}
       <section className="py-20 bg-amber-900 text-white">

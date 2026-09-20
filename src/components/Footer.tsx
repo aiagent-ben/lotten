@@ -12,8 +12,8 @@ export function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-400 py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
-          <div className="md:col-span-2">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
+          <div className="col-span-2 md:col-span-1">
             <Link
               href="/"
               className="mb-4 block"
@@ -52,6 +52,29 @@ export function Footer() {
                 className="text-sm hover:text-white transition-colors block"
               >
                 Bestsellers
+              </Link>
+            </nav>
+          </div>
+          <div>
+            <h4 className="font-medium text-white mb-4">Stories & Care</h4>
+            <nav className="space-y-2">
+              <Link
+                href="/blog"
+                className="text-sm hover:text-white transition-colors block"
+              >
+                Journal & News
+              </Link>
+              <Link
+                href="/guides"
+                className="text-sm hover:text-white transition-colors block"
+              >
+                Care Guides
+              </Link>
+              <Link
+                href="/lookbooks"
+                className="text-sm hover:text-white transition-colors block"
+              >
+                Lookbooks
               </Link>
             </nav>
           </div>

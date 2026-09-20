@@ -37,12 +37,14 @@ export default function ContentPage() {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
   const fetchContent = async () => {
     setLoading(true);
+    setError(null);
     try {
       const params = new URLSearchParams({
         page: currentPage.toString(),
@@ -53,6 +55,10 @@ export default function ContentPage() {
       if (search) params.set('search', search);
 
       const response = await fetch(`/api/admin/content?${params.toString()}`);
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || errData.message || `Failed to fetch content (${response.status})`);
+      }
       const result: ContentResponse = await response.json();
 
       if (result.data) {
@@ -60,8 +66,9 @@ export default function ContentPage() {
         setTotalCount(result.count);
         setTotalPages(result.totalPages);
       }
-    } catch (error) {
-      console.error('Failed to fetch content:', error);
+    } catch (err) {
+      console.error('Failed to fetch content:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch content');
     } finally {
       setLoading(false);
     }
@@ -70,6 +77,14 @@ export default function ContentPage() {
   useEffect(() => {
     fetchContent();
   }, [currentPage, typeFilter, statusFilter, search]);
+
+  const getPublicUrl = (type: string, slug: string) => {
+    if (type === 'page') return `/${slug}`;
+    if (type === 'blog') return `/blog/${slug}`;
+    if (type === 'guide') return `/guides/${slug}`;
+    if (type === 'lookbook') return `/lookbooks/${slug}`;
+    return `/${type}/${slug}`;
+  };
 
   const getStatusBadge = (status: string) => {
     const styles = {
@@ -99,9 +114,13 @@ export default function ContentPage() {
       });
       if (response.ok) {
         fetchContent();
+      } else {
+        const errData = await response.json().catch(() => ({}));
+        alert(errData.error || 'Failed to delete content');
       }
     } catch (error) {
       console.error('Failed to delete content:', error);
+      alert('Failed to delete content');
     }
   };
 
@@ -117,6 +136,13 @@ export default function ContentPage() {
           New Content
         </Link>
       </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+          <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="card">
@@ -207,7 +233,7 @@ export default function ContentPage() {
                         <Link href={`/admin/content/${item.id}/edit`} className="btn-ghost btn-sm" title="Edit">
                           <Edit className="w-4 h-4" />
                         </Link>
-                        <Link href={`/${item.type === 'page' ? '' : item.type}/${item.slug}`} target="_blank" className="btn-ghost btn-sm" title="View">
+                        <Link href={getPublicUrl(item.type, item.slug)} target="_blank" className="btn-ghost btn-sm" title="View">
                           <Eye className="w-4 h-4" />
                         </Link>
                         <button

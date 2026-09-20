@@ -97,11 +97,11 @@ export function ContentForm({ isNew = true }: ContentFormProps) {
         if (data.data) {
           const content = data.data;
           setFormData({
-            title: content.title,
-            slug: content.slug,
+            title: content.title || '',
+            slug: content.slug || '',
             excerpt: content.excerpt || '',
-            type: content.type,
-            status: content.status,
+            type: content.type || 'blog',
+            status: content.status || 'draft',
             body_mdx: content.body_mdx || '',
             featured_image_url: content.featured_image_url || '',
             featured_image_alt: content.featured_image_alt || '',
@@ -110,14 +110,17 @@ export function ContentForm({ isNew = true }: ContentFormProps) {
             seo_og_image: content.seo_og_image || '',
             published_at: content.published_at ? format(parseISO(content.published_at), 'yyyy-MM-dd') : '',
             scheduled_at: content.scheduled_at ? format(parseISO(content.scheduled_at), 'yyyy-MM-dd') : '',
-            category: content.category || '',
-            tags: content.tags || [],
+            category: content.category || (content.categories?.[0]?.name || ''),
+            tags: Array.isArray(content.tags) ? content.tags : [],
             room_type: content.room_type || '',
-            style_tags: content.style_tags?.join(', ') || '',
-            featured_products: content.featured_products?.join(', ') || '',
-            hotspots: content.hotspots ? JSON.stringify(content.hotspots, null, 2) : '[]',
+            style_tags: Array.isArray(content.style_tags) ? content.style_tags.join(', ') : (content.style_tags || ''),
+            featured_products: Array.isArray(content.featured_products) ? content.featured_products.join(', ') : (content.featured_products || ''),
+            hotspots: content.hotspots ? (typeof content.hotspots === 'string' ? content.hotspots : JSON.stringify(content.hotspots, null, 2)) : '[]',
           });
         }
+      } else {
+        const errData = await response.json().catch(() => ({}));
+        setError(errData.error || errData.message || 'Failed to load content');
       }
     } catch (err) {
       setError('Failed to load content');
@@ -171,6 +174,16 @@ export function ContentForm({ isNew = true }: ContentFormProps) {
       return;
     }
 
+    let parsedHotspots = [];
+    if (formData.hotspots?.trim()) {
+      try {
+        parsedHotspots = JSON.parse(formData.hotspots);
+      } catch {
+        setError('Hotspots must be valid JSON');
+        return;
+      }
+    }
+
     setSaving(true);
     setError('');
 
@@ -183,9 +196,9 @@ export function ContentForm({ isNew = true }: ContentFormProps) {
         tags: formData.tags || [],
         style_tags: formData.style_tags.split(',').map(t => t.trim()).filter(Boolean),
         featured_products: formData.featured_products.split(',').map(t => t.trim()).filter(Boolean),
-        hotspots: JSON.parse(formData.hotspots || '[]'),
-        published_at: formData.published_at || null,
-        scheduled_at: formData.scheduled_at || null,
+        hotspots: parsedHotspots,
+        published_at: formData.published_at ? new Date(formData.published_at).toISOString() : null,
+        scheduled_at: formData.scheduled_at ? new Date(formData.scheduled_at).toISOString() : null,
       };
 
       const response = await fetch(url, {
@@ -198,8 +211,8 @@ export function ContentForm({ isNew = true }: ContentFormProps) {
         router.push('/admin/content');
         router.refresh();
       } else {
-        const error = await response.json();
-        setError(error.message || 'Failed to save content');
+        const errData = await response.json().catch(() => ({}));
+        setError(errData.error || errData.message || 'Failed to save content');
       }
     } catch (err) {
       setError('An error occurred while saving');

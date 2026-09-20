@@ -404,3 +404,61 @@ export interface StockReservationReleaseLog {
   released_at: string;
   released_by: string;
 }
+
+// ============================================================================
+// CONTENT MANAGEMENT SYSTEM (MDX)
+// ============================================================================
+
+export type ContentType = 'blog' | 'guide' | 'lookbook' | 'page';
+export type ContentStatus = 'draft' | 'published' | 'scheduled';
+
+export interface ContentPage {
+  id: string;
+  slug: string;
+  title: string;
+  body_mdx: string;
+  excerpt: string | null;
+  type: ContentType;
+  status: ContentStatus;
+  category: string | null;
+  tags: string[];
+  room_type: string | null;
+  style_tags: string[];
+  featured_products: string[];
+  hotspots: Array<{ productId?: string; x?: number; y?: number; label?: string; tooltip?: string }>;
+  featured_image_url: string | null;
+  featured_image_alt: string | null;
+  seo_title: string | null;
+  seo_description: string | null;
+  seo_og_image: string | null;
+  published_at: string | null;
+  scheduled_at: string | null;
+  read_time_minutes: number | null;
+  view_count: number;
+  is_featured: boolean;
+  template: string;
+  author_id: string | null;
+  created_at: string;
+  updated_at: string;
+  categories?: ContentCategory[];
+  tags_rel?: ContentTag[];
+}
+
+export interface ContentCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  type: 'blog' | 'guide' | 'lookbook';
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ContentTag {
+  id: string;
+  name: string;
+  slug: string;
+  created_at: string;
+}
