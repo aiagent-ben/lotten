@@ -23,6 +23,8 @@ const r2Client = new S3Client({
 const R2_BUCKET = process.env.R2_BUCKET_NAME!;
 const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL!; // e.g., https://pub-xxx.r2.dev
 
+const ALLOWED_FOLDERS = ['products', 'content', 'brands', 'collections', 'lookbooks'];
+
 export async function POST(request: NextRequest) {
   const authError = await verifyAdminAuth(request);
   if (authError) return authError;
@@ -30,7 +32,8 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    const folder = formData.get('folder') as string || 'products';
+    const rawFolder = ((formData.get('folder') as string) || 'products').toLowerCase();
+    const folder = ALLOWED_FOLDERS.includes(rawFolder) ? rawFolder : 'products';
     
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -99,6 +102,11 @@ export async function DELETE(request: NextRequest) {
     
     if (!key) {
       return NextResponse.json({ error: 'No key provided' }, { status: 400 });
+    }
+
+    const isSafeKey = !key.includes('..') && ALLOWED_FOLDERS.some((f) => key.startsWith(`${f}/`));
+    if (!isSafeKey) {
+      return NextResponse.json({ error: 'Invalid or unauthorized object key' }, { status: 400 });
     }
 
     const command = new DeleteObjectCommand({

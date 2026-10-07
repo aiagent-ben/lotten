@@ -8,14 +8,10 @@ import {
   rejectQuote,
 } from '@/lib/actions/quote';
 import { checkStockAvailability } from '@/lib/actions/stock';
-
-let client: ReturnType<typeof createServiceClient> | null = null;
+import { getAuthenticatedCustomer } from '@/lib/auth/user';
 
 function getSupabase() {
-  if (!client) {
-    client = createServiceClient();
-  }
-  return client;
+  return createServiceClient();
 }
 
 export async function GET(request: Request) {
@@ -24,6 +20,14 @@ export async function GET(request: Request) {
     const quoteId = searchParams.get('id');
     const inquiryId = searchParams.get('inquiry_id');
     const status = searchParams.get('status');
+
+    // 1. Authenticate caller
+    const authResult = await getAuthenticatedCustomer(request);
+    if (!authResult) {
+      return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    const { user, customer } = authResult;
+    const isAdmin = user.user_metadata?.role === 'admin' || customer.is_active && user.user_metadata?.role === 'admin';
     
     // Get single quote with all details
     if (quoteId) {
@@ -40,6 +44,7 @@ export async function GET(request: Request) {
           inquiry:inquiry_id (
             id,
             session_id,
+            customer_id,
             customer:customer_id (id, email, contact_name, company_name),
             inquiry_items (*)
           ),
@@ -48,10 +53,14 @@ export async function GET(request: Request) {
         .eq('id', quoteId)
         .single();
       
-      if (error) throw error;
-      
-      if (!quote) {
+      if (error || !quote) {
         return Response.json({ success: false, error: 'Quote not found' }, { status: 404 });
+      }
+
+      // Check ownership
+      const quoteCustomerId = quote.inquiry?.customer_id || quote.inquiry?.customer?.id;
+      if (!isAdmin && quoteCustomerId !== customer.id) {
+        return Response.json({ success: false, error: 'Forbidden' }, { status: 403 });
       }
       
       return Response.json({ success: true, quote });
@@ -59,6 +68,21 @@ export async function GET(request: Request) {
     
     // List quotes by inquiry
     if (inquiryId) {
+      // Check inquiry ownership
+      const { data: inquiry } = await getSupabase()
+        .from('inquiries')
+        .select('id, customer_id')
+        .eq('id', inquiryId)
+        .single();
+
+      if (!inquiry) {
+        return Response.json({ success: false, error: 'Inquiry not found' }, { status: 404 });
+      }
+
+      if (!isAdmin && inquiry.customer_id !== customer.id) {
+        return Response.json({ success: false, error: 'Forbidden' }, { status: 403 });
+      }
+
       const { data: quotes, error } = await getSupabase()
         .from('quotes')
         .select('*')
@@ -70,37 +94,15 @@ export async function GET(request: Request) {
       return Response.json({ success: true, quotes: quotes || [] });
     }
     
-    // Admin list with filters
-    const { data: { user } } = await getSupabase().auth.getUser();
-    if (!user) {
-      return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
-    
-    const { data: isAdmin } = await getSupabase()
-      .from('customers')
-      .select('id')
-      .eq('auth_user_id', user.id)
-      .single();
-    
-    // Check admin role
-    const { data: role } = await getSupabase().auth.getUser();
-    const isAdminUser = role.user?.user_metadata?.role === 'admin';
-    
-    if (!isAdminUser) {
+    if (!isAdmin) {
       // Customer can only see their own quotes
-      const { data: customer } = await getSupabase()
-        .from('customers')
-        .select('id')
-        .eq('auth_user_id', user.id)
-        .single();
-      
       let query = getSupabase()
         .from('quotes')
         .select(`
           *,
-          inquiry:inquiry_id (customer_id)
+          inquiry:inquiry_id!inner (customer_id)
         `)
-        .eq('inquiry.customer_id', customer?.id)
+        .eq('inquiry.customer_id', customer.id)
         .order('created_at', { ascending: false });
       
       if (status) {
@@ -144,10 +146,11 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { action, ...data } = body;
     
-    const { data: { user } } = await getSupabase().auth.getUser();
-    if (!user) {
+    const authResult = await getAuthenticatedCustomer(request);
+    if (!authResult) {
       return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
+    const { user, customer } = authResult;
     
     switch (action) {
       case 'generate': {

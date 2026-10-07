@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/db/client';
 import { verifyAdminAuth } from '@/lib/auth/admin';
 import { validateCsrfToken } from '@/lib/csrf';
+import { sanitizePostgrestSearch } from '@/lib/db/sanitize';
 import { normalizeCategories } from '@/lib/categories';
 
 export async function GET(request: NextRequest) {
@@ -44,7 +45,10 @@ export async function GET(request: NextRequest) {
     .range((page - 1) * perPage, page * perPage - 1);
 
   if (search) {
-    query = query.or(`name.ilike.%${search}%,article_no.ilike.%${search}%,slug.ilike.%${search}%`);
+    const sanitizedSearch = sanitizePostgrestSearch(search);
+    if (sanitizedSearch) {
+      query = query.or(`name.ilike.%${sanitizedSearch}%,article_no.ilike.%${sanitizedSearch}%,slug.ilike.%${sanitizedSearch}%`);
+    }
   }
 
   if (collectionFilter) {

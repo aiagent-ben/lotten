@@ -5,13 +5,8 @@ import { revalidatePath } from 'next/cache';
 import { randomUUID } from 'crypto';
 import { calculateQuotePrice, type PriceCalculationInput, type PriceCalculationOutput, type Configuration } from '@/lib/pricing/engine';
 
-let client: ReturnType<typeof createServiceClient> | null = null;
-
 function getSupabase() {
-  if (!client) {
-    client = createServiceClient();
-  }
-  return client;
+  return createServiceClient();
 }
 
 function generateQuoteNumber(): string {

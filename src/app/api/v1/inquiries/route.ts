@@ -9,14 +9,10 @@ import {
   submitInquiry,
   mergeInquiryOnLogin 
 } from '@/lib/actions/inquiry';
-
-let client: ReturnType<typeof createServiceClient> | null = null;
+import { getAuthenticatedCustomer } from '@/lib/auth/user';
 
 function getSupabase() {
-  if (!client) {
-    client = createServiceClient();
-  }
-  return client;
+  return createServiceClient();
 }
 
 const ANON_SESSION_COOKIE = 'lotten_anon_session';
@@ -44,8 +40,15 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get('session_id');
     const status = searchParams.get('status');
+    const cookieStore = await cookies();
+    const cookieSessionId = cookieStore.get(ANON_SESSION_COOKIE)?.value;
     
     if (sessionId) {
+      // Validate that requested session matches client's cookie
+      if (!cookieSessionId || cookieSessionId !== sessionId) {
+        return Response.json({ success: false, error: 'Forbidden' }, { status: 403 });
+      }
+
       // Get anonymous inquiry
       const { data: inquiry } = await getSupabase()
         .from('inquiries')
@@ -71,20 +74,11 @@ export async function GET(request: Request) {
     }
     
     // Authenticated user inquiries
-    const { data: { user } } = await getSupabase().auth.getUser();
-    if (!user) {
+    const authResult = await getAuthenticatedCustomer(request);
+    if (!authResult) {
       return Response.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
-    
-    const { data: customer } = await getSupabase()
-      .from('customers')
-      .select('id')
-      .eq('auth_user_id', user.id)
-      .single();
-    
-    if (!customer) {
-      return Response.json({ success: false, error: 'Customer profile not found' }, { status: 404 });
-    }
+    const { customer } = authResult;
     
     let query = getSupabase()
       .from('inquiries')

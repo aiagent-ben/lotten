@@ -3,13 +3,8 @@
 import { createServiceClient } from '@/lib/db/client';
 import { revalidatePath } from 'next/cache';
 
-let client: ReturnType<typeof createServiceClient> | null = null;
-
 function getSupabase() {
-  if (!client) {
-    client = createServiceClient();
-  }
-  return client;
+  return createServiceClient();
 }
 
 export interface ReserveStockResult {

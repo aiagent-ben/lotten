@@ -4,14 +4,10 @@ import { createServiceClient } from '@/lib/db/client';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { randomUUID } from 'crypto';
-
-let client: ReturnType<typeof createServiceClient> | null = null;
+import { getAuthenticatedCustomer } from '@/lib/auth/user';
 
 function getSupabase() {
-  if (!client) {
-    client = createServiceClient();
-  }
-  return client;
+  return createServiceClient();
 }
 
 const ANON_SESSION_COOKIE = 'lotten_anon_session';
@@ -338,6 +334,11 @@ export async function submitInquiry(inquiryId: string): Promise<{ success: boole
 
 export async function mergeInquiryOnLogin(sessionId: string, customerId: string): Promise<{ success: boolean; error?: string }> {
   try {
+    const authResult = await getAuthenticatedCustomer();
+    if (authResult && authResult.customer.id !== customerId) {
+      return { success: false, error: 'Forbidden' };
+    }
+
     // Find anonymous draft inquiry
     const { data: anonInquiry } = await getSupabase()
       .from('inquiries')

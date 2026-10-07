@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/db/client';
 import { verifyAdminAuth } from '@/lib/auth/admin';
+import { sanitizePostgrestSearch } from '@/lib/db/sanitize';
 
 export async function GET(request: NextRequest) {
   const authError = await verifyAdminAuth(request);
@@ -21,7 +22,10 @@ export async function GET(request: NextRequest) {
     .order('created_at', { ascending: false });
     
   if (search) {
-    query = query.or(`code.ilike.%${search}%,name.ilike.%${search}%`);
+    const sanitizedSearch = sanitizePostgrestSearch(search);
+    if (sanitizedSearch) {
+      query = query.or(`code.ilike.%${sanitizedSearch}%,name.ilike.%${sanitizedSearch}%`);
+    }
   }
   
   if (status) {

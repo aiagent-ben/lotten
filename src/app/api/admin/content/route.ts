@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/db/client';
 import { verifyAdminAuth } from '@/lib/auth/admin';
+import { sanitizePostgrestSearch } from '@/lib/db/sanitize';
 
 export async function GET(request: NextRequest) {
   const authError = await verifyAdminAuth(request);
@@ -33,8 +34,10 @@ export async function GET(request: NextRequest) {
       query = query.eq('status', status);
     }
     if (search) {
-      const sanitized = search.replace(/[\\%_]/g, '\\$&');
-      query = query.or(`title.ilike.%${sanitized}%,slug.ilike.%${sanitized}%`);
+      const sanitized = sanitizePostgrestSearch(search);
+      if (sanitized) {
+        query = query.or(`title.ilike.%${sanitized}%,slug.ilike.%${sanitized}%`);
+      }
     }
 
     const { data: content, error, count } = await query

@@ -8,6 +8,7 @@ import { formatPrice, getColorHex } from '@/lib/data/products';
 import { cn } from '@/lib/utils';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { RecentlyViewedCarousel } from '@/components/RecentlyViewedCarousel';
+import DOMPurify from 'isomorphic-dompurify';
 
 interface ProductDetailClientProps {
   product: {
@@ -499,7 +500,7 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
             {activeTab === 'description' && (
               <div className="prose prose-amber max-w-none">
                 {product.description ? (
-                  <div dangerouslySetInnerHTML={{ __html: product.description }} />
+                  <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description) }} />
                 ) : (
                   <p className="text-stone-500">No description available.</p>
                 )}

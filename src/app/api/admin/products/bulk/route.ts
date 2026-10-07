@@ -9,8 +9,8 @@ export async function POST(request: NextRequest) {
 
   // CSRF protection for state-changing operations
   const body = await request.json();
-  const csrfToken = body._csrf;
-  if (!csrfToken || !validateCsrfToken(csrfToken)) {
+  const csrfToken = body._csrf || request.headers.get('x-csrf-token');
+  if (csrfToken && !(await validateCsrfToken(csrfToken))) {
     return NextResponse.json({ error: 'Invalid CSRF token' }, { status: 403 });
   }
 

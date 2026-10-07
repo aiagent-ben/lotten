@@ -1,5 +1,6 @@
 import { createServiceClient } from '@/lib/db/client';
 import { compileMDX } from '@/lib/mdx';
+import { sanitizePostgrestSearch } from '@/lib/db/sanitize';
 
 export interface ContentPost {
   id: string;
@@ -96,7 +97,7 @@ function mapContentFromDB(data: any): ContentPost {
 }
 
 function escapeLike(value: string): string {
-  return value.replace(/[\\%_]/g, '\\$&');
+  return sanitizePostgrestSearch(value);
 }
 
 export async function getContentList(params: ContentListParams = {}): Promise<ContentListResponse> {
