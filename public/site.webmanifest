@@ -9,20 +9,9 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "https://lotten.2share.tech/favicon.ico",
+      "src": "/favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
-    },
-    {
-      "src": "https://lotten.2share.tech/favicon-16x16.png",
-      "sizes": "16x16",
-      "type": "image/png"
-    },
-    {
-      "src": "https://lotten.2share.tech/apple-touch-icon.png",
-      "sizes": "180x180",
-      "type": "image/png",
-      "purpose": "any maskable"
     }
   ],
   "categories": ["shopping", "lifestyle", "home"],

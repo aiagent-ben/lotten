@@ -129,7 +129,7 @@ export default async function HomePage() {
             <Link href="/collections/dover" className="collection-card group relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-500 animate-slide-up border border-stone-200">
               <div className="relative aspect-[4/3] overflow-hidden">
                 <Image
-                  src="https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/335070/335070-dover-coffee-table-113/0.webp"
+                  src="https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/134127/134127-dover-coffee-table-109113/0.webp"
                   alt="Dover Collection - Modern coffee tables and living room furniture"
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -162,7 +162,7 @@ export default async function HomePage() {
             <Link href="/collections/castor" className="collection-card group relative rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-500 animate-slide-up border border-stone-200">
               <div className="relative aspect-[4/3] overflow-hidden">
                 <Image
-                  src="https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/335003/335003-castor-1-8m-tv-cabinet-1141021325/0.webp"
+                  src="https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/335043/335043-castor-1-5m-tv-cabinet-1141021325/0.webp"
                   alt="Castor Collection - Contemporary TV cabinets and entertainment units"
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"

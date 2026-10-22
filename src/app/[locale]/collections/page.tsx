@@ -72,7 +72,7 @@ export default async function CollectionsPage() {
                     {/* Hero Image */}
                     <div className="collection-card-image relative aspect-[4/3] overflow-hidden">
                       <Image
-                        src={collection.hero_image_url || '/placeholder-collection.jpg'}
+                        src={collection.hero_image_url || '/hero-furniture.jpg'}
                         alt={`${collection.name} collection`}
                         fill
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

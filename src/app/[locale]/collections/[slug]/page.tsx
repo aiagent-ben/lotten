@@ -80,7 +80,7 @@ export default async function CollectionDetailPage({ params }: Props) {
       <section className="relative min-h-[60vh] flex items-center">
         <div className="absolute inset-0">
           <Image
-            src={collection.hero_image_url || '/hero-collection.jpg'}
+            src={collection.hero_image_url || '/hero-furniture.jpg'}
             alt={`${collection.name} Collection`}
             fill
             priority
@@ -284,7 +284,7 @@ export default async function CollectionDetailPage({ params }: Props) {
                         className="relative aspect-[4/3] rounded-2xl overflow-hidden group bg-gray-100"
                       >
                         <Image
-                          src={relatedCollection.hero_image_url || '/placeholder-collection.jpg'}
+                          src={relatedCollection.hero_image_url || '/hero-furniture.jpg'}
                           alt={`${relatedCollection.name} collection`}
                           fill
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

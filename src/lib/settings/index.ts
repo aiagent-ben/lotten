@@ -59,7 +59,7 @@ async function fetchSettings(): Promise<SiteSettings> {
     seo_defaults: {
       site_title: getString('site_title', 'Lotten'),
       site_description: getString('site_description', 'Curated Malaysian Oak furniture for modern homes — direct from manufacturer to your door.'),
-      og_image: getString('og_image', '/og-default.jpg'),
+      og_image: getString('og_image', '/hero-furniture.jpg'),
     },
     default_currency: getString('default_currency', 'MYR'),
     supported_currencies: getStringArray('supported_currencies', ['MYR']),
@@ -75,7 +75,7 @@ function getDefaults(): SiteSettings {
     seo_defaults: {
       site_title: 'Lotten',
       site_description: 'Curated Malaysian Oak furniture for modern homes — direct from manufacturer to your door.',
-      og_image: '/og-default.jpg',
+      og_image: '/hero-furniture.jpg',
     },
     default_currency: 'MYR',
     supported_currencies: ['MYR'],

@@ -52,7 +52,7 @@ function getLocaleMetadata(locale: string) {
       description: meta.description,
       images: [
         {
-          url: "/og-default.jpg",
+          url: "/hero-furniture.jpg",
           width: 1200,
           height: 630,
           alt: "Lotten - Malaysian Oak Furniture",
@@ -63,12 +63,10 @@ function getLocaleMetadata(locale: string) {
       card: "summary_large_image",
       title: meta.title,
       description: meta.description,
-      images: ["/og-default.jpg"],
+      images: ["/hero-furniture.jpg"],
     },
     icons: {
       icon: "/favicon.ico",
-      shortcut: "/favicon-16x16.png",
-      apple: "/apple-touch-icon.png",
     },
     manifest: "https://lotten.2share.tech/site.webmanifest",
   };
