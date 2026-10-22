@@ -1,0 +1,31 @@
+auditConfig:
+  ignoreCves:
+    - CVE-2026-93687
+    - CVE-2026-97058
+    - GHSA-vfj7-8cjw-p6xm
+    - GHSA-hp3w-g68c-fv3c
+  ignoreGhsas:
+    - GHSA-vfj7-8cjw-p6xm
+    - GHSA-hp3w-g68c-fv3c
+
+overrides:
+  '@tiptap/core@>=2.0.0-alpha.0 <3.30.4': '>=3.30.4'
+  '@vitest/mocker@>=2.1.0-beta.7 <4.1.12': '>=4.1.12'
+  '@vitest/mocker@>=4.1.11 <4.1.12': '>=4.1.12'
+  dompurify@<=3.4.15: '>=3.4.16'
+  dompurify@>=3.4.13 <=3.4.15: '>=3.4.16'
+  markdown-it@<14.3.3: '>=14.3.3'
+  markdown-it@>=14.1.0 <14.3.3: '>=14.3.3'
+  next@>=16.0.0 <16.2.11: '>=16.2.11'
+  next@>=16.0.0 <16.3.3: '>=16.3.3'
+  next@>=16.0.0 <16.3.8: '>=16.3.8'
+  next@>=16.2.0 <16.3.6: '>=16.3.6'
+  postcss@<8.5.10: '>=8.5.10'
+  postcss@<=8.5.11: '>=8.5.12'
+  postcss@<=8.5.17: '>=8.5.18'
+  postcss@<=8.5.22: '>=8.5.23'
+  sharp@<0.35.0: '>=0.35.0'
+  sharp@<0.35.4: '>=0.35.4'
+  sharp@<0.35.5: '>=0.35.5'
+  source-map-js@>=1.0.0 <1.2.2: '>=1.2.2'
+  vite: '>=8.3.3'

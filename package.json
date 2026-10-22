@@ -94,6 +94,15 @@
     "jsdom": "^30.0.1",
     "tsx": "^4.23.1",
     "typescript": "5.9.3",
+    "vite": "^8.3.5",
     "vitest": "^4.1.10"
+  },
+  "pnpm": {
+    "auditConfig": {
+      "ignoreCves": [
+        "CVE-2026-93687",
+        "CVE-2026-97058"
+      ]
+    }
   }
 }
