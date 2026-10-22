@@ -1,5 +1,6 @@
 # Dockerfile for Coolify deployment
 FROM node:22.14-alpine AS base
+RUN npm install -g pnpm@10.30.2
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -7,15 +8,15 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Install dependencies
-COPY package.json package-lock.json* ./
-RUN npm ci
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
 
 # Build the app
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build
+RUN pnpm run build
 
 # Production image
 FROM base AS runner
