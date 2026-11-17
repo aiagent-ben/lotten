@@ -19,6 +19,9 @@ const nextConfig: NextConfig = {
   },
   // Turbopack config - empty to disable error
   turbopack: {},
+  experimental: {
+    agentUpgrade: 'security',
+  },
   // Disable static generation for error pages (Next.js 15 + React 19 bug workaround)
   // Using generateStaticParams returning empty array on error pages
 };
