@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/db/client';
 import { verifyAdminAuth } from '@/lib/auth/admin';
+import { safeRevalidateTag } from '@/lib/i18n/cache';
 
 export async function GET(
   request: NextRequest,
@@ -79,6 +80,10 @@ export async function PUT(
       updated_at: new Date().toISOString(),
     };
 
+    if (body.translations && typeof body.translations === 'object') {
+      updateData.translations = body.translations;
+    }
+
     const { data, error } = await supabase
       .from('content_pages')
       .update(updateData)
@@ -90,6 +95,8 @@ export async function PUT(
       console.error('Error updating content page:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    safeRevalidateTag('content');
 
     // Update categories
     if (body.categoryIds) {

@@ -1,4 +1,7 @@
 import type { NextConfig } from 'next';
+import createNextIntlPlugin from 'next-intl/plugin';
+
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
   // Enable standalone output for Docker deployment
@@ -26,4 +29,4 @@ const nextConfig: NextConfig = {
   // Using generateStaticParams returning empty array on error pages
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

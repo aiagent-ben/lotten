@@ -1,7 +1,9 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { setRequestLocale } from 'next-intl/server';
 import ProductDetailClient from '../[slug]/ProductDetailClient';
 import { getColorHex } from '@/lib/utils';
+import { locales } from '@/i18n/routing';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -13,13 +15,14 @@ export const metadata: Metadata = {
 };
 
 export async function generateStaticParams() {
-  return [{ locale: 'en' }, { locale: 'zh' }, { locale: 'ms' }];
+  return locales.map((locale) => ({ locale }));
 }
 
 export const revalidate = 3600;
 
 export default async function AlfordTestPage({ params }: Props) {
   const { locale } = await params;
+  setRequestLocale(locale);
   
   const productData = {
     "source_url": "https://www.b2bfurnituresupply.com/dining-room/dining-room-bar-and-counter-table/145144-alford-counter-table-1802-solid",

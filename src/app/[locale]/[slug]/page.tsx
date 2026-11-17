@@ -1,30 +1,46 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getContentBySlug, getStaticParamsForType, compileContentMDX } from '@/lib/data/content';
 import Image from 'next/image';
-import { format } from 'date-fns';
-import Link from 'next/link';
-import { ChevronLeft, Calendar, ArrowRight } from 'lucide-react';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
+import { getContentBySlug, getStaticParamsForType, compileContentMDX } from '@/lib/data/content';
+import { buildLocaleAlternates } from '@/lib/i18n/seo';
+import { locales, type Locale } from '@/i18n/routing';
+import { ChevronLeft } from 'lucide-react';
 
 interface PageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }
 
 export async function generateStaticParams() {
-  return getStaticParamsForType('page');
+  const slugs = await getStaticParamsForType('page');
+  const params: { locale: string; slug: string }[] = [];
+  for (const locale of locales) {
+    for (const s of slugs) {
+      params.push({ locale, slug: s.slug });
+    }
+  }
+  return params;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const content = await getContentBySlug(slug, 'page');
-  
+  const { locale, slug } = await params;
+  if (!locales.includes(locale as Locale)) return {};
+  setRequestLocale(locale);
+
+  const [tCommon, content] = await Promise.all([
+    getTranslations({ locale, namespace: 'common' }),
+    getContentBySlug(slug, 'page', locale),
+  ]);
+
   if (!content) {
-    return { title: 'Page Not Found' };
+    return { title: tCommon('not_found') };
   }
 
   return {
     title: content.meta_title || content.title,
     description: content.meta_description || content.excerpt || undefined,
+    alternates: buildLocaleAlternates(locale, `/${slug}`),
     openGraph: {
       title: content.meta_title || content.title,
       description: content.meta_description || content.excerpt || undefined,
@@ -41,8 +57,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function PagePage({ params }: PageProps) {
-  const { slug } = await params;
-  const content = await getContentBySlug(slug, 'page');
+  const { locale, slug } = await params;
+  setRequestLocale(locale);
+
+  const [tCommon, content] = await Promise.all([
+    getTranslations({ locale, namespace: 'common' }),
+    getContentBySlug(slug, 'page', locale),
+  ]);
 
   if (!content) {
     notFound();
@@ -53,14 +74,14 @@ export default async function PagePage({ params }: PageProps) {
   return (
     <article className={`max-w-6xl mx-auto px-4 py-12 lg:px-8 lg:py-16 ${content.template === 'wide' ? 'max-w-full' : ''}`}>
       <header className="mb-12">
-        <Link 
-          href="/" 
+        <Link
+          href="/"
           className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-6"
         >
           <ChevronLeft className="w-4 h-4" />
-          Home
+          {tCommon('home')}
         </Link>
-        
+
         <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-4">
           {content.title}
         </h1>
@@ -87,7 +108,7 @@ export default async function PagePage({ params }: PageProps) {
         <nav className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <Link href="/" className="btn btn-secondary">
             <ChevronLeft className="w-4 h-4 mr-2" />
-            Back to Home
+            {tCommon('back_to_home')}
           </Link>
         </nav>
       </footer>

@@ -1,97 +1,128 @@
 import { Metadata } from 'next';
-import { getContentList, getContentCategories } from '@/lib/data/content';
-import Link from 'next/link';
 import Image from 'next/image';
-import { format } from 'date-fns';
-import { ChevronRight, Calendar, MapPin, Tag, Image as ImageIcon, ShoppingBag, ArrowRight, Grid, List } from 'lucide-react';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
+import { getContentList } from '@/lib/data/content';
+import { toTermKey } from '@/lib/i18n/localize';
+import { buildLocaleAlternates } from '@/lib/i18n/seo';
+import { locales, type Locale } from '@/i18n/routing';
+import { ChevronRight, MapPin, Image as ImageIcon, ShoppingBag } from 'lucide-react';
 
 interface PageProps {
-  searchParams: Promise<{ 
-    page?: string; 
-    room?: string; 
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{
+    page?: string;
+    room?: string;
     style?: string;
     search?: string;
   }>;
 }
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  if (!locales.includes(locale as Locale)) return {};
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'lookbook' });
   return {
-    title: 'Lookbooks - Oak & Home',
-    description: 'Curated room inspiration and shoppable lookbooks. Discover styled spaces featuring our Malaysian Oak furniture collections.',
+    title: t('meta_title'),
+    description: t('meta_description'),
+    alternates: buildLocaleAlternates(locale, '/lookbooks'),
   };
 }
 
-const roomTypes = [
-  { slug: 'living-room', name: 'Living Room', icon: '🛋️' },
-  { slug: 'bedroom', name: 'Bedroom', icon: '🛏️' },
-  { slug: 'dining-room', name: 'Dining Room', icon: '🍽️' },
-  { slug: 'office', name: 'Home Office', icon: '💻' },
-  { slug: 'outdoor', name: 'Outdoor', icon: '🌿' },
-];
+const styleTagKeys = [
+  'modern',
+  'scandinavian',
+  'industrial',
+  'mid-century',
+  'minimalist',
+  'rustic',
+  'coastal',
+  'bohemian',
+] as const;
 
-const styleTags = [
-  'modern', 'scandinavian', 'industrial', 'mid-century', 
-  'minimalist', 'rustic', 'coastal', 'bohemian'
-];
+export default async function LookbooksPage({ params: routeParams, searchParams }: PageProps) {
+  const [{ locale }, params] = await Promise.all([routeParams, searchParams]);
+  setRequestLocale(locale);
 
-export default async function LookbooksPage({ searchParams }: PageProps) {
-  const params = await searchParams;
   const page = parseInt(params.page || '1');
   const room = params.room;
   const style = params.style;
   const search = params.search;
 
-  const [contentResult, categories] = await Promise.all([
-    getContentList({ 
-      type: 'lookbook', 
-      status: 'published', 
-      page, 
+  const [t, tCommon, contentResult] = await Promise.all([
+    getTranslations({ locale, namespace: 'lookbook' }),
+    getTranslations({ locale, namespace: 'common' }),
+    getContentList({
+      type: 'lookbook',
+      status: 'published',
+      page,
       perPage: 12,
       room_type: room,
       style: style,
       search: search,
+      locale,
     }),
-    getContentCategories('lookbook'),
   ]);
 
-  const { data: lookbooks, count, totalPages } = contentResult;
+  const { data: lookbooks, totalPages } = contentResult;
+
+  const roomTypes = [
+    { slug: 'living-room', name: t('room_living_room'), icon: '🛋️' },
+    { slug: 'bedroom', name: t('room_bedroom'), icon: '🛏️' },
+    { slug: 'dining-room', name: t('room_dining_room'), icon: '🍽️' },
+    { slug: 'office', name: t('room_office'), icon: '💻' },
+    { slug: 'outdoor', name: t('room_outdoor'), icon: '🌿' },
+  ];
+
+  const translateRoom = (roomType: string) => {
+    const key = `room_${toTermKey(roomType)}`;
+    return t.has(key) ? t(key) : roomType.replace('-', ' ');
+  };
+
+  const translateStyle = (tag: string) => {
+    const key = `style_${toTermKey(tag)}`;
+    return t.has(key) ? t(key) : tag;
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 lg:px-8 lg:py-16">
       <header className="mb-12">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-amber-50 text-amber-800 border border-amber-200/80 rounded-full text-xs font-medium mb-4">
           <ImageIcon className="w-3.5 h-3.5" />
-          Editorial Lookbooks
+          {t('badge')}
         </div>
-        <h1 className="text-4xl lg:text-5xl font-serif font-medium text-stone-900 mb-4 tracking-tight">Room Inspiration</h1>
-        <p className="text-lg text-stone-600 max-w-2xl leading-relaxed">
-          Curated interior styling featuring our handcrafted Malaysian Oak collections. Explore spatial harmony and shop each look directly.
-        </p>
+        <h1 className="text-4xl lg:text-5xl font-serif font-medium text-stone-900 mb-4 tracking-tight">
+          {t('title')}
+        </h1>
+        <p className="text-lg text-stone-600 max-w-2xl leading-relaxed">{t('subtitle')}</p>
       </header>
 
       {/* Filter Bar */}
       <div className="mb-10 space-y-4 p-5 rounded-2xl bg-stone-50 border border-stone-200/80">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-stone-500 w-16">Room:</span>
-          <Link 
+          <span className="text-xs font-semibold uppercase tracking-wider text-stone-500 w-16">
+            {t('room_label')}
+          </span>
+          <Link
             href={`/lookbooks${style ? `?style=${encodeURIComponent(style)}` : ''}`}
             className={`px-3.5 py-1.5 text-xs font-medium rounded-full transition-colors ${
-              !room 
-                ? 'bg-stone-900 text-stone-50 shadow-sm' 
+              !room
+                ? 'bg-stone-900 text-stone-50 shadow-sm'
                 : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-100'
             }`}
           >
-            All Rooms
+            {t('all_rooms')}
           </Link>
           {roomTypes.map((roomType) => {
             const isActive = room === roomType.slug;
             return (
-              <Link 
+              <Link
                 key={roomType.slug}
                 href={`/lookbooks?room=${encodeURIComponent(roomType.slug)}${style ? `&style=${encodeURIComponent(style)}` : ''}`}
                 className={`px-3.5 py-1.5 text-xs font-medium rounded-full transition-colors flex items-center gap-1.5 ${
-                  isActive 
-                    ? 'bg-stone-900 text-stone-50 shadow-sm' 
+                  isActive
+                    ? 'bg-stone-900 text-stone-50 shadow-sm'
                     : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-100'
                 }`}
               >
@@ -101,32 +132,34 @@ export default async function LookbooksPage({ searchParams }: PageProps) {
             );
           })}
         </div>
-        
+
         <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-stone-200/60">
-          <span className="text-xs font-semibold uppercase tracking-wider text-stone-500 w-16">Style:</span>
-          <Link 
+          <span className="text-xs font-semibold uppercase tracking-wider text-stone-500 w-16">
+            {t('style_label')}
+          </span>
+          <Link
             href={`/lookbooks${room ? `?room=${encodeURIComponent(room)}` : ''}`}
             className={`px-3.5 py-1.5 text-xs font-medium rounded-full transition-colors ${
-              !style 
-                ? 'bg-amber-800 text-white shadow-sm' 
+              !style
+                ? 'bg-amber-800 text-white shadow-sm'
                 : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-100'
             }`}
           >
-            All Styles
+            {t('all_styles')}
           </Link>
-          {styleTags.map((styleTag) => {
+          {styleTagKeys.map((styleTag) => {
             const isActive = style === styleTag;
             return (
-              <Link 
+              <Link
                 key={styleTag}
                 href={`/lookbooks?style=${encodeURIComponent(styleTag)}${room ? `&room=${encodeURIComponent(room)}` : ''}`}
                 className={`px-3.5 py-1.5 text-xs font-medium rounded-full capitalize transition-colors ${
-                  isActive 
-                    ? 'bg-amber-800 text-white shadow-sm' 
+                  isActive
+                    ? 'bg-amber-800 text-white shadow-sm'
                     : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-100'
                 }`}
               >
-                {styleTag}
+                {translateStyle(styleTag)}
               </Link>
             );
           })}
@@ -137,10 +170,10 @@ export default async function LookbooksPage({ searchParams }: PageProps) {
         {lookbooks.length === 0 ? (
           <div className="text-center py-16 bg-stone-50 rounded-2xl border border-stone-200/80">
             <ImageIcon className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-            <h3 className="text-xl font-medium text-stone-900 mb-2">No lookbooks found</h3>
-            <p className="text-stone-600 mb-4">Try clearing filters to see all room inspiration.</p>
+            <h3 className="text-xl font-medium text-stone-900 mb-2">{t('no_lookbooks')}</h3>
+            <p className="text-stone-600 mb-4">{t('no_lookbooks_desc')}</p>
             <Link href="/lookbooks" className="btn btn-secondary btn-sm inline-flex">
-              Reset Filters
+              {tCommon('reset_filters')}
             </Link>
           </div>
         ) : (
@@ -167,16 +200,16 @@ export default async function LookbooksPage({ searchParams }: PageProps) {
                         <div className="absolute top-4 left-4">
                           <span className="px-3 py-1 text-xs font-medium bg-stone-900/80 text-stone-100 rounded-full backdrop-blur-sm capitalize flex items-center gap-1.5 shadow-sm">
                             <MapPin className="w-3 h-3 text-amber-300" />
-                            {lookbook.room_type.replace('-', ' ')}
+                            {translateRoom(lookbook.room_type)}
                           </span>
                         </div>
                       )}
                     </figure>
                     <div className="p-6">
                       <div className="flex flex-wrap gap-1.5 mb-3">
-                        {lookbook.style_tags.map((tag) => (
-                          <span key={tag} className="px-2.5 py-0.5 text-xs bg-amber-50 text-amber-800 border border-amber-200/50 rounded-full capitalize">
-                            {tag}
+                        {lookbook.style_tags.map((tagItem) => (
+                          <span key={tagItem} className="px-2.5 py-0.5 text-xs bg-amber-50 text-amber-800 border border-amber-200/50 rounded-full capitalize">
+                            {translateStyle(tagItem)}
                           </span>
                         ))}
                       </div>
@@ -193,13 +226,13 @@ export default async function LookbooksPage({ searchParams }: PageProps) {
                   <div className="px-6 py-4 border-t border-stone-100 bg-stone-50/50 flex items-center justify-between text-sm">
                     <span className="text-stone-500 font-medium flex items-center gap-1.5">
                       <ShoppingBag className="w-4 h-4 text-amber-700" />
-                      {lookbook.featured_products?.length || 0} Featured Pieces
+                      {t('featured_pieces', { count: lookbook.featured_products?.length || 0 })}
                     </span>
-                    <Link 
+                    <Link
                       href={`/lookbooks/${lookbook.slug}`}
                       className="inline-flex items-center gap-1 text-amber-800 hover:text-amber-900 font-medium text-sm transition-colors"
                     >
-                      Shop the Look
+                      {t('shop_the_look')}
                       <ChevronRight className="w-4 h-4" />
                     </Link>
                   </div>
@@ -209,24 +242,24 @@ export default async function LookbooksPage({ searchParams }: PageProps) {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <nav className="flex items-center justify-center gap-2" aria-label="Pagination">
+              <nav className="flex items-center justify-center gap-2" aria-label={tCommon('pagination_aria')}>
                 {page > 1 && (
-                  <Link 
+                  <Link
                     href={`/lookbooks?page=${page - 1}${room ? `&room=${encodeURIComponent(room)}` : ''}${style ? `&style=${encodeURIComponent(style)}` : ''}`}
                     className="btn btn-outline btn-sm"
                   >
-                    Previous
+                    {tCommon('previous')}
                   </Link>
                 )}
                 <span className="px-4 text-sm text-stone-600 tabular-nums">
-                  Page {page} of {totalPages}
+                  {tCommon('page_of', { page, total: totalPages })}
                 </span>
                 {page < totalPages && (
-                  <Link 
+                  <Link
                     href={`/lookbooks?page=${page + 1}${room ? `&room=${encodeURIComponent(room)}` : ''}${style ? `&style=${encodeURIComponent(style)}` : ''}`}
                     className="btn btn-outline btn-sm"
                   >
-                    Next
+                    {tCommon('next')}
                   </Link>
                 )}
               </nav>
@@ -234,12 +267,10 @@ export default async function LookbooksPage({ searchParams }: PageProps) {
 
             {/* CTA */}
             <div className="text-center py-12 bg-amber-50/60 border border-amber-200 rounded-2xl mt-8">
-              <h2 className="text-2xl font-bold text-stone-900 mb-4">Want to Create Your Own Lookbook?</h2>
-              <p className="text-stone-600 mb-6 max-w-xl mx-auto">
-                Our design team can help you visualize furniture in your space. Book a free virtual consultation.
-              </p>
+              <h2 className="text-2xl font-bold text-stone-900 mb-4">{t('cta_title')}</h2>
+              <p className="text-stone-600 mb-6 max-w-xl mx-auto">{t('cta_subtitle')}</p>
               <Link href="/contact" className="btn btn-primary inline-flex">
-                Book Consultation
+                {t('book_consultation')}
               </Link>
             </div>
           </>

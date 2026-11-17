@@ -19,6 +19,6 @@ export const collectionsMap: Record<string, string> = {
   'col-nakula': 'Nakula',
 };
 
-export function getCollectionName(collectionId: string): string {
-  return collectionsMap[collectionId] || 'Collection';
+export function getCollectionName(collectionId: string, fallback = 'Collection'): string {
+  return collectionsMap[collectionId] || fallback;
 }

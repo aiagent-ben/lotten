@@ -1,54 +1,73 @@
 import { Metadata } from 'next';
-import Link from 'next/link';
 import Image from 'next/image';
-import { getAllActiveProducts, getCollectionBySlug, formatPrice, getCollections } from '@/lib/data/products';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
+import { getAllActiveProducts, formatPrice, getCollections } from '@/lib/data/products';
 import { CANONICAL_CATEGORIES } from '@/lib/constants/categories';
+import { buildLocaleAlternates } from '@/lib/i18n/seo';
+import { locales, type Locale } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 import ProductsPageClient from './ProductsPageClient';
 import { ProductFilters } from './ProductFilters';
 
-export const metadata: Metadata = {
-  title: 'All Products',
-  description: 'Browse our complete collection of premium Malaysian Oak furniture — TV cabinets, sideboards, dining tables, desks, and more.',
-};
-
 export const revalidate = 3600; // ISR: revalidate every hour
 
 interface Props {
-  searchParams: Promise<{ 
-    page?: string; 
-    collection?: string; 
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{
+    page?: string;
+    collection?: string;
     category?: string;
     sort?: string;
   }>;
 }
 
-export default async function ProductsPage({ searchParams }: Props) {
-  const params = await searchParams;
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  if (!locales.includes(locale as Locale)) return {};
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'product' });
+  return {
+    title: t('products_page_title'),
+    description: t('products_page_meta_desc'),
+    alternates: buildLocaleAlternates(locale, '/products'),
+  };
+}
+
+export default async function ProductsPage({ params: routeParams, searchParams }: Props) {
+  const [{ locale }, params] = await Promise.all([routeParams, searchParams]);
+  setRequestLocale(locale);
+
   const page = parseInt(params.page || '1');
   const collectionFilter = params.collection || '';
   const categoryFilter = params.category || '';
   const sortFilter = params.sort || 'featured';
   const perPage = 12;
 
-  // Get all active products and collections in parallel
-  const [productsData, allCollections] = await Promise.all([
-    getAllActiveProducts(),
-    getCollections(),
+  const [t, tCommon, productsData, allCollections] = await Promise.all([
+    getTranslations({ locale, namespace: 'product' }),
+    getTranslations({ locale, namespace: 'common' }),
+    getAllActiveProducts(locale),
+    getCollections(locale),
   ]);
+
+  const matchedCollection = collectionFilter
+    ? allCollections.find((c) => c.id === collectionFilter || c.slug === collectionFilter) || null
+    : null;
 
   let products = productsData;
 
-  // Filter by collection
+  // Filter by collection (supports either collection UUID or slug)
   if (collectionFilter) {
-    products = products.filter(p => p.collection_id === collectionFilter);
+    const targetId = matchedCollection ? matchedCollection.id : collectionFilter;
+    products = products.filter((p) => p.collection_id === targetId);
   }
 
   // Filter by category (new, bestseller, or specific category tag)
   if (categoryFilter === 'new') {
-    products = products.filter(p => p.is_new);
+    products = products.filter((p) => p.is_new);
   } else if (categoryFilter === 'bestseller') {
-    products = products.filter(p => p.is_bestseller);
+    products = products.filter((p) => p.is_bestseller);
   } else if (categoryFilter) {
     const target = categoryFilter.toLowerCase();
     const categoryConfig = CANONICAL_CATEGORIES.find(
@@ -60,13 +79,11 @@ export default async function ProductsPage({ searchParams }: Props) {
     ];
 
     products = products.filter((p) => {
-      // 1. Check structured categories array
       const inCategories = p.categories?.some((c) =>
         searchTerms.some((term) => c.toLowerCase() === term || c.toLowerCase().includes(term))
       );
       if (inCategories) return true;
 
-      // 2. Fallback to product name matching for un-migrated products
       const nameLower = p.name.toLowerCase();
       return searchTerms.some((term) => nameLower.includes(term));
     });
@@ -88,7 +105,6 @@ export default async function ProductsPage({ searchParams }: Props) {
       break;
     case 'featured':
     default:
-      // Featured: new and bestsellers first, then by sort_order
       products.sort((a, b) => {
         const aScore = (a.is_new ? 2 : 0) + (a.is_bestseller ? 1 : 0);
         const bScore = (b.is_new ? 2 : 0) + (b.is_bestseller ? 1 : 0);
@@ -101,20 +117,15 @@ export default async function ProductsPage({ searchParams }: Props) {
   const totalPages = Math.ceil(products.length / perPage);
   const paginatedProducts = products.slice((page - 1) * perPage, page * perPage);
 
-  // Get collection for filter display
-  const collection = collectionFilter ? await getCollectionBySlug(collectionFilter) : null;
-
-  // Transform collections for ProductFilters component (only collections with active products, sorted A-Z)
-  const activeCollectionIds = new Set(productsData.map(p => p.collection_id).filter(Boolean));
+  const activeCollectionIds = new Set(productsData.map((p) => p.collection_id).filter(Boolean));
   const filterCollections = allCollections
-    .filter(c => c.is_active && activeCollectionIds.has(c.id))
-    .map(c => ({ id: c.id, name: c.name }))
+    .filter((c) => c.is_active && activeCollectionIds.has(c.id))
+    .map((c) => ({ id: c.id, name: c.name }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  // Helper function to get collection name from collection_id (uses dynamic data)
   function getCollectionName(collectionId: string): string {
-    const found = allCollections.find(c => c.id === collectionId);
-    return found?.name || 'Collection';
+    const found = allCollections.find((c) => c.id === collectionId);
+    return found?.name || t('collection_fallback');
   }
 
   return (
@@ -123,14 +134,14 @@ export default async function ProductsPage({ searchParams }: Props) {
       <section className="py-16 bg-stone-100/50 border-b border-stone-200">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="heading-1 text-stone-900 mb-4">All Products</h1>
-            <p className="body-lg text-stone-600">
-              Discover our complete range of premium Malaysian Oak furniture, 
-              handcrafted for modern living spaces.
-            </p>
-            {collection && (
+            <h1 className="heading-1 text-stone-900 mb-4">{t('products_page_title')}</h1>
+            <p className="body-lg text-stone-600">{t('products_page_subtitle')}</p>
+            {matchedCollection && (
               <p className="body text-amber-800 mt-4 font-medium">
-                Showing {products.length} product{products.length !== 1 ? 's' : ''} in {collection.name}
+                {t('showing_in_collection', {
+                  count: products.length,
+                  collection: matchedCollection.name,
+                })}
               </p>
             )}
           </div>
@@ -141,7 +152,7 @@ export default async function ProductsPage({ searchParams }: Props) {
       <section className="py-8 border-b border-stone-200">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <ProductFilters
-            collectionFilter={collectionFilter}
+            collectionFilter={matchedCollection ? matchedCollection.id : collectionFilter}
             categoryFilter={categoryFilter}
             sortFilter={sortFilter}
             collections={filterCollections}
@@ -159,20 +170,20 @@ export default async function ProductsPage({ searchParams }: Props) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
               </div>
-              <h2 className="heading-3 text-stone-900 mt-2">No products found</h2>
+              <h2 className="heading-3 text-stone-900 mt-2">{t('no_products_found')}</h2>
               <p className="body text-stone-600 mt-2">
                 {categoryFilter || collectionFilter
-                  ? "We couldn't find any products matching your current filters. Try resetting them or explore the complete collection."
-                  : "Try adjusting your filters or browse all collections."}
+                  ? t('no_products_filtered')
+                  : t('no_products_default')}
               </p>
               <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
                 {(categoryFilter || collectionFilter) && (
                   <Link href="/products" className="btn btn-primary px-5 py-2.5 rounded-lg shadow-xs hover:shadow transition-all">
-                    Clear Filters
+                    {t('clear_filters')}
                   </Link>
                 )}
                 <Link href="/products" className="btn btn-outline px-5 py-2.5 rounded-lg border-stone-200 hover:bg-stone-50 transition-colors">
-                  View All Products
+                  {t('view_all_products')}
                 </Link>
               </div>
             </div>
@@ -180,18 +191,20 @@ export default async function ProductsPage({ searchParams }: Props) {
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" role="list">
                 {paginatedProducts.map((product) => {
-                  const primaryImage = product.product_images?.find((img) => img.is_primary) || product.product_images?.[0];
-                 
+                  const primaryImage =
+                    product.product_images?.find((img) => img.is_primary) ||
+                    product.product_images?.[0];
+
                   return (
-                    <article 
-                      key={product.id} 
+                    <article
+                      key={product.id}
                       className="product-card group bg-white rounded-xl border border-stone-200 overflow-hidden hover:shadow-lg transition-shadow duration-300"
                       role="listitem"
                     >
-                      <Link 
+                      <Link
                         href={`/products/${product.slug}`}
                         className="block"
-                        aria-label={`View ${product.name}`}
+                        aria-label={t('view_product_aria', { name: product.name })}
                       >
                         {/* Product Image */}
                         <div className="relative aspect-[4/3] overflow-hidden bg-stone-100">
@@ -211,14 +224,18 @@ export default async function ProductsPage({ searchParams }: Props) {
                               </svg>
                             </div>
                           )}
-                         
+
                           {/* Badges */}
                           <div className="absolute top-3 left-3 right-3 flex justify-between">
                             {product.is_new && (
-                              <span className="badge-primary badge-success text-xs px-2 py-1">New</span>
+                              <span className="badge-primary badge-success text-xs px-2 py-1">
+                                {t('new_badge')}
+                              </span>
                             )}
                             {product.is_bestseller && (
-                              <span className="badge-primary text-xs px-2 py-1">Bestseller</span>
+                              <span className="badge-primary text-xs px-2 py-1">
+                                {t('bestseller')}
+                              </span>
                             )}
                           </div>
                         </div>
@@ -232,7 +249,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                             {product.name}
                           </h3>
                           <p className="product-card-price text-lg font-bold text-stone-900 tabular-nums">
-                            {formatPrice(product.price_usd)}
+                            {formatPrice(product.price_usd, locale, t('contact_for_price'))}
                           </p>
                         </div>
                       </Link>
@@ -245,19 +262,23 @@ export default async function ProductsPage({ searchParams }: Props) {
               {totalPages > 1 && (
                 <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
                   <p className="text-sm text-stone-600">
-                    Showing {(page - 1) * perPage + 1} to {Math.min(page * perPage, products.length)} of {products.length} products
+                    {t('showing_range', {
+                      start: (page - 1) * perPage + 1,
+                      end: Math.min(page * perPage, products.length),
+                      total: products.length,
+                    })}
                   </p>
-                  <nav className="flex items-center gap-2" aria-label="Pagination">
+                  <nav className="flex items-center gap-2" aria-label={tCommon('pagination_aria')}>
                     {page > 1 && (
                       <Link
                         href={`/products?page=${page - 1}${collectionFilter ? `&collection=${collectionFilter}` : ''}${categoryFilter ? `&category=${categoryFilter}` : ''}${sortFilter !== 'featured' ? `&sort=${sortFilter}` : ''}`}
                         className="btn btn-outline btn-sm"
-                        aria-label="Previous page"
+                        aria-label={tCommon('previous_page')}
                       >
                         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                         </svg>
-                        Previous
+                        {tCommon('previous')}
                       </Link>
                     )}
                     <div className="flex items-center gap-1">
@@ -282,7 +303,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                                 ? 'bg-amber-900 text-white shadow-xs'
                                 : 'text-stone-600 hover:bg-stone-100'
                             )}
-                            aria-label={`Page ${pageNum}`}
+                            aria-label={tCommon('page_number', { page: pageNum })}
                             aria-current={page === pageNum ? 'page' : undefined}
                           >
                             {pageNum}
@@ -294,9 +315,9 @@ export default async function ProductsPage({ searchParams }: Props) {
                       <Link
                         href={`/products?page=${page + 1}${collectionFilter ? `&collection=${collectionFilter}` : ''}${categoryFilter ? `&category=${categoryFilter}` : ''}${sortFilter !== 'featured' ? `&sort=${sortFilter}` : ''}`}
                         className="btn btn-outline btn-sm"
-                        aria-label="Next page"
+                        aria-label={tCommon('next_page')}
                       >
-                        Next
+                        {tCommon('next')}
                         <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
@@ -313,13 +334,12 @@ export default async function ProductsPage({ searchParams }: Props) {
       {/* CTA Section */}
       <section className="py-16 bg-amber-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="heading-2 text-stone-900 mb-4">Can&apos;t Find What You&apos;re Looking For?</h2>
+          <h2 className="heading-2 text-stone-900 mb-4">{t('cta_title')}</h2>
           <p className="body-lg text-stone-600 mb-8 max-w-2xl mx-auto">
-            We have more products available in our showroom. Contact our team for custom orders 
-            or to inquire about upcoming collections.
+            {t('cta_subtitle')}
           </p>
           <Link href="/contact" className="btn btn-primary btn-lg">
-            Contact Us
+            {tCommon('contact_us')}
           </Link>
         </div>
       </section>

@@ -23,6 +23,14 @@ interface ProductDocument {
   slug: string;
   short_description: string | null;
   description: string | null;
+  name_my?: string | null;
+  short_description_my?: string | null;
+  description_my?: string | null;
+  collection_name_my?: string | null;
+  name_zh?: string | null;
+  short_description_zh?: string | null;
+  description_zh?: string | null;
+  collection_name_zh?: string | null;
   price_usd: number;
   cost_usd: number | null;
   collection_id: string;
@@ -122,6 +130,14 @@ function transformProduct(product: any): ProductDocument {
     slug: product.slug,
     short_description: product.short_description,
     description: product.description,
+    name_my: product.translations?.my?.name || null,
+    short_description_my: product.translations?.my?.short_description || null,
+    description_my: product.translations?.my?.description || null,
+    collection_name_my: collection?.translations?.my?.name || null,
+    name_zh: product.translations?.zh?.name || null,
+    short_description_zh: product.translations?.zh?.short_description || null,
+    description_zh: product.translations?.zh?.description || null,
+    collection_name_zh: collection?.translations?.zh?.name || null,
     price_usd: Number(product.price_usd),
     cost_usd: product.cost_usd ? Number(product.cost_usd) : null,
     collection_id: collection?.id || '',
@@ -177,10 +193,18 @@ async function setupIndex() {
   await meilisearch.index(PRODUCTS_INDEX).updateSettings({
     searchableAttributes: [
       'name',
+      'name_my',
+      'name_zh',
       'short_description',
+      'short_description_my',
+      'short_description_zh',
       'description',
+      'description_my',
+      'description_zh',
       'article_no',
       'collection_name',
+      'collection_name_my',
+      'collection_name_zh',
       'brand_name',
       'materials.material',
       'materials.finish',
@@ -222,18 +246,23 @@ async function setupIndex() {
       maxTotalHits: 1000,
     },
     synonyms: {
-      'tv cabinet': ['tv unit', 'entertainment unit', 'media console'],
-      'sideboard': ['buffet', 'credenza', 'cabinet'],
-      'coffee table': ['centre table', 'living room table'],
-      'console table': ['entryway table', 'sofa table'],
-      'dining table': ['dinner table'],
-      'bedside table': ['nightstand', 'bedside cabinet'],
-      'wardrobe': ['closet', 'armoire'],
-      'bookshelf': ['bookcase', 'shelving'],
-      'oak': ['malaysian oak', 'solid oak'],
-      'walnut': ['walnut finish'],
-      'cocoa': ['dark brown', 'chocolate'],
-      'natural': ['raw', 'unfinished'],
+      'tv cabinet': ['tv unit', 'entertainment unit', 'media console', 'kabinet tv', '电视柜'],
+      'kabinet tv': ['tv cabinet', 'tv unit'],
+      'sideboard': ['buffet', 'credenza', 'cabinet', 'almari sisi', '餐边柜'],
+      'coffee table': ['centre table', 'living room table', 'meja kopi', '茶几'],
+      'meja kopi': ['coffee table'],
+      'console table': ['entryway table', 'sofa table', 'meja konsol', '玄关桌'],
+      'dining table': ['dinner table', 'meja makan', '餐桌'],
+      'meja makan': ['dining table'],
+      'dining chair': ['kerusi makan', '餐椅'],
+      'bedside table': ['nightstand', 'bedside cabinet', 'meja sisi katil', '床头柜'],
+      'wardrobe': ['closet', 'armoire', 'almari pakaian', '衣柜'],
+      'bookshelf': ['bookcase', 'shelving', 'rak buku', '书架'],
+      'desk': ['working desk', 'meja kerja', '书桌', '办公桌'],
+      'oak': ['malaysian oak', 'solid oak', 'kayu oak', 'kayu oak malaysia', '橡木', '马来西亚橡木'],
+      'walnut': ['walnut finish', 'warna walnut', '胡桃木'],
+      'cocoa': ['dark brown', 'chocolate', 'koko', '可可色'],
+      'natural': ['raw', 'unfinished', 'semula jadi', '原木色'],
     },
   });
 

@@ -7,7 +7,10 @@ export async function POST(request: NextRequest) {
     const { email } = body;
 
     if (!email || typeof email !== 'string' || !email.includes('@')) {
-      return NextResponse.json({ error: 'Invalid email address' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Invalid email address', code: 'invalid_email' },
+        { status: 400 }
+      );
     }
 
     const supabase = createServiceClient();
@@ -19,12 +22,18 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Newsletter subscription error:', error);
-      return NextResponse.json({ error: 'Failed to subscribe' }, { status: 500 });
+      return NextResponse.json(
+        { error: 'Failed to subscribe', code: 'subscribe_failed' },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('Newsletter API error:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error', code: 'server_error' },
+      { status: 500 }
+    );
   }
 }

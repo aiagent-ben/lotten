@@ -74,11 +74,11 @@ export async function proxy(request: NextRequest) {
     return handleAdminAuth(request, pathname);
   }
 
-  const pathnameHasLocale = locales.some(
+  const matchedLocale = locales.find(
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
   );
 
-  if (!pathnameHasLocale) {
+  if (!matchedLocale) {
     // Redirect to default locale
     const locale = defaultLocale;
     return NextResponse.redirect(
@@ -86,8 +86,33 @@ export async function proxy(request: NextRequest) {
     );
   }
 
-  const response = { current: NextResponse.next({ request }) };
-  const supabase = getSupabaseClient(request, response);
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-next-intl-locale', matchedLocale);
+  const requestWithLocale = new Request(request.url, {
+    headers: requestHeaders,
+    method: request.method,
+  });
+
+  const response = { current: NextResponse.next({ request: { headers: requestHeaders } }) };
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
+          cookiesToSet.forEach(({ name, value }: { name: string; value: string; options: CookieOptions }) => request.cookies.set(name, value));
+          response.current = NextResponse.next({ request: { headers: requestHeaders } });
+          cookiesToSet.forEach(({ name, value, options }: { name: string; value: string; options: CookieOptions }) =>
+            response.current.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+  void requestWithLocale;
 
   // Refresh session if expired - required for Server Components
   await supabase.auth.getUser();
@@ -111,8 +136,10 @@ export async function proxy(request: NextRequest) {
   }
 
   if (settings?.maintenance_mode && !isMaintenancePage) {
-    const maintenanceUrl = new URL(`/${defaultLocale}/maintenance`, request.url);
-    return NextResponse.rewrite(maintenanceUrl);
+    const maintenanceUrl = new URL(`/${matchedLocale}/maintenance`, request.url);
+    return NextResponse.rewrite(maintenanceUrl, {
+      request: { headers: requestHeaders },
+    });
   }
 
   return response.current;

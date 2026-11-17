@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { ShoppingBag } from 'lucide-react';
 
 interface HotspotMarkerProps {
@@ -13,6 +14,7 @@ interface HotspotMarkerProps {
 }
 
 export function HotspotMarker({ label, tooltip, productId, x, y }: HotspotMarkerProps) {
+  const t = useTranslations('lookbook');
   const [isHovered, setIsHovered] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -106,7 +108,7 @@ export function HotspotMarker({ label, tooltip, productId, x, y }: HotspotMarker
               className="inline-flex items-center gap-1 text-amber-300 hover:text-amber-200 font-medium underline"
               onClick={(e) => e.stopPropagation()}
             >
-              <span>Shop Piece</span>
+              <span>{t('shop_piece')}</span>
               <span aria-hidden="true">&rarr;</span>
             </Link>
           </div>

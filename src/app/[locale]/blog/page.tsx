@@ -1,59 +1,73 @@
 import { Metadata } from 'next';
-import { getContentList, getContentCategories } from '@/lib/data/content';
-import Link from 'next/link';
 import Image from 'next/image';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
+import { getContentList, getContentCategories } from '@/lib/data/content';
+import { getDateFnsLocale } from '@/lib/i18n/localize';
+import { buildLocaleAlternates } from '@/lib/i18n/seo';
+import { locales, type Locale } from '@/i18n/routing';
 import { format } from 'date-fns';
-import { ChevronRight, Calendar, Clock, Tag, BookOpen, Shield, Sparkles, ArrowRight, Grid, List } from 'lucide-react';
+import { Calendar, Clock, BookOpen, Sparkles } from 'lucide-react';
 
 interface PageProps {
-  searchParams: Promise<{ 
-    page?: string; 
-    category?: string; 
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{
+    page?: string;
+    category?: string;
     tag?: string;
     search?: string;
   }>;
 }
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  if (!locales.includes(locale as Locale)) return {};
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'blog' });
   return {
-    title: 'Blog - Oak & Home',
-    description: 'Latest news, trends, and inspiration from Oak & Home. Discover Malaysian Oak furniture insights, styling tips, and design trends.',
+    title: t('meta_title'),
+    description: t('meta_description'),
+    alternates: buildLocaleAlternates(locale, '/blog'),
   };
 }
 
-export default async function BlogPage({ searchParams }: PageProps) {
-  const params = await searchParams;
+export default async function BlogPage({ params: routeParams, searchParams }: PageProps) {
+  const [{ locale }, params] = await Promise.all([routeParams, searchParams]);
+  setRequestLocale(locale);
+
   const page = parseInt(params.page || '1');
   const category = params.category;
   const tag = params.tag;
   const search = params.search;
 
-  const [contentResult, categories] = await Promise.all([
-    getContentList({ 
-      type: 'blog', 
-      status: 'published', 
-      page, 
+  const [t, tCommon, contentResult, categories] = await Promise.all([
+    getTranslations({ locale, namespace: 'blog' }),
+    getTranslations({ locale, namespace: 'common' }),
+    getContentList({
+      type: 'blog',
+      status: 'published',
+      page,
       perPage: 12,
       category: category || undefined,
       tag: tag || undefined,
       search: search || undefined,
+      locale,
     }),
-    getContentCategories('blog'),
+    getContentCategories('blog', locale),
   ]);
 
-  const { data: posts, count, totalPages } = contentResult;
+  const { data: posts, totalPages } = contentResult;
+  const dateLocale = getDateFnsLocale(locale);
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
       <header className="mb-12">
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-900 border border-amber-200 rounded-full text-sm font-medium mb-6">
           <BookOpen className="w-4 h-4 text-amber-700" />
-          Blog
+          {t('badge')}
         </div>
-        <h1 className="text-4xl lg:text-5xl font-bold text-stone-900 mb-4">Latest Articles</h1>
-        <p className="text-xl text-stone-600 max-w-2xl">
-          Design inspiration, furniture trends, and expert insights for your home.
-        </p>
+        <h1 className="text-4xl lg:text-5xl font-bold text-stone-900 mb-4">{t('title')}</h1>
+        <p className="text-xl text-stone-600 max-w-2xl">{t('subtitle')}</p>
       </header>
 
       <div className="flex flex-col lg:flex-row gap-8">
@@ -61,45 +75,48 @@ export default async function BlogPage({ searchParams }: PageProps) {
         <aside className="lg:w-64 flex-shrink-0">
           <div className="sticky top-24 space-y-8">
             {/* Search */}
-            <div>
-              <label htmlFor="blog-search" className="sr-only">Search blog</label>
+            <form method="GET" action={`/${locale}/blog`}>
+              {category && <input type="hidden" name="category" value={category} />}
+              <label htmlFor="blog-search" className="sr-only">{t('search_label')}</label>
               <div className="relative">
                 <input
                   type="search"
                   id="blog-search"
-                  placeholder="Search articles..."
+                  name="search"
+                  defaultValue={search || ''}
+                  placeholder={t('search_placeholder')}
                   className="input w-full pl-10"
                 />
                 <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
-            </div>
+            </form>
 
             {/* Categories Filter */}
             {categories.length > 0 && (
               <div>
-                <h3 className="font-semibold text-stone-900 mb-4">Categories</h3>
+                <h3 className="font-semibold text-stone-900 mb-4">{t('categories')}</h3>
                 <ul className="space-y-2">
                   <li>
-                    <Link 
-                      href="/blog" 
+                    <Link
+                      href="/blog"
                       className={`block px-3 py-2 rounded-lg text-sm transition-colors ${
                         !category ? 'bg-amber-50 text-amber-900 font-medium' : 'text-stone-600 hover:bg-stone-50'
                       }`}
                     >
-                      All Posts
+                      {t('all_posts')}
                     </Link>
                   </li>
                   {categories.map((cat) => (
-                    <li key={cat}>
-                      <Link 
-                        href={`/blog?category=${encodeURIComponent(cat)}`} 
+                    <li key={cat.value}>
+                      <Link
+                        href={`/blog?category=${encodeURIComponent(cat.value)}`}
                         className={`block px-3 py-2 rounded-lg text-sm transition-colors ${
-                          category === cat ? 'bg-amber-50 text-amber-900 font-medium' : 'text-stone-600 hover:bg-stone-50'
+                          category === cat.value ? 'bg-amber-50 text-amber-900 font-medium' : 'text-stone-600 hover:bg-stone-50'
                         }`}
                       >
-                        {cat}
+                        {cat.label}
                       </Link>
                     </li>
                   ))}
@@ -111,10 +128,10 @@ export default async function BlogPage({ searchParams }: PageProps) {
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
               <h4 className="font-semibold text-amber-950 mb-3 flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-amber-700" />
-                Featured
+                {t('featured')}
               </h4>
               <Link href="/blog" className="text-sm font-medium text-amber-800 hover:text-amber-900 hover:underline">
-                View all featured posts →
+                {t('view_all_featured')}
               </Link>
             </div>
           </div>
@@ -125,16 +142,16 @@ export default async function BlogPage({ searchParams }: PageProps) {
           {posts.length === 0 ? (
             <div className="text-center py-16">
               <BookOpen className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-              <h3 className="text-xl font-medium text-stone-900 mb-2">No articles found</h3>
-              <p className="text-stone-600">Try adjusting your filters or search terms.</p>
+              <h3 className="text-xl font-medium text-stone-900 mb-2">{t('no_articles')}</h3>
+              <p className="text-stone-600">{t('no_articles_desc')}</p>
             </div>
           ) : (
             <>
               <div className={`grid gap-6 mb-8 ${
-                posts.length === 1 
-                  ? 'grid-cols-1' 
-                  : posts.length === 2 
-                  ? 'grid-cols-1 md:grid-cols-2' 
+                posts.length === 1
+                  ? 'grid-cols-1'
+                  : posts.length === 2
+                  ? 'grid-cols-1 md:grid-cols-2'
                   : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
               }`}>
                 {posts.map((post) => {
@@ -144,8 +161,8 @@ export default async function BlogPage({ searchParams }: PageProps) {
                       <Link href={`/blog/${post.slug}`} className={`block ${isSingle && post.featured_image_url ? 'md:grid md:grid-cols-12' : ''}`}>
                         {post.featured_image_url && (
                           <figure className={`relative overflow-hidden ${
-                            isSingle 
-                              ? 'md:col-span-5 aspect-[16/10] md:aspect-auto md:min-h-full' 
+                            isSingle
+                              ? 'md:col-span-5 aspect-[16/10] md:aspect-auto md:min-h-full'
                               : 'aspect-[4/3]'
                           }`}>
                             <Image
@@ -171,9 +188,9 @@ export default async function BlogPage({ searchParams }: PageProps) {
                                 {post.category}
                               </span>
                             )}
-                            {post.tags.slice(0, 3).map((tag) => (
-                              <span key={tag} className="px-2.5 py-0.5 text-xs bg-stone-100 text-stone-700 font-medium rounded-full">
-                                {tag}
+                            {post.tags.slice(0, 3).map((tagItem) => (
+                              <span key={tagItem} className="px-2.5 py-0.5 text-xs bg-stone-100 text-stone-700 font-medium rounded-full">
+                                {tagItem}
                               </span>
                             ))}
                             {post.tags.length > 3 && (
@@ -197,13 +214,13 @@ export default async function BlogPage({ searchParams }: PageProps) {
                           {post.published_at && (
                             <time dateTime={post.published_at} className="flex items-center gap-1.5">
                               <Calendar className="w-4 h-4 text-stone-400" />
-                              {format(new Date(post.published_at), 'MMM d, yyyy')}
+                              {format(new Date(post.published_at), 'MMM d, yyyy', { locale: dateLocale })}
                             </time>
                           )}
                           {post.read_time_minutes && (
                             <span className="flex items-center gap-1.5">
                               <Clock className="w-4 h-4 text-stone-400" />
-                              {post.read_time_minutes} min read
+                              {t('min_read', { minutes: post.read_time_minutes })}
                             </span>
                           )}
                         </div>
@@ -215,24 +232,24 @@ export default async function BlogPage({ searchParams }: PageProps) {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <nav className="flex items-center justify-center gap-2" aria-label="Pagination">
+                <nav className="flex items-center justify-center gap-2" aria-label={tCommon('pagination_aria')}>
                   {page > 1 && (
-                    <Link 
+                    <Link
                       href={`/blog?page=${page - 1}${category ? `&category=${encodeURIComponent(category)}` : ''}${tag ? `&tag=${encodeURIComponent(tag)}` : ''}`}
                       className="btn btn-outline btn-sm"
                     >
-                      Previous
+                      {tCommon('previous')}
                     </Link>
                   )}
                   <span className="px-4 text-sm text-stone-600 tabular-nums">
-                    Page {page} of {totalPages}
+                    {tCommon('page_of', { page, total: totalPages })}
                   </span>
                   {page < totalPages && (
-                    <Link 
+                    <Link
                       href={`/blog?page=${page + 1}${category ? `&category=${encodeURIComponent(category)}` : ''}${tag ? `&tag=${encodeURIComponent(tag)}` : ''}`}
                       className="btn btn-outline btn-sm"
                     >
-                      Next
+                      {tCommon('next')}
                     </Link>
                   )}
                 </nav>

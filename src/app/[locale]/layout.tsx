@@ -1,96 +1,129 @@
-import type { Metadata } from "next";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
-import { notFound } from "next/navigation";
-import { locales } from "@/i18n/request";
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
+import { LocaleProvider } from '@/components/LocaleProvider';
+import { locales, type Locale } from '@/i18n/routing';
+import { cn } from '@/lib/utils';
+import { interSans, cormorantDisplay } from '@/lib/fonts';
+import { toHtmlLang, toOgLocale } from '@/lib/i18n/localize';
+
+const CLIENT_NAMESPACES = [
+  'nav',
+  'footer',
+  'localeSwitcher',
+  'newsletter',
+  'common',
+  'product',
+  'search',
+  'lookbook',
+  'categories',
+  'materials',
+  'errors',
+] as const;
 
 interface LayoutProps {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }
 
-function getLocaleMetadata(locale: string) {
-  const localeMap: Record<string, { title: string; description: string; ogLocale: string }> = {
-    en: {
-      title: "Lotten — Curated Malaysian Oak Furniture",
-      description: "Curated Malaysian Oak furniture for modern homes — direct from manufacturer to your door.",
-      ogLocale: "en_MY",
-    },
-    zh: {
-      title: "Lotten — 精选马来西亚橡木家具",
-      description: "为现代家庭精选马来西亚橡木家具 — 直接从制造商到您家门口。",
-      ogLocale: "zh_MY",
-    },
-    my: {
-      title: "Lotten — Perabot Oak Malaysia Terpilih",
-      description: "Perabot oak Malaysia terpilih untuk rumah moden — terus dari kilang ke pintu anda.",
-      ogLocale: "ms_MY",
-    },
-  };
+export function generateStaticParams() {
+  return locales.map((locale) => ({ locale }));
+}
 
-  const meta = localeMap[locale] || localeMap.en;
+export async function generateMetadata({ params }: LayoutProps): Promise<Metadata> {
+  const { locale } = await params;
+  if (!locales.includes(locale as Locale)) {
+    return {};
+  }
+
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'metadata' });
+  const title = t('site_title');
+  const description = t('site_description');
+
   return {
     title: {
-      default: meta.title,
-      template: "%s | Lotten",
+      default: title,
+      template: '%s | Lotten',
     },
-    description: meta.description,
-    keywords: ["furniture", "malaysian oak", "home decor", "interior design", "oak furniture"],
-    authors: [{ name: "Lotten" }],
-    creator: "Lotten",
-    publisher: "Lotten",
+    description,
+    keywords: ['furniture', 'malaysian oak', 'home decor', 'interior design', 'oak furniture'],
+    authors: [{ name: 'Lotten' }],
+    creator: 'Lotten',
+    publisher: 'Lotten',
     robots: {
       index: true,
       follow: true,
     },
     openGraph: {
-      type: "website",
-      locale: meta.ogLocale,
-      url: "https://lotten.com",
-      siteName: "Lotten",
-      title: meta.title,
-      description: meta.description,
+      type: 'website',
+      locale: toOgLocale(locale),
+      url: 'https://lotten.com',
+      siteName: 'Lotten',
+      title,
+      description,
       images: [
         {
-          url: "/hero-furniture.jpg",
+          url: '/hero-furniture.jpg',
           width: 1200,
           height: 630,
-          alt: "Lotten - Malaysian Oak Furniture",
+          alt: t('og_image_alt'),
         },
       ],
     },
     twitter: {
-      card: "summary_large_image",
-      title: meta.title,
-      description: meta.description,
-      images: ["/hero-furniture.jpg"],
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ['/hero-furniture.jpg'],
     },
     icons: {
-      icon: "/favicon.ico",
+      icon: '/favicon.ico',
     },
-    manifest: "https://lotten.2share.tech/site.webmanifest",
+    manifest: '/site.webmanifest',
   };
-}
-
-export async function generateMetadata({ params }: LayoutProps): Promise<Metadata> {
-  const { locale } = await params;
-  return getLocaleMetadata(locale);
 }
 
 export default async function LocaleLayout({ children, params }: LayoutProps) {
   const { locale } = await params;
 
-  if (!locales.includes(locale as any)) {
+  if (!locales.includes(locale as Locale)) {
     notFound();
   }
 
+  setRequestLocale(locale);
+  const allMessages = (await getMessages()) as Record<string, unknown>;
+  const clientMessages: Record<string, unknown> = {};
+  for (const ns of CLIENT_NAMESPACES) {
+    if (ns in allMessages) {
+      clientMessages[ns] = allMessages[ns];
+    }
+  }
+
   return (
-    <>
-      <Header />
-      <main className="pt-16 min-h-screen">
-        {children}
-      </main>
-      <Footer />
-    </>
+    <html
+      lang={toHtmlLang(locale)}
+      className={cn('h-full antialiased', interSans.variable, cormorantDisplay.variable)}
+    >
+      <head>
+        <script
+          src="https://analytics.ahrefs.com/analytics.js"
+          data-key="PajpQgo4HGinw17tro/UmA"
+          async
+        />
+      </head>
+      <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
+        <NextIntlClientProvider locale={locale} messages={clientMessages}>
+          <LocaleProvider>
+            <Header />
+            <main className="pt-16 min-h-screen">{children}</main>
+            <Footer />
+          </LocaleProvider>
+        </NextIntlClientProvider>
+      </body>
+    </html>
   );
 }

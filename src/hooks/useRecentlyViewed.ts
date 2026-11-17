@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import type { Product } from '@/lib/types/database';
+import type { LocaleTranslations, ProductTranslation, CollectionTranslation } from '@/lib/types/database';
 
 export type RecentlyViewedProduct = {
   id: string;
@@ -11,6 +11,9 @@ export type RecentlyViewedProduct = {
   images: { url: string; alt_text?: string; is_primary?: boolean }[];
   product_images: { url: string; alt_text?: string; is_primary?: boolean }[];
   collection_id: string;
+  collection_name?: string;
+  collection_translations?: LocaleTranslations<CollectionTranslation> | null;
+  translations?: LocaleTranslations<ProductTranslation> | null;
   is_new?: boolean;
   is_bestseller?: boolean;
 };

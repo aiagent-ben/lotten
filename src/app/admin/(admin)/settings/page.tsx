@@ -46,6 +46,10 @@ export default function SettingsPage() {
     company_address: 'Kuala Lumpur, Malaysia',
     company_phone: '+60 3-xxxx-xxxx',
     company_registration: 'XXXXXX-X',
+    translations: {
+      my: { maintenance_message: '', seo_defaults: { site_title: '', site_description: '' } },
+      zh: { maintenance_message: '', seo_defaults: { site_title: '', site_description: '' } },
+    },
   });
 
   useEffect(() => {
@@ -314,13 +318,47 @@ export default function SettingsPage() {
               <div className="space-y-4 bg-amber-50 border border-amber-200 rounded-lg p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="maintenance_message" className="label">Maintenance Message</label>
+                    <label htmlFor="maintenance_message" className="label">Maintenance Message (English)</label>
                     <textarea
                       id="maintenance_message"
                       name="maintenance_message"
                       value={settings.maintenance_message}
                       onChange={handleChange}
                       rows={3}
+                      className="input mt-1"
+                    />
+                    <label htmlFor="maintenance_message_my" className="label mt-3">Maintenance Message (Bahasa Melayu)</label>
+                    <textarea
+                      id="maintenance_message_my"
+                      value={settings.translations?.my?.maintenance_message || ''}
+                      onChange={(e) =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          translations: {
+                            ...prev.translations,
+                            my: { ...(prev.translations?.my || {}), maintenance_message: e.target.value },
+                          },
+                        }))
+                      }
+                      rows={2}
+                      placeholder="Kami sedang menjalankan penyelenggaraan berjadual..."
+                      className="input mt-1"
+                    />
+                    <label htmlFor="maintenance_message_zh" className="label mt-3">Maintenance Message (中文)</label>
+                    <textarea
+                      id="maintenance_message_zh"
+                      value={settings.translations?.zh?.maintenance_message || ''}
+                      onChange={(e) =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          translations: {
+                            ...prev.translations,
+                            zh: { ...(prev.translations?.zh || {}), maintenance_message: e.target.value },
+                          },
+                        }))
+                      }
+                      rows={2}
+                      placeholder="我们正在进行例行维护..."
                       className="input mt-1"
                     />
                   </div>

@@ -3,6 +3,14 @@
  * These types mirror the Supabase database schema
  */
 
+export type TranslationLocaleKey = 'my' | 'zh';
+export type LocaleTranslations<T> = Partial<Record<TranslationLocaleKey, Partial<T>>>;
+
+export interface BrandTranslation {
+  name?: string;
+  description?: string | null;
+}
+
 export interface Brand {
   id: string;
   name: string;
@@ -10,8 +18,14 @@ export interface Brand {
   description: string | null;
   logo_url: string | null;
   sort_order: number;
+  translations?: LocaleTranslations<BrandTranslation> | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface CollectionTranslation {
+  name?: string;
+  description?: string | null;
 }
 
 export interface Collection {
@@ -24,6 +38,7 @@ export interface Collection {
   color_palette: ColorOption[] | null;
   is_active: boolean;
   sort_order: number;
+  translations?: LocaleTranslations<CollectionTranslation> | null;
   created_at: string;
   updated_at: string;
   brand?: Brand;
@@ -72,6 +87,13 @@ export interface ProductVariant {
   updated_at: string;
 }
 
+export interface ProductTranslation {
+  name?: string;
+  short_description?: string | null;
+  description?: string | null;
+  pack_type?: string | null;
+}
+
 export interface Product {
   id: string;
   article_no: string;
@@ -103,6 +125,7 @@ export interface Product {
   is_new: boolean;
   is_bestseller: boolean;
   sort_order: number;
+  translations?: LocaleTranslations<ProductTranslation> | null;
   created_at: string;
   updated_at: string;
   categories?: string[] | null;
@@ -192,6 +215,14 @@ export interface DiscountCode {
   updated_at: string;
 }
 
+export interface SiteSettingsTranslation {
+  maintenance_message?: string;
+  seo_defaults?: {
+    site_title?: string;
+    site_description?: string;
+  };
+}
+
 export interface SiteSettings {
   show_pricing: boolean;
   show_stock: boolean;
@@ -204,6 +235,7 @@ export interface SiteSettings {
   };
   default_currency: string;
   supported_currencies: string[];
+  translations?: LocaleTranslations<SiteSettingsTranslation>;
 }
 
 export interface SearchAnalytics {
@@ -412,6 +444,24 @@ export interface StockReservationReleaseLog {
 export type ContentType = 'blog' | 'guide' | 'lookbook' | 'page';
 export type ContentStatus = 'draft' | 'published' | 'scheduled';
 
+export interface ContentHotspotTranslation {
+  productId?: string;
+  label?: string;
+  tooltip?: string;
+}
+
+export interface ContentPageTranslation {
+  title?: string;
+  excerpt?: string | null;
+  body_mdx?: string;
+  featured_image_alt?: string | null;
+  seo_title?: string | null;
+  seo_description?: string | null;
+  category?: string | null;
+  tags?: string[];
+  hotspots?: ContentHotspotTranslation[];
+}
+
 export interface ContentPage {
   id: string;
   slug: string;
@@ -437,6 +487,7 @@ export interface ContentPage {
   view_count: number;
   is_featured: boolean;
   template: string;
+  translations?: LocaleTranslations<ContentPageTranslation> | null;
   author_id: string | null;
   created_at: string;
   updated_at: string;

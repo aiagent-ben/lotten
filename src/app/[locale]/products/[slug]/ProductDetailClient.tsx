@@ -1,10 +1,11 @@
 "use client";
 
-import { notFound } from 'next/navigation';
-import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { formatPrice, getColorHex } from '@/lib/data/products';
+import { toTermKey } from '@/lib/i18n/localize';
 import { cn } from '@/lib/utils';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { RecentlyViewedCarousel } from '@/components/RecentlyViewedCarousel';
@@ -44,6 +45,7 @@ interface ProductDetailClientProps {
     sort_order: number;
     created_at: string;
     updated_at: string;
+    translations?: any;
     collection?: any;
     relatedProducts?: any[];
   };
@@ -61,12 +63,28 @@ interface ProductDetailClientProps {
   relatedProducts?: any[];
 }
 
-export default function ProductDetailClient({ product, images = [] }: ProductDetailClientProps) {
+export default function ProductDetailClient({
+  product,
+  images = [],
+  relatedProducts: propRelatedProducts = [],
+}: ProductDetailClientProps) {
+  const t = useTranslations('product');
+  const tCommon = useTranslations('common');
+  const tMaterials = useTranslations('materials');
+  const locale = useLocale();
+
   const { addToRecentlyViewed, recentlyViewed } = useRecentlyViewed();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [selectedFinish, setSelectedFinish] = useState<{ code: string; name: string; hex: string; part: string } | null>(product.colors?.[0] || null);
   const [activeTab, setActiveTab] = useState<'description' | 'dimensions' | 'materials'>('description');
   const thumbnailRef = useRef<HTMLDivElement>(null);
+
+  const translateTerm = (group: 'parts' | 'materials' | 'finishes', raw?: string | null, fallback?: string) => {
+    if (!raw) return fallback || '';
+    const key = `${group}.${toTermKey(raw)}`;
+    if (tMaterials.has(key)) return tMaterials(key);
+    return raw.replace(/_/g, ' ');
+  };
 
   // Track recently viewed
   useEffect(() => {
@@ -75,12 +93,15 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
       name: product.name,
       slug: product.slug,
       price_usd: product.price_usd,
-      images: images.map(img => ({
+      translations: product.translations || null,
+      collection_name: product.collection?.name,
+      collection_translations: product.collection?.translations || null,
+      images: images.map((img) => ({
         url: img.url,
         alt_text: img.alt_text ?? undefined,
         is_primary: img.is_primary,
       })) || [],
-      product_images: images.map(img => ({
+      product_images: images.map((img) => ({
         url: img.url,
         alt_text: img.alt_text ?? undefined,
         is_primary: img.is_primary,
@@ -92,93 +113,78 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
   }, [product.id, addToRecentlyViewed]);
 
   const collection = product.collection;
+  const relatedProducts = propRelatedProducts.length > 0 ? propRelatedProducts : (product.relatedProducts || []);
 
-  // Related products from same collection (passed as prop from server component)
-  const relatedProducts = product.relatedProducts || [];
-
-  // Filter primary image and gallery images - exclude color swatches (small 30x30 hinlim URLs)
   const isColorSwatch = (img: typeof images[0]) => {
     if (!img.url) return false;
-    // Color swatches are small hinlim images with /color/ in URL
-    return img.url.includes('/color/') && (img.width && img.width <= 100 || img.height && img.height <= 100);
+    return img.url.includes('/color/') && ((img.width && img.width <= 100) || (img.height && img.height <= 100));
   };
 
-  const productImages = images.filter(img => !isColorSwatch(img));
-  const primaryImage = productImages.find(img => img.is_primary) || productImages[0];
-  const galleryImages = productImages.filter(img => !img.is_primary) || [];
+  const productImages = images.filter((img) => !isColorSwatch(img));
+  const primaryImage = productImages.find((img) => img.is_primary) || productImages[0];
+  const galleryImages = productImages.filter((img) => !img.is_primary) || [];
   const allImages = primaryImage ? [primaryImage, ...galleryImages] : galleryImages;
 
-  // Handle finish selection
   const handleFinishSelect = useCallback((finish: { code: string; name: string; hex: string; part: string }) => {
     setSelectedFinish(finish);
   }, []);
 
-  // Update selected index if it goes out of bounds
   useEffect(() => {
     if (selectedIndex >= allImages.length) {
       setSelectedIndex(0);
     }
   }, [allImages.length, selectedIndex]);
 
-  // Handle thumbnail click
   const handleThumbnailClick = useCallback((index: number) => {
     setSelectedIndex(index);
   }, []);
 
-  // Keyboard navigation for thumbnails
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'ArrowLeft') {
       e.preventDefault();
-      setSelectedIndex(prev => (prev > 0 ? prev - 1 : allImages.length - 1));
+      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : allImages.length - 1));
     } else if (e.key === 'ArrowRight') {
       e.preventDefault();
-      setSelectedIndex(prev => (prev < allImages.length - 1 ? prev + 1 : 0));
+      setSelectedIndex((prev) => (prev < allImages.length - 1 ? prev + 1 : 0));
     } else if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
     }
   }, [allImages.length]);
 
-  // Scroll selected thumbnail into view
   const scrollThumbnailIntoView = useCallback((index: number) => {
     if (thumbnailRef.current) {
       const children = thumbnailRef.current.children;
       if (children[index]) {
-        (children[index] as HTMLElement).scrollIntoView({ 
-          behavior: 'smooth', 
+        (children[index] as HTMLElement).scrollIntoView({
+          behavior: 'smooth',
           inline: 'center',
-          block: 'nearest'
+          block: 'nearest',
         });
       }
     }
   }, []);
 
-  // Scroll when selection changes
   useEffect(() => {
     scrollThumbnailIntoView(selectedIndex);
   }, [selectedIndex, scrollThumbnailIntoView]);
 
-  // Parse specifications for quick-specs summary strip
   const specs = parseSpecifications(product);
-
-  // Recently viewed (excluding current product)
-  const filteredRecentlyViewed = recentlyViewed.filter(p => p.id !== product.id);
-
-  // Get the currently selected image
+  const filteredRecentlyViewed = recentlyViewed.filter((p) => p.id !== product.id);
   const selectedImage = allImages[selectedIndex] || allImages[0];
 
   return (
     <div>
       <main className="min-h-screen bg-background">
         {/* Breadcrumb */}
-        <nav className="py-4 bg-stone-100/60 border-b border-stone-200" aria-label="Breadcrumb">
+        <nav className="py-4 bg-stone-100/60 border-b border-stone-200" aria-label={tCommon('breadcrumb_aria')}>
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <ol className="flex items-center gap-2 text-sm">
               <li>
-                <Link href="/" className="text-stone-500 hover:text-stone-700">Home</Link>
+                <Link href="/" className="text-stone-500 hover:text-stone-700">{tCommon('home')}</Link>
               </li>
               <li className="text-stone-300">/</li>
               <li>
-                <Link href="/products" className="text-stone-500 hover:text-stone-700">Products</Link>
+                <Link href="/products" className="text-stone-500 hover:text-stone-700">{tCommon('products')}</Link>
               </li>
               <li className="text-stone-300">/</li>
               {collection && (
@@ -204,7 +210,6 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
               {/* Gallery */}
               <div className="space-y-4">
-                {/* Main Image */}
                 <div className="relative aspect-square rounded-xl overflow-hidden bg-stone-100 border border-stone-200">
                   {selectedImage ? (
                     <Image
@@ -227,13 +232,13 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                   {/* Badges */}
                   <div className="absolute top-4 left-4 right-4 flex gap-2">
                     {product.is_new && (
-                      <span className="badge-primary badge-success text-sm px-3 py-1">New Arrival</span>
+                      <span className="badge-primary badge-success text-sm px-3 py-1">{t('new_arrival')}</span>
                     )}
                     {product.is_bestseller && (
-                      <span className="badge-primary text-sm px-3 py-1">Bestseller</span>
+                      <span className="badge-primary text-sm px-3 py-1">{t('bestseller')}</span>
                     )}
                     {product.stock_available > 0 && product.stock_available <= (product.low_stock_threshold || 5) && (
-                      <span className="badge-warning text-sm px-3 py-1">Low Stock</span>
+                      <span className="badge-warning text-sm px-3 py-1">{t('low_stock')}</span>
                     )}
                   </div>
                 </div>
@@ -244,7 +249,7 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                     ref={thumbnailRef}
                     className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide"
                     role="list"
-                    aria-label="Product images"
+                    aria-label={t('images_aria')}
                   >
                     {allImages.map((image, index) => (
                       <button
@@ -258,13 +263,13 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                             : 'border-transparent hover:border-stone-300'
                         )}
                         role="listitem"
-                        aria-label={`View image ${index + 1}`}
+                        aria-label={t('view_image_aria', { index: index + 1 })}
                         aria-selected={selectedIndex === index}
                         tabIndex={selectedIndex === index ? 0 : -1}
                       >
                         <Image
                           src={image.url}
-                          alt={`${product.name} - view ${index + 1}`}
+                          alt={t('view_index_alt', { name: product.name, index: index + 1 })}
                           fill
                           sizes="80px"
                           className="object-cover"
@@ -280,62 +285,57 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
 
               {/* Product Info */}
               <div className="space-y-6">
-                {/* Collection Badge */}
                 {collection && (
-                  <Link 
+                  <Link
                     href={`/collections/${collection.slug}`}
                     className="inline-flex items-center gap-1 text-sm text-amber-700 font-medium hover:text-amber-900"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a2 2 0 012-2h10a2 2 0 012 2v12a2 2 0 01-2 2h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-1.414 0L7.414 18.707a1 1 0 01-.707-.293H5a2 2 0 01-2-2V4z" />
                     </svg>
-                    {collection.name} Collection
+                    {t('collection_badge', { name: collection.name })}
                   </Link>
                 )}
 
-                {/* Product Name */}
                 <div className="flex items-center gap-4 mb-4 flex-wrap">
                   <h1 className="heading-1 text-stone-900">{product.name}</h1>
                   {product.colors && product.colors.length > 0 && (
                     <div className="flex items-center gap-2">
-                      {/* Deduplicate colors by code */}
-                      {Array.from(new Map(product.colors.map(c => [c.code, c])).values()).map((color, index) => (
-                        <div
-                          key={`${color.code}-${index}`}
-                          className="flex items-center gap-2 px-3 py-1 rounded-lg border border-stone-200 bg-white text-sm"
-                        >
-                          {/* Color swatch dot using hex value from database */}
-                          <span
-                            className="w-4 h-4 rounded-full border border-stone-300 flex-shrink-0 shadow-xs"
-                            style={{ backgroundColor: color.hex || '#d1d5db' }}
-                            title={color.name}
-                            aria-hidden="true"
-                          />
-                          <span className="font-medium text-stone-900">{color.name}</span>
-                          <span className="text-xs text-stone-500 font-mono">#{color.code}</span>
-                        </div>
-                      ))}
+                      {Array.from(new Map(product.colors.map((c) => [c.code, c])).values()).map((color, index) => {
+                        const finishLabel = translateTerm('finishes', color.name, color.name);
+                        return (
+                          <div
+                            key={`${color.code}-${index}`}
+                            className="flex items-center gap-2 px-3 py-1 rounded-lg border border-stone-200 bg-white text-sm"
+                          >
+                            <span
+                              className="w-4 h-4 rounded-full border border-stone-300 flex-shrink-0 shadow-xs"
+                              style={{ backgroundColor: color.hex || '#d1d5db' }}
+                              title={finishLabel}
+                              aria-hidden="true"
+                            />
+                            <span className="font-medium text-stone-900">{finishLabel}</span>
+                            <span className="text-xs text-stone-500 font-mono">#{color.code}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
-
                 </div>
 
-                {/* Article Number */}
-                <p className="text-sm text-stone-500 font-mono">Article No: {product.article_no}</p>
+                <p className="text-sm text-stone-500 font-mono">{t('article_no', { no: product.article_no })}</p>
 
-                {/* Price */}
                 <div className="flex items-baseline gap-4">
                   <span className="text-3xl font-bold text-stone-900 tabular-nums">
-                    {formatPrice(product.price_usd)}
+                    {formatPrice(product.price_usd, locale, t('contact_for_price'))}
                   </span>
                   {product.stock_available > 0 ? (
-                    <span className="badge-success text-sm px-3 py-1">In Stock</span>
+                    <span className="badge-success text-sm px-3 py-1">{t('in_stock')}</span>
                   ) : (
-                    <span className="badge-destructive text-sm px-3 py-1">Out of Stock</span>
+                    <span className="badge-destructive text-sm px-3 py-1">{t('out_of_stock')}</span>
                   )}
                 </div>
 
-                {/* Short Description */}
                 {product.short_description && (
                   <p className="body-lg text-stone-600 border-t border-b border-stone-200 py-4">
                     {product.short_description}
@@ -346,25 +346,25 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-stone-100/60 rounded-xl border border-stone-200">
                   {specs.dimensions && (
                     <div className="text-center">
-                      <p className="caption text-stone-500">Dimensions</p>
+                      <p className="caption text-stone-500">{t('dimensions')}</p>
                       <p className="font-medium text-stone-900">{specs.dimensions}</p>
                     </div>
                   )}
                   {specs.weight && (
                     <div className="text-center">
-                      <p className="caption text-stone-500">Weight</p>
+                      <p className="caption text-stone-500">{t('weight')}</p>
                       <p className="font-medium text-stone-900">{specs.weight} kg</p>
                     </div>
                   )}
                   {specs.volume && (
                     <div className="text-center">
-                      <p className="caption text-stone-500">Volume</p>
+                      <p className="caption text-stone-500">{t('volume')}</p>
                       <p className="font-medium text-stone-900">{specs.volume} m³</p>
                     </div>
                   )}
                   {specs.packType && (
                     <div className="text-center">
-                      <p className="caption text-stone-500">Packaging</p>
+                      <p className="caption text-stone-500">{t('packaging')}</p>
                       <p className="font-medium text-stone-900">{specs.packType}</p>
                     </div>
                   )}
@@ -373,34 +373,37 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                 {/* Color Options */}
                 {product.colors && product.colors.length > 0 && (
                   <div className="border-t border-b border-stone-200 py-6">
-                    <h3 className="heading-4 text-stone-900 mb-4">Available Finishes</h3>
+                    <h3 className="heading-4 text-stone-900 mb-4">{t('available_finishes')}</h3>
                     <div className="flex flex-wrap gap-3">
-                      {Array.from(new Map(product.colors.map(c => [c.code, c])).values()).map((color, index) => (
-                        <button
-                          key={`${color.code}-${index}`}
-                          onClick={() => handleFinishSelect(color)}
-                          className={cn(
-                            'inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all',
-                            selectedFinish?.code === color.code
-                              ? 'border-amber-700 bg-amber-50 text-amber-900 ring-2 ring-amber-700/50'
-                              : 'border-stone-200 text-stone-700 hover:border-amber-300'
-                          )}
-                          aria-pressed={selectedFinish?.code === color.code}
-                        >
-                          <span
-                            className="w-6 h-6 rounded border border-stone-300"
-                            style={{ backgroundColor: color.hex || getColorHex(color.code) }}
-                            title={`${color.name} (${color.code})`}
-                          />
-                          <span className="text-sm font-medium">{color.name}</span>
-                          <span className="text-xs text-stone-500 font-mono">#{color.code}</span>
-                          {selectedFinish?.code === color.code && (
-                            <svg className="w-4 h-4 text-amber-700" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          )}
-                        </button>
-                      ))}
+                      {Array.from(new Map(product.colors.map((c) => [c.code, c])).values()).map((color, index) => {
+                        const finishLabel = translateTerm('finishes', color.name, color.name);
+                        return (
+                          <button
+                            key={`${color.code}-${index}`}
+                            onClick={() => handleFinishSelect(color)}
+                            className={cn(
+                              'inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all',
+                              selectedFinish?.code === color.code
+                                ? 'border-amber-700 bg-amber-50 text-amber-900 ring-2 ring-amber-700/50'
+                                : 'border-stone-200 text-stone-700 hover:border-amber-300'
+                            )}
+                            aria-pressed={selectedFinish?.code === color.code}
+                          >
+                            <span
+                              className="w-6 h-6 rounded border border-stone-300"
+                              style={{ backgroundColor: color.hex || getColorHex(color.code) }}
+                              title={`${finishLabel} (${color.code})`}
+                            />
+                            <span className="text-sm font-medium">{finishLabel}</span>
+                            <span className="text-xs text-stone-500 font-mono">#{color.code}</span>
+                            {selectedFinish?.code === color.code && (
+                              <svg className="w-4 h-4 text-amber-700" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -408,7 +411,7 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                 {/* CTA Buttons */}
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                   <Link href="/contact" className="btn btn-primary btn-lg flex-1 text-center">
-                    Enquire Now
+                    {t('enquire_now')}
                   </Link>
                 </div>
 
@@ -418,25 +421,25 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                     <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span>{product.lead_time_weeks} weeks lead time</span>
+                    <span>{t('lead_time_weeks', { weeks: product.lead_time_weeks })}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>
-                    <span>MOQ: {product.moq}</span>
+                    <span>{t('moq_label', { moq: product.moq })}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span>Solid Malaysian Oak</span>
+                    <span>{t('solid_oak')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
-                    <span>Direct from Workshop</span>
+                    <span>{t('direct_workshop')}</span>
                   </div>
                 </div>
               </div>
@@ -447,11 +450,11 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
         {/* Product Details Tabs */}
         <section className="py-16 bg-stone-100/50 border-t border-stone-200">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <nav className="mb-8" aria-label="Product details tabs">
+            <nav className="mb-8" aria-label={t('tabs_aria')}>
               <ul className="flex flex-wrap gap-6 border-b border-stone-200" role="tablist">
                 <li>
-                  <button 
-                    role="tab" 
+                  <button
+                    role="tab"
                     aria-selected={activeTab === 'description'}
                     onClick={() => setActiveTab('description')}
                     className={cn(
@@ -461,12 +464,12 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                         : 'text-stone-500 hover:text-stone-900 border-transparent hover:border-stone-300'
                     )}
                   >
-                    Description
+                    {t('tab_description')}
                   </button>
                 </li>
                 <li>
-                  <button 
-                    role="tab" 
+                  <button
+                    role="tab"
                     aria-selected={activeTab === 'dimensions'}
                     onClick={() => setActiveTab('dimensions')}
                     className={cn(
@@ -476,12 +479,12 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                         : 'text-stone-500 hover:text-stone-900 border-transparent hover:border-stone-300'
                     )}
                   >
-                    Dimensions & Specifications
+                    {t('tab_dimensions')}
                   </button>
                 </li>
                 <li>
-                  <button 
-                    role="tab" 
+                  <button
+                    role="tab"
                     aria-selected={activeTab === 'materials'}
                     onClick={() => setActiveTab('materials')}
                     className={cn(
@@ -491,7 +494,7 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                         : 'text-stone-500 hover:text-stone-900 border-transparent hover:border-stone-300'
                     )}
                   >
-                    Materials & Finishes
+                    {t('tab_materials')}
                   </button>
                 </li>
               </ul>
@@ -502,27 +505,32 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                 {product.description ? (
                   <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description) }} />
                 ) : (
-                  <p className="text-stone-500">No description available.</p>
+                  <p className="text-stone-500">{t('no_description')}</p>
                 )}
               </div>
             )}
 
-
             {activeTab === 'materials' && (
               <div className="space-y-8">
-                <h2 className="heading-2 text-stone-900">Materials & Finishes</h2>
-                
+                <h2 className="heading-2 text-stone-900">{t('materials_finishes')}</h2>
+
                 {product.materials && product.materials.length > 0 && (
                   <div>
-                    <h3 className="heading-3 text-stone-900 mb-4">Materials</h3>
+                    <h3 className="heading-3 text-stone-900 mb-4">{t('materials')}</h3>
                     <ul className="space-y-3">
                       {product.materials.map((material: any, index: number) => (
                         <li key={index} className="flex items-center justify-between p-4 bg-white rounded-lg border border-stone-200">
-                          <span className="text-stone-600 capitalize">{material.part?.replace(/_/g, ' ') || 'Material'}</span>
+                          <span className="text-stone-600 capitalize">
+                            {translateTerm('parts', material.part, t('material_fallback'))}
+                          </span>
                           <div className="flex items-center gap-4 text-stone-900">
-                            <span className="font-medium">{material.material || 'Malaysian Oak'}</span>
+                            <span className="font-medium">
+                              {translateTerm('materials', material.material, tMaterials('materials.malaysian_oak'))}
+                            </span>
                             {material.finish && (
-                              <span className="text-sm text-stone-500">({material.finish})</span>
+                              <span className="text-sm text-stone-500">
+                                ({translateTerm('finishes', material.finish, material.finish)})
+                              </span>
                             )}
                           </div>
                         </li>
@@ -533,22 +541,25 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
 
                 {product.colors && product.colors.length > 0 && (
                   <div>
-                    <h3 className="heading-3 text-stone-900 mb-4">Available Finishes</h3>
+                    <h3 className="heading-3 text-stone-900 mb-4">{t('available_finishes')}</h3>
                     <div className="flex flex-wrap gap-3">
-                      {product.colors.map((color: any) => (
-                        <div 
-                          key={`${color.part}-${color.code}`}
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-stone-200 bg-white text-sm"
-                        >
-                          <span
-                            className="w-5 h-5 rounded border border-stone-300 flex-shrink-0"
-                            style={{ backgroundColor: color.hex || getColorHex(color.code) }}
-                            title={`${color.name} (${color.code})`}
-                          />
-                          <span className="font-medium text-stone-900">{color.name}</span>
-                          <span className="text-xs text-stone-500 font-mono">#{color.code}</span>
-                        </div>
-                      ))}
+                      {product.colors.map((color: any) => {
+                        const finishLabel = translateTerm('finishes', color.name, color.name);
+                        return (
+                          <div
+                            key={`${color.part}-${color.code}`}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-stone-200 bg-white text-sm"
+                          >
+                            <span
+                              className="w-5 h-5 rounded border border-stone-300 flex-shrink-0"
+                              style={{ backgroundColor: color.hex || getColorHex(color.code) }}
+                              title={`${finishLabel} (${color.code})`}
+                            />
+                            <span className="font-medium text-stone-900">{finishLabel}</span>
+                            <span className="text-xs text-stone-500 font-mono">#{color.code}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -558,23 +569,21 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
             {activeTab === 'dimensions' && (
               <div className="space-y-10 max-w-5xl">
                 <div>
-                  <h2 className="heading-2 text-stone-900">Dimensions & Specifications</h2>
-                  <p className="text-sm text-stone-500 mt-1">
-                    Precise product measurements and packaging specifications.
-                  </p>
+                  <h2 className="heading-2 text-stone-900">{t('dimensions_specs')}</h2>
+                  <p className="text-sm text-stone-500 mt-1">{t('dimensions_subtitle')}</p>
                 </div>
 
                 {/* Section 1: In-Room Product Dimensions */}
                 <div className="space-y-4">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-stone-500">
-                    Product Dimensions
+                    {t('product_dimensions')}
                   </h3>
-                  
+
                   {product.width_mm || product.depth_mm || product.height_mm || product.weight_kg ? (
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                       {product.width_mm && (
                         <div className="bg-white p-5 rounded-xl border border-stone-200/90 shadow-xs hover:border-amber-600/40 transition-colors">
-                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">Width</p>
+                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">{t('width')}</p>
                           <p className="font-sans font-semibold text-2xl text-stone-900 mt-1.5 tabular-nums">
                             {product.width_mm} <span className="text-sm font-normal text-stone-500">mm</span>
                           </p>
@@ -585,7 +594,7 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                       )}
                       {product.depth_mm && (
                         <div className="bg-white p-5 rounded-xl border border-stone-200/90 shadow-xs hover:border-amber-600/40 transition-colors">
-                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">Depth</p>
+                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">{t('depth')}</p>
                           <p className="font-sans font-semibold text-2xl text-stone-900 mt-1.5 tabular-nums">
                             {product.depth_mm} <span className="text-sm font-normal text-stone-500">mm</span>
                           </p>
@@ -596,7 +605,7 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                       )}
                       {product.height_mm && (
                         <div className="bg-white p-5 rounded-xl border border-stone-200/90 shadow-xs hover:border-amber-600/40 transition-colors">
-                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">Height</p>
+                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">{t('height')}</p>
                           <p className="font-sans font-semibold text-2xl text-stone-900 mt-1.5 tabular-nums">
                             {product.height_mm} <span className="text-sm font-normal text-stone-500">mm</span>
                           </p>
@@ -607,7 +616,7 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                       )}
                       {product.weight_kg && (
                         <div className="bg-white p-5 rounded-xl border border-stone-200/90 shadow-xs hover:border-amber-600/40 transition-colors">
-                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">Weight</p>
+                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">{t('weight')}</p>
                           <p className="font-sans font-semibold text-2xl text-stone-900 mt-1.5 tabular-nums">
                             {product.weight_kg} <span className="text-sm font-normal text-stone-500">kg</span>
                           </p>
@@ -618,7 +627,7 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                       )}
                     </div>
                   ) : (
-                    <p className="text-sm text-stone-500">Dimensions not specified.</p>
+                    <p className="text-sm text-stone-500">{t('no_dimensions')}</p>
                   )}
                 </div>
 
@@ -626,34 +635,34 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                 {(product.carton_length_mm || product.carton_width_mm || product.carton_height_mm || product.volume_m3 || product.pack_type) && (
                   <div className="space-y-4 pt-4 border-t border-stone-200/60">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-stone-500">
-                      Packaging & Logistics
+                      {t('packaging_logistics')}
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {(product.carton_length_mm || product.carton_width_mm || product.carton_height_mm) && (
                         <div className="bg-white p-5 rounded-xl border border-stone-200/90 shadow-xs">
-                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">Carton Dimensions</p>
+                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">{t('carton_dimensions')}</p>
                           <p className="font-sans font-semibold text-lg text-stone-900 mt-1.5 tabular-nums">
                             {product.carton_length_mm || '—'} × {product.carton_width_mm || '—'} × {product.carton_height_mm || '—'} <span className="text-xs font-normal text-stone-500">mm</span>
                           </p>
-                          <p className="text-xs text-stone-400 mt-0.5">Length × Width × Height</p>
+                          <p className="text-xs text-stone-400 mt-0.5">{t('length_width_height')}</p>
                         </div>
                       )}
                       {product.volume_m3 && (
                         <div className="bg-white p-5 rounded-xl border border-stone-200/90 shadow-xs">
-                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">Shipping Volume</p>
+                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">{t('shipping_volume')}</p>
                           <p className="font-sans font-semibold text-lg text-stone-900 mt-1.5 tabular-nums">
                             {product.volume_m3} <span className="text-xs font-normal text-stone-500">m³ (CBM)</span>
                           </p>
-                          <p className="text-xs text-stone-400 mt-0.5">Cubic meters per carton</p>
+                          <p className="text-xs text-stone-400 mt-0.5">{t('cubic_meters')}</p>
                         </div>
                       )}
                       {product.pack_type && (
                         <div className="bg-white p-5 rounded-xl border border-stone-200/90 shadow-xs">
-                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">Packaging Type</p>
+                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">{t('packaging_type')}</p>
                           <p className="font-sans font-semibold text-lg text-stone-900 mt-1.5">
                             {product.pack_type}
                           </p>
-                          <p className="text-xs text-stone-400 mt-0.5">Standard export packing</p>
+                          <p className="text-xs text-stone-400 mt-0.5">{t('standard_export_packing')}</p>
                         </div>
                       )}
                     </div>
@@ -664,25 +673,25 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                 {(product.lead_time_weeks || product.moq) && (
                   <div className="space-y-4 pt-4 border-t border-stone-200/60">
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-stone-500">
-                      Supply & Ordering
+                      {t('supply_ordering')}
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {product.lead_time_weeks && (
                         <div className="bg-white p-5 rounded-xl border border-stone-200/90 shadow-xs">
-                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">Lead Time</p>
+                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">{t('lead_time')}</p>
                           <p className="font-sans font-semibold text-lg text-stone-900 mt-1.5 tabular-nums">
-                            {product.lead_time_weeks} <span className="text-xs font-normal text-stone-500">weeks</span>
+                            {product.lead_time_weeks} <span className="text-xs font-normal text-stone-500">{t('weeks')}</span>
                           </p>
-                          <p className="text-xs text-stone-400 mt-0.5">Production & dispatch timeline</p>
+                          <p className="text-xs text-stone-400 mt-0.5">{t('production_timeline')}</p>
                         </div>
                       )}
                       {product.moq && (
                         <div className="bg-white p-5 rounded-xl border border-stone-200/90 shadow-xs">
-                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">Minimum Order Quantity (MOQ)</p>
+                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500">{t('moq_full')}</p>
                           <p className="font-sans font-semibold text-lg text-stone-900 mt-1.5 tabular-nums">
-                            {product.moq} <span className="text-xs font-normal text-stone-500">{product.moq === 1 ? 'unit' : 'units'}</span>
+                            {product.moq} <span className="text-xs font-normal text-stone-500">{product.moq === 1 ? t('unit_singular') : t('unit_plural')}</span>
                           </p>
-                          <p className="text-xs text-stone-400 mt-0.5">Minimum commercial batch size</p>
+                          <p className="text-xs text-stone-400 mt-0.5">{t('min_batch_size')}</p>
                         </div>
                       )}
                     </div>
@@ -696,19 +705,22 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
               <section className="py-16">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                   <div className="flex items-center justify-between mb-8">
-                    <h2 className="heading-2 text-stone-900">You May Also Like</h2>
-                    <Link href={`/collections/${collection?.slug}`} className="text-amber-800 hover:text-amber-900 font-medium text-sm">
-                      View All {collection?.name} →
-                    </Link>
+                    <h2 className="heading-2 text-stone-900">{t('you_may_also_like')}</h2>
+                    {collection && (
+                      <Link href={`/collections/${collection.slug}`} className="text-amber-800 hover:text-amber-900 font-medium text-sm">
+                        {t('view_all_collection', { name: collection.name })}
+                      </Link>
+                    )}
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {relatedProducts.map((related) => {
-                      const primaryImg = related.images?.find((img: any) => img.is_primary) || related.images?.[0];
+                      const imgs = related.product_images || related.images || [];
+                      const primaryImg = imgs.find((img: any) => img.is_primary) || imgs[0];
                       return (
-                        <Link 
-                          key={related.id} 
+                        <Link
+                          key={related.id}
                           href={`/products/${related.slug}`}
-                          className="product-card group bg-white rounded-xl border border-stone-200 overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                          className="product-card group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow duration-300"
                         >
                           <div className="relative aspect-[4/3] overflow-hidden bg-stone-100">
                             {primaryImg ? (
@@ -730,13 +742,13 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
                           </div>
                           <div className="p-4">
                             <p className="caption text-amber-800 font-medium mb-1">
-                              {collection?.name || 'Collection'}
+                              {collection?.name || t('collection_fallback')}
                             </p>
                             <h3 className="product-card-title font-semibold text-stone-900 mb-2 line-clamp-2 group-hover:text-primary transition-colors">
                               {related.name}
                             </h3>
                             <p className="product-card-price text-lg font-bold text-stone-900 tabular-nums">
-                              {formatPrice(related.price_usd)}
+                              {formatPrice(related.price_usd, locale, t('contact_for_price'))}
                             </p>
                           </div>
                         </Link>
@@ -760,7 +772,6 @@ export default function ProductDetailClient({ product, images = [] }: ProductDet
   );
 }
 
-// Helper function to parse specifications for the quick specs summary strip
 function parseSpecifications(product: any): { dimensions?: string; weight?: string; volume?: string; packType?: string } {
   const specs: { dimensions?: string; weight?: string; volume?: string; packType?: string } = {};
 

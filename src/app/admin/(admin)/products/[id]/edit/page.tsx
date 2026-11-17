@@ -6,10 +6,11 @@ import { ColorOptionEditor } from '@/components/admin/ColorOptionEditor';
 import { ImageUploader } from '@/components/admin/ImageUploader';
 import { ProductVariantEditor } from '@/components/admin/ProductVariantEditor';
 import { CategoryTagPicker } from '@/components/admin/CategoryTagPicker';
+import { LocaleTabsBar, type AdminEditLocale } from '@/components/admin/LocaleTabsBar';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { formatPrice } from '@/lib/utils';
-import type { MaterialSpec, ColorOption } from '@/lib/types/database';
+import type { MaterialSpec, ColorOption, LocaleTranslations, ProductTranslation } from '@/lib/types/database';
 
 interface FormData {
   article_no: string;
@@ -43,6 +44,7 @@ interface FormData {
   materials: string;
   colors: string;
   variants: string;
+  translations: LocaleTranslations<ProductTranslation>;
 }
 
 interface Collection {
@@ -92,6 +94,7 @@ interface ProductData {
   collections: { id: string; name: string; slug: string } | null;
   images: { id: string; url: string; alt_text: string | null; sort_order: number; is_primary: boolean }[];
   variants: { id: string; article_no: string; name: string; slug: string; price_usd: number; stock_available: number; variant_attributes: Record<string, string> }[];
+  translations?: LocaleTranslations<ProductTranslation> | null;
 }
 
 export default function EditProductPage() {
@@ -99,10 +102,7 @@ export default function EditProductPage() {
   const params = useParams();
   const productId = params?.id as string | undefined;
 
-  if (!productId) {
-    return <div>Loading...</div>;
-  }
-  
+  const [activeLocale, setActiveLocale] = useState<AdminEditLocale>('en');
   const [formData, setFormData] = useState<FormData>({
     article_no: '',
     name: '',
@@ -139,6 +139,7 @@ export default function EditProductPage() {
       { part: '', name: '', code: '', hex: '#FFFFFF' },
     ], null, 2),
     variants: '[]',
+    translations: {},
   });
 
   const [collections, setCollections] = useState<{id: string; name: string; slug: string}[]>([]);
@@ -147,6 +148,7 @@ export default function EditProductPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    if (!productId) return;
     async function fetchData() {
       try {
         const [productRes, collectionsRes, brandsRes] = await Promise.all([
@@ -196,6 +198,7 @@ export default function EditProductPage() {
             materials: JSON.stringify(product.materials || [], null, 2),
             colors: JSON.stringify(product.colors || [], null, 2),
             variants: JSON.stringify(initialVariants, null, 2),
+            translations: product.translations && typeof product.translations === 'object' ? product.translations : {},
           });
         }
         
@@ -210,6 +213,37 @@ export default function EditProductPage() {
     
     fetchData();
   }, [productId]);
+
+  const activeTranslation: Partial<ProductTranslation> =
+    activeLocale === 'en' ? {} : formData.translations?.[activeLocale] || {};
+
+  const updateTranslationField = <K extends keyof ProductTranslation>(
+    field: K,
+    value: ProductTranslation[K]
+  ) => {
+    if (activeLocale === 'en') return;
+    setFormData((prev) => ({
+      ...prev,
+      translations: {
+        ...prev.translations,
+        [activeLocale]: {
+          ...(prev.translations?.[activeLocale] || {}),
+          [field]: value,
+        },
+      },
+    }));
+  };
+
+  const handleLocalizedTextChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    if (activeLocale === 'en') {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    } else {
+      updateTranslationField(name as keyof ProductTranslation, value as never);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -245,7 +279,7 @@ export default function EditProductPage() {
     }
   };
 
-  if (loading) {
+  if (!productId || loading) {
     return (
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -275,6 +309,14 @@ export default function EditProductPage() {
 
       <form className="card" action="#" method="POST" onSubmit={handleSubmit}>
         <div className="card-content space-y-8">
+          <LocaleTabsBar
+            activeLocale={activeLocale}
+            onChange={setActiveLocale}
+            hasTranslation={(loc) => {
+              const tr = formData.translations?.[loc];
+              return Boolean(tr && (tr.name || tr.short_description || tr.description));
+            }}
+          />
           
           {/* Basic Information */}
           <fieldset className="space-y-6">
@@ -297,16 +339,18 @@ export default function EditProductPage() {
               </div>
               
               <div>
-                <label htmlFor="name" className="label">Product Name *</label>
+                <label htmlFor="name" className="label">
+                  Product Name {activeLocale === 'en' ? '*' : `(${activeLocale.toUpperCase()})`}
+                </label>
                 <input
                   type="text"
                   id="name"
                   name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="e.g., BREDA 1.5M TV CABINET 109/167"
+                  value={activeLocale === 'en' ? formData.name : (activeTranslation.name ?? '')}
+                  onChange={handleLocalizedTextChange}
+                  placeholder={activeLocale === 'en' ? 'e.g., BREDA 1.5M TV CABINET 109/167' : formData.name || 'Translated product name'}
                   className="input mt-1"
-                  required
+                  required={activeLocale === 'en'}
                 />
               </div>
             </div>
@@ -347,24 +391,35 @@ export default function EditProductPage() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
-                <label htmlFor="short_description" className="label">Short Description</label>
+                <label htmlFor="short_description" className="label">
+                  Short Description {activeLocale !== 'en' && `(${activeLocale.toUpperCase()})`}
+                </label>
                 <textarea
                   id="short_description"
                   name="short_description"
-                  value={formData.short_description}
-                  onChange={handleChange}
+                  value={activeLocale === 'en' ? formData.short_description : (activeTranslation.short_description ?? '')}
+                  onChange={handleLocalizedTextChange}
                   rows={2}
-                  placeholder="Brief description for product cards and listings (max 200 chars)"
+                  placeholder={activeLocale === 'en' ? 'Brief description for product cards and listings (max 200 chars)' : formData.short_description || 'Translated short description'}
                   className="input mt-1"
                 />
               </div>
             </div>
             
             <div>
-              <label htmlFor="description" className="label">Full Description</label>
+              <label htmlFor="description" className="label">
+                Full Description {activeLocale !== 'en' && `(${activeLocale.toUpperCase()})`}
+              </label>
               <RichTextEditor
-                value={formData.description}
-                onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+                key={activeLocale}
+                value={activeLocale === 'en' ? formData.description : (activeTranslation.description ?? '')}
+                onChange={(value) => {
+                  if (activeLocale === 'en') {
+                    setFormData(prev => ({ ...prev, description: value }));
+                  } else {
+                    updateTranslationField('description', value);
+                  }
+                }}
                 placeholder="Rich text description with formatting..."
                 readOnly={false}
               />
@@ -516,14 +571,16 @@ export default function EditProductPage() {
               </div>
               
               <div>
-                <label htmlFor="pack_type" className="label">Pack Type</label>
+                <label htmlFor="pack_type" className="label">
+                  Pack Type {activeLocale !== 'en' && `(${activeLocale.toUpperCase()})`}
+                </label>
                 <input
                   type="text"
                   id="pack_type"
                   name="pack_type"
-                  value={formData.pack_type}
-                  onChange={handleChange}
-                  placeholder="1PC/CTN"
+                  value={activeLocale === 'en' ? formData.pack_type : (activeTranslation.pack_type ?? '')}
+                  onChange={handleLocalizedTextChange}
+                  placeholder={activeLocale === 'en' ? '1PC/CTN' : formData.pack_type || 'Translated pack type'}
                   className="input mt-1"
                 />
               </div>

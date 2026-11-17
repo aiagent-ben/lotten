@@ -1,12 +1,13 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { toBcp47Locale } from '@/lib/i18n/localize';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 export function formatPrice(price: number, currency = 'MYR', locale = 'en-MY'): string {
-  return new Intl.NumberFormat(locale, {
+  return new Intl.NumberFormat(toBcp47Locale(locale), {
     style: 'currency',
     currency,
     minimumFractionDigits: 0,
@@ -15,7 +16,7 @@ export function formatPrice(price: number, currency = 'MYR', locale = 'en-MY'): 
 }
 
 export function formatCurrency(amount: number, currency = 'MYR', locale = 'en-MY'): string {
-  return new Intl.NumberFormat(locale, {
+  return new Intl.NumberFormat(toBcp47Locale(locale), {
     style: 'currency',
     currency,
     minimumFractionDigits: 2,
@@ -24,7 +25,7 @@ export function formatCurrency(amount: number, currency = 'MYR', locale = 'en-MY
 }
 
 export function formatNumber(num: number, locale = 'en-MY'): string {
-  return new Intl.NumberFormat(locale).format(num);
+  return new Intl.NumberFormat(toBcp47Locale(locale)).format(num);
 }
 
 export function slugify(text: string): string {

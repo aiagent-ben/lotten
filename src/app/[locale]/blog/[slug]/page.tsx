@@ -1,31 +1,48 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getContentBySlug, getStaticParamsForType, compileContentMDX, incrementViewCount } from '@/lib/data/content';
 import Image from 'next/image';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
+import { getContentBySlug, getStaticParamsForType, compileContentMDX, incrementViewCount } from '@/lib/data/content';
+import { getDateFnsLocale } from '@/lib/i18n/localize';
+import { buildLocaleAlternates } from '@/lib/i18n/seo';
+import { locales, type Locale } from '@/i18n/routing';
 import { format } from 'date-fns';
-import Link from 'next/link';
-import { ChevronLeft, Calendar, Tag, Clock, ArrowRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { ChevronLeft, Calendar, Tag, Clock } from 'lucide-react';
 
 interface PageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }
 
 export async function generateStaticParams() {
-  return getStaticParamsForType('blog');
+  const slugs = await getStaticParamsForType('blog');
+  const params: { locale: string; slug: string }[] = [];
+  for (const locale of locales) {
+    for (const s of slugs) {
+      params.push({ locale, slug: s.slug });
+    }
+  }
+  return params;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const content = await getContentBySlug(slug, 'blog');
-  
+  const { locale, slug } = await params;
+  if (!locales.includes(locale as Locale)) return {};
+  setRequestLocale(locale);
+
+  const [t, content] = await Promise.all([
+    getTranslations({ locale, namespace: 'blog' }),
+    getContentBySlug(slug, 'blog', locale),
+  ]);
+
   if (!content) {
-    return { title: 'Post Not Found' };
+    return { title: t('not_found') };
   }
 
   return {
     title: content.meta_title || content.title,
     description: content.meta_description || content.excerpt || undefined,
+    alternates: buildLocaleAlternates(locale, `/blog/${slug}`),
     openGraph: {
       title: content.meta_title || content.title,
       description: content.meta_description || content.excerpt || undefined,
@@ -48,31 +65,40 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function BlogPostPage({ params }: PageProps) {
-  const { slug } = await params;
-  const content = await getContentBySlug(slug, 'blog');
+  const { locale, slug } = await params;
+  setRequestLocale(locale);
+
+  const [t, content] = await Promise.all([
+    getTranslations({ locale, namespace: 'blog' }),
+    getContentBySlug(slug, 'blog', locale),
+  ]);
 
   if (!content) {
     notFound();
   }
 
-  // Increment view count (fire and forget)
   incrementViewCount(content.id);
 
   const html = await compileContentMDX(content);
-  const publishedDate = content.published_at ? format(new Date(content.published_at), 'MMMM d, yyyy') : '';
-  const readTime = content.read_time_minutes ? `${content.read_time_minutes} min read` : '';
+  const dateLocale = getDateFnsLocale(locale);
+  const publishedDate = content.published_at
+    ? format(new Date(content.published_at), 'MMMM d, yyyy', { locale: dateLocale })
+    : '';
+  const readTime = content.read_time_minutes
+    ? t('min_read', { minutes: content.read_time_minutes })
+    : '';
 
   return (
     <article className="max-w-4xl mx-auto px-4 py-12 lg:px-8 lg:py-16">
       <header className="mb-12">
-        <Link 
-          href="/blog" 
+        <Link
+          href="/blog"
           className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-6"
         >
           <ChevronLeft className="w-4 h-4" />
-          Back to Blog
+          {t('back_to_blog')}
         </Link>
-        
+
         <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-6">
           {publishedDate && (
             <time dateTime={content.published_at!} className="flex items-center gap-1">
@@ -100,10 +126,10 @@ export default async function BlogPostPage({ params }: PageProps) {
 
         {content.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-6">
-            {content.tags.map((tag) => (
-              <span key={tag} className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full">
+            {content.tags.map((tagItem) => (
+              <span key={tagItem} className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full">
                 <Tag className="w-3 h-3" />
-                {tag}
+                {tagItem}
               </span>
             ))}
           </div>
@@ -131,7 +157,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         <nav className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <Link href="/blog" className="btn btn-secondary">
             <ChevronLeft className="w-4 h-4 mr-2" />
-            All Blog Posts
+            {t('all_blog_posts')}
           </Link>
         </nav>
       </footer>

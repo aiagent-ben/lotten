@@ -4,6 +4,7 @@ import { verifyAdminAuth } from '@/lib/auth/admin';
 import { validateCsrfToken } from '@/lib/csrf';
 import { sanitizePostgrestSearch } from '@/lib/db/sanitize';
 import { normalizeCategories } from '@/lib/categories';
+import { safeRevalidateTag } from '@/lib/i18n/cache';
 
 export async function GET(request: NextRequest) {
   const authError = await verifyAdminAuth(request);
@@ -142,46 +143,54 @@ export async function POST(request: NextRequest) {
     // Generate slug from name if not provided
     const slug = body.slug || body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
+    const insertPayload: Record<string, unknown> = {
+      article_no: body.article_no,
+      collection_id: body.collection_id,
+      name: body.name,
+      slug: slug,
+      short_description: body.short_description,
+      description: body.description,
+      width_mm: body.width_mm ? parseInt(body.width_mm) : null,
+      depth_mm: body.depth_mm ? parseInt(body.depth_mm) : null,
+      height_mm: body.height_mm ? parseInt(body.height_mm) : null,
+      weight_kg: body.weight_kg ? parseFloat(body.weight_kg) : null,
+      volume_m3: body.volume_m3 ? parseFloat(body.volume_m3) : null,
+      pack_type: body.pack_type,
+      carton_length_mm: body.carton_length_mm ? parseInt(body.carton_length_mm) : null,
+      carton_width_mm: body.carton_width_mm ? parseInt(body.carton_width_mm) : null,
+      carton_height_mm: body.carton_height_mm ? parseInt(body.carton_height_mm) : null,
+      materials: materials || [],
+      colors: colors || [],
+      price_usd: parseFloat(body.price_usd),
+      cost_usd: body.cost_usd ? parseFloat(body.cost_usd) : null,
+      moq: parseInt(body.moq) || 1,
+      lead_time_weeks: parseInt(body.lead_time_weeks) || 8,
+      stock_available: parseInt(body.stock_available) || 0,
+      stock_reserved: parseInt(body.stock_reserved) || 0,
+      stock_incoming: parseInt(body.stock_incoming) || 0,
+      low_stock_threshold: parseInt(body.low_stock_threshold) || 5,
+      is_active: body.is_active !== false,
+      is_new: body.is_new === true,
+      is_bestseller: body.is_bestseller === true,
+      sort_order: parseInt(body.sort_order) || 0,
+      categories: normalizeCategories(body.categories),
+    };
+
+    if (body.translations && typeof body.translations === 'object') {
+      insertPayload.translations = body.translations;
+    }
+
     const { data: product, error } = await supabase
       .from('products')
-      .insert({
-        article_no: body.article_no,
-        collection_id: body.collection_id,
-        name: body.name,
-        slug: slug,
-        short_description: body.short_description,
-        description: body.description,
-        width_mm: body.width_mm ? parseInt(body.width_mm) : null,
-        depth_mm: body.depth_mm ? parseInt(body.depth_mm) : null,
-        height_mm: body.height_mm ? parseInt(body.height_mm) : null,
-        weight_kg: body.weight_kg ? parseFloat(body.weight_kg) : null,
-        volume_m3: body.volume_m3 ? parseFloat(body.volume_m3) : null,
-        pack_type: body.pack_type,
-        carton_length_mm: body.carton_length_mm ? parseInt(body.carton_length_mm) : null,
-        carton_width_mm: body.carton_width_mm ? parseInt(body.carton_width_mm) : null,
-        carton_height_mm: body.carton_height_mm ? parseInt(body.carton_height_mm) : null,
-        materials: materials || [],
-        colors: colors || [],
-        price_usd: parseFloat(body.price_usd),
-        cost_usd: body.cost_usd ? parseFloat(body.cost_usd) : null,
-        moq: parseInt(body.moq) || 1,
-        lead_time_weeks: parseInt(body.lead_time_weeks) || 8,
-        stock_available: parseInt(body.stock_available) || 0,
-        stock_reserved: parseInt(body.stock_reserved) || 0,
-        stock_incoming: parseInt(body.stock_incoming) || 0,
-        low_stock_threshold: parseInt(body.low_stock_threshold) || 5,
-        is_active: body.is_active !== false,
-        is_new: body.is_new === true,
-        is_bestseller: body.is_bestseller === true,
-        sort_order: parseInt(body.sort_order) || 0,
-        categories: normalizeCategories(body.categories),
-      })
+      .insert(insertPayload)
       .select()
       .single();
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    safeRevalidateTag('products');
 
     // Insert images if provided
     if (images && images.length > 0) {

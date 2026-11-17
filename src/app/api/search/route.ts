@@ -16,9 +16,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     
     const query = searchParams.get('q') || '';
+    const locale = searchParams.get('locale') || 'en';
     const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
     const limit = Math.min(Math.max(1, parseInt(searchParams.get('limit') || '20')), 100);
-    const sort = searchParams.get('sort') || 'sort_order:asc';
+    const sort = searchParams.get('sort') || searchParams.get('sortBy') || 'sort_order:asc';
     
     const filters: SearchFilters = {};
     
@@ -76,7 +77,7 @@ export async function GET(request: NextRequest) {
     
     const sortArray = sort.split(',');
     
-    const result = await searchProducts(query, filters, page, limit, sortArray);
+    const result = await searchProducts(query, filters, page, limit, sortArray, locale);
     
     return NextResponse.json({
       success: true,

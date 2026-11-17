@@ -1,14 +1,34 @@
-import { Metadata } from "next";
-import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { Metadata } from 'next';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
+import { buildLocaleAlternates } from '@/lib/i18n/seo';
+import { locales, type Locale } from '@/i18n/routing';
+import { ChevronLeft } from 'lucide-react';
 
-export const metadata: Metadata = {
-  title: "Shipping Information",
-  description:
-    "Delivery timelines and shipping options for Lotten furniture within Malaysia.",
-};
+interface PageProps {
+  params: Promise<{ locale: string }>;
+}
 
-export default function ShippingPage() {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  if (!locales.includes(locale as Locale)) return {};
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'shipping' });
+  return {
+    title: t('meta_title'),
+    description: t('meta_description'),
+    alternates: buildLocaleAlternates(locale, '/shipping'),
+  };
+}
+
+export default async function ShippingPage({ params }: PageProps) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const [t, tCommon] = await Promise.all([
+    getTranslations({ locale, namespace: 'shipping' }),
+    getTranslations({ locale, namespace: 'common' }),
+  ]);
+
   return (
     <main className="min-h-screen bg-white">
       <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
@@ -17,74 +37,61 @@ export default function ShippingPage() {
           className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-8"
         >
           <ChevronLeft className="w-4 h-4" />
-          Back to Home
+          {tCommon('back_to_home')}
         </Link>
 
         <h1 className="font-display text-4xl sm:text-5xl font-semibold text-gray-900 leading-tight mb-6">
-          Shipping Information
+          {t('title')}
         </h1>
         <p className="text-lg text-gray-700 leading-relaxed mb-12">
-          We deliver throughout Peninsular Malaysia and East Malaysia. All
-          shipping is handled in-house — no third-party logistics — so your
-          piece arrives exactly as it left the workshop.
+          {t('subtitle')}
         </p>
 
         <section className="border-t border-gray-100 pt-12 mb-12">
           <h2 className="font-display text-2xl font-semibold text-gray-900 mb-4">
-            Delivery Timelines
+            {t('timelines_title')}
           </h2>
           <ul className="space-y-3 text-gray-700">
             <li>
-              <strong>Stocked items:</strong> 3–5 business days within
-              Peninsular Malaysia; 5–10 business days to East Malaysia.
+              <strong>{t('stocked_strong')}</strong> {t('stocked_text')}
             </li>
             <li>
-              <strong>Made-to-order items:</strong> 6–10 weeks depending on the
-              collection and finish. The lead time for each product is shown on
-              its detail page.
+              <strong>{t('mto_strong')}</strong> {t('mto_text')}
             </li>
             <li>
-              <strong>Custom orders:</strong> Quoted individually at the time
-              of order.
+              <strong>{t('custom_strong')}</strong> {t('custom_text')}
             </li>
           </ul>
         </section>
 
         <section className="border-t border-gray-100 pt-12 mb-12">
           <h2 className="font-display text-2xl font-semibold text-gray-900 mb-4">
-            Shipping Rates
+            {t('rates_title')}
           </h2>
           <p className="text-lg text-gray-700 leading-relaxed">
-            Flat-rate shipping is calculated at checkout based on state and
-            order size:
+            {t('rates_intro')}
           </p>
           <ul className="space-y-2 mt-4 text-gray-700">
-            <li>Peninsular Malaysia: RM 150 per shipment.</li>
-            <li>Sabah and Sarawak: RM 250 per shipment.</li>
-            <li>
-              Orders above RM 2,000 ship free within Peninsular Malaysia.
-            </li>
+            <li>{t('rate_peninsular')}</li>
+            <li>{t('rate_east')}</li>
+            <li>{t('rate_free')}</li>
           </ul>
-          <p className="text-sm text-gray-500 mt-4">
-            Rates are reviewed quarterly. Confirm at checkout before placing
-            your order.
-          </p>
+          <p className="text-sm text-gray-500 mt-4">{t('rates_note')}</p>
         </section>
 
         <section className="border-t border-gray-100 pt-12">
           <h2 className="font-display text-2xl font-semibold text-gray-900 mb-4">
-            Track Your Order
+            {t('track_title')}
           </h2>
           <p className="text-lg text-gray-700 leading-relaxed">
-            Once your order ships we'll send a tracking link by email. Having
-            trouble?{" "}
+            {t('track_prefix')}{' '}
             <Link
               href="/contact"
               className="text-amber-700 hover:text-amber-900 underline underline-offset-4"
             >
-              Contact the Lotten team
-            </Link>{" "}
-            and we'll sort it out.
+              {t('track_link')}
+            </Link>{' '}
+            {t('track_suffix')}
           </p>
         </section>
       </article>

@@ -1,6 +1,10 @@
 import { createServiceClient } from '@/lib/db/client';
 import { compileMDX } from '@/lib/mdx';
 import { sanitizePostgrestSearch } from '@/lib/db/sanitize';
+import { localizeContentPost } from '@/lib/i18n/localize';
+import type { ContentPageTranslation, LocaleTranslations } from '@/lib/types/database';
+import DOMPurify from 'isomorphic-dompurify';
+import React from 'react';
 
 export interface ContentPost {
   id: string;
@@ -34,6 +38,7 @@ export interface ContentPost {
   hotspots: Array<{ productId: string; x: number; y: number; label: string; tooltip: string }>;
   // Page specific
   template: string;
+  translations?: LocaleTranslations<ContentPageTranslation> | null;
 }
 
 interface ContentListParams {
@@ -48,6 +53,7 @@ interface ContentListParams {
   style?: string;
   featured?: boolean;
   limit?: number;
+  locale?: string;
 }
 
 interface ContentListResponse {
@@ -93,6 +99,7 @@ function mapContentFromDB(data: any): ContentPost {
     featured_products: Array.isArray(data.featured_products) ? data.featured_products : [],
     hotspots: Array.isArray(data.hotspots) ? data.hotspots : [],
     template: data.template || 'default',
+    translations: data.translations || null,
   };
 }
 
@@ -112,6 +119,7 @@ export async function getContentList(params: ContentListParams = {}): Promise<Co
     tag,
     featured,
     limit,
+    locale = 'en',
   } = params;
 
   let query = supabase
@@ -127,7 +135,11 @@ export async function getContentList(params: ContentListParams = {}): Promise<Co
   }
   if (search) {
     const escapedSearch = escapeLike(search);
-    query = query.or(`title.ilike.%${escapedSearch}%,slug.ilike.%${escapedSearch}%,excerpt.ilike.%${escapedSearch}%`);
+    if (escapedSearch) {
+      query = query.or(
+        `title.ilike.%${escapedSearch}%,slug.ilike.%${escapedSearch}%,excerpt.ilike.%${escapedSearch}%,translations->my->>title.ilike.%${escapedSearch}%,translations->zh->>title.ilike.%${escapedSearch}%`
+      );
+    }
   }
   if (category) {
     query = query.eq('category', category);
@@ -163,7 +175,7 @@ export async function getContentList(params: ContentListParams = {}): Promise<Co
   }
 
   return {
-    data: (data || []).map(mapContentFromDB),
+    data: (data || []).map((row) => localizeContentPost(mapContentFromDB(row), locale)),
     count: count || 0,
     page: pageNum,
     perPage: perPageNum,
@@ -171,7 +183,11 @@ export async function getContentList(params: ContentListParams = {}): Promise<Co
   };
 }
 
-export async function getContentBySlug(slug: string, type?: 'blog' | 'guide' | 'lookbook' | 'page'): Promise<ContentPost | null> {
+export async function getContentBySlug(
+  slug: string,
+  type?: 'blog' | 'guide' | 'lookbook' | 'page',
+  locale = 'en'
+): Promise<ContentPost | null> {
   const supabase = await getSupabase();
 
   let query = supabase
@@ -190,10 +206,10 @@ export async function getContentBySlug(slug: string, type?: 'blog' | 'guide' | '
     return null;
   }
 
-  return mapContentFromDB(data);
+  return localizeContentPost(mapContentFromDB(data), locale);
 }
 
-export async function getContentById(id: string): Promise<ContentPost | null> {
+export async function getContentById(id: string, locale = 'en'): Promise<ContentPost | null> {
   const supabase = await getSupabase();
 
   const { data, error } = await supabase
@@ -206,24 +222,34 @@ export async function getContentById(id: string): Promise<ContentPost | null> {
     return null;
   }
 
-  return mapContentFromDB(data);
+  return localizeContentPost(mapContentFromDB(data), locale);
 }
 
-export async function getPublishedContentByType(type: 'blog' | 'guide' | 'lookbook' | 'page', limit = 10): Promise<ContentPost[]> {
-  const result = await getContentList({ type, status: 'published', limit });
+export async function getPublishedContentByType(
+  type: 'blog' | 'guide' | 'lookbook' | 'page',
+  limit = 10,
+  locale = 'en'
+): Promise<ContentPost[]> {
+  const result = await getContentList({ type, status: 'published', limit, locale });
   return result.data;
 }
 
-export async function getFeaturedContent(limit = 5): Promise<ContentPost[]> {
-  const result = await getContentList({ status: 'published', featured: true, limit });
+export async function getFeaturedContent(limit = 5, locale = 'en'): Promise<ContentPost[]> {
+  const result = await getContentList({ status: 'published', featured: true, limit, locale });
   return result.data;
 }
 
-export async function getRelatedContent(contentId: string, type: 'blog' | 'guide' | 'lookbook', tags: string[], limit = 3): Promise<ContentPost[]> {
+export async function getRelatedContent(
+  contentId: string,
+  type: 'blog' | 'guide' | 'lookbook',
+  tags: string[],
+  limit = 3,
+  locale = 'en'
+): Promise<ContentPost[]> {
   const supabase = await getSupabase();
 
   if (tags.length === 0) {
-    return getPublishedContentByType(type, limit);
+    return getPublishedContentByType(type, limit, locale);
   }
 
   const { data, error } = await supabase
@@ -241,15 +267,23 @@ export async function getRelatedContent(contentId: string, type: 'blog' | 'guide
     return [];
   }
 
-  return (data || []).map(mapContentFromDB);
+  return (data || []).map((row) => localizeContentPost(mapContentFromDB(row), locale));
 }
 
-export async function getContentCategories(type?: 'blog' | 'guide' | 'lookbook'): Promise<string[]> {
+export interface LocalizedContentCategory {
+  value: string;
+  label: string;
+}
+
+export async function getContentCategories(
+  type?: 'blog' | 'guide' | 'lookbook',
+  locale = 'en'
+): Promise<LocalizedContentCategory[]> {
   const supabase = await getSupabase();
 
   let query = supabase
     .from('content_pages')
-    .select('category')
+    .select('category, translations')
     .eq('status', 'published')
     .not('category', 'is', null);
 
@@ -262,7 +296,7 @@ export async function getContentCategories(type?: 'blog' | 'guide' | 'lookbook')
   if (error || !data || data.length === 0) {
     let catQuery = supabase
       .from('content_categories')
-      .select('name')
+      .select('name, translations')
       .eq('is_active', true)
       .order('sort_order');
 
@@ -275,14 +309,20 @@ export async function getContentCategories(type?: 'blog' | 'guide' | 'lookbook')
       console.error('Error fetching categories:', catError);
       return [];
     }
-    return (catData || []).map((c) => c.name);
+    return (catData || []).map((c: any) => ({
+      value: c.name,
+      label: (locale !== 'en' && c.translations?.[locale]?.name) || c.name,
+    }));
   }
 
-  const set = new Set<string>();
+  const map = new Map<string, string>();
   data.forEach((c: any) => {
-    if (c.category) set.add(c.category);
+    if (c.category && !map.has(c.category)) {
+      const trLabel = locale !== 'en' ? c.translations?.[locale]?.category : undefined;
+      map.set(c.category, trLabel && trLabel.trim() ? trLabel : c.category);
+    }
   });
-  return Array.from(set);
+  return Array.from(map.entries()).map(([value, label]) => ({ value, label }));
 }
 
 export async function getAllTags(): Promise<string[]> {
@@ -328,11 +368,32 @@ export async function incrementViewCount(id: string): Promise<void> {
   }
 }
 
-export async function compileContentMDX(content: ContentPost): Promise<any> {
-  const result = await compileMDX(content.body_mdx);
-  // For RSC, we return the compiled React element directly
-  // The page components will handle rendering
-  return result.content;
+/**
+ * Compile Markdown/MDX safely, falling back to sanitized HTML when content was
+ * authored via Tiptap RichTextEditor (which outputs HTML attributes like style="...").
+ */
+export async function compileContentMDX(content: ContentPost): Promise<React.ReactElement> {
+  const raw = content.body_mdx || '';
+  const looksLikeHtml = /^\s*<(?:p|h[1-6]|ul|ol|div|blockquote|figure|table|section)\b/i.test(raw);
+
+  if (looksLikeHtml) {
+    const cleanHtml = DOMPurify.sanitize(raw);
+    return React.createElement('div', {
+      className: 'prose prose-stone max-w-none',
+      dangerouslySetInnerHTML: { __html: cleanHtml },
+    });
+  }
+
+  try {
+    const result = await compileMDX(raw);
+    return result.content;
+  } catch {
+    const cleanHtml = DOMPurify.sanitize(raw);
+    return React.createElement('div', {
+      className: 'prose prose-stone max-w-none',
+      dangerouslySetInnerHTML: { __html: cleanHtml },
+    });
+  }
 }
 
 export async function getStaticParamsForType(type: 'blog' | 'guide' | 'lookbook' | 'page'): Promise<{ slug: string }[]> {

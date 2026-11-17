@@ -1,4 +1,7 @@
-import Link from "next/link";
+"use client";
+
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { Logo } from "@/components/Logo";
 
 /**
@@ -9,6 +12,8 @@ import { Logo } from "@/components/Logo";
  *   /sustainability, /careers, /press — no content, no route, no link.
  */
 export function Footer() {
+  const t = useTranslations("footer");
+
   return (
     <footer className="bg-stone-900 text-stone-400 py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -17,104 +22,103 @@ export function Footer() {
             <Link
               href="/"
               className="mb-4 block"
-              aria-label="Lotten Home"
+              aria-label={t("home_aria")}
             >
               <Logo variant="full" className="h-9 w-auto text-white" />
             </Link>
             <p className="text-sm text-stone-400 max-w-sm leading-relaxed">
-              Curated Malaysian Oak furniture for modern homes. Direct from
-              manufacturer to your door — honest pricing, exceptional quality.
+              {t("brand_blurb")}
             </p>
           </div>
           <div>
-            <h4 className="font-medium text-white mb-4">Shop</h4>
+            <h4 className="font-medium text-white mb-4">{t("shop")}</h4>
             <nav className="space-y-2">
               <Link
                 href="/products"
                 className="text-sm hover:text-white transition-colors block"
               >
-                All Products
+                {t("all_products")}
               </Link>
               <Link
                 href="/collections"
                 className="text-sm hover:text-white transition-colors block"
               >
-                Collections
+                {t("collections")}
               </Link>
               <Link
                 href="/products?category=new"
                 className="text-sm hover:text-white transition-colors block"
               >
-                New Arrivals
+                {t("new_arrivals")}
               </Link>
               <Link
                 href="/products?category=bestseller"
                 className="text-sm hover:text-white transition-colors block"
               >
-                Bestsellers
+                {t("bestsellers")}
               </Link>
             </nav>
           </div>
           <div>
-            <h4 className="font-medium text-white mb-4">Stories & Care</h4>
+            <h4 className="font-medium text-white mb-4">{t("stories_care")}</h4>
             <nav className="space-y-2">
               <Link
                 href="/blog"
                 className="text-sm hover:text-white transition-colors block"
               >
-                Journal & News
+                {t("journal_news")}
               </Link>
               <Link
                 href="/guides"
                 className="text-sm hover:text-white transition-colors block"
               >
-                Care Guides
+                {t("care_guides")}
               </Link>
               <Link
                 href="/lookbooks"
                 className="text-sm hover:text-white transition-colors block"
               >
-                Lookbooks
+                {t("lookbooks")}
               </Link>
             </nav>
           </div>
           <div>
-            <h4 className="font-medium text-white mb-4">Support</h4>
+            <h4 className="font-medium text-white mb-4">{t("support")}</h4>
             <nav className="space-y-2">
               <Link
                 href="/contact"
                 className="text-sm hover:text-white transition-colors block"
               >
-                Contact Us
+                {t("contact_us")}
               </Link>
               <Link
                 href="/faq"
                 className="text-sm hover:text-white transition-colors block"
               >
-                FAQ
+                {t("faq")}
               </Link>
               <Link
                 href="/shipping"
                 className="text-sm hover:text-white transition-colors block"
               >
-                Shipping Info
+                {t("shipping_info")}
               </Link>
               <Link
                 href="/returns"
                 className="text-sm hover:text-white transition-colors block"
               >
-                Returns
+                {t("returns")}
               </Link>
             </nav>
           </div>
           <div>
-            <h4 className="font-medium text-white mb-4">Company</h4>
+            <h4 className="font-medium text-white mb-4">{t("company")}</h4>
             <nav className="space-y-2">
               <Link
                 href="/about"
                 className="text-sm hover:text-white transition-colors block"
               >
-                About Us
+                {t("about_us")}
               </Link>
             </nav>
           </div>
@@ -122,7 +126,7 @@ export function Footer() {
 
         <div className="border-t border-stone-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-stone-500">
-            © {new Date().getFullYear()} Lotten Furniture. All rights reserved.
+            {t("copyright", { year: new Date().getFullYear() })}
           </p>
           <div className="flex items-center gap-6">
             <a

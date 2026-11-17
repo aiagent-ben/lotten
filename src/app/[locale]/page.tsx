@@ -1,25 +1,52 @@
 import { Metadata } from 'next';
-import Link from 'next/link';
 import Image from 'next/image';
-import { getFeaturedProducts, getAllActiveProducts, getCollectionBySlug } from '@/lib/data/products';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
+import { getFeaturedProducts } from '@/lib/data/products';
 import { getContentList } from '@/lib/data/content';
 import { formatPrice } from '@/lib/utils';
 import { format } from 'date-fns';
 import NewsletterForm from '@/components/NewsletterForm';
 import { getCollectionName } from '@/lib/collections';
+import { getDateFnsLocale } from '@/lib/i18n/localize';
+import { buildLocaleAlternates } from '@/lib/i18n/seo';
+import { locales, type Locale } from '@/i18n/routing';
 import { Factory, TreePine, ShieldCheck, BookOpen, ArrowRight, Clock, Calendar } from 'lucide-react';
 
-export const metadata: Metadata = {
-  title: 'Lotten — Curated Malaysian Oak Furniture',
-  description: 'Curated Malaysian Oak furniture for modern homes — direct from manufacturer to your door.',
-};
+export const revalidate = 3600;
 
-export default async function HomePage() {
-  const [featuredProducts, contentResult] = await Promise.all([
-    getFeaturedProducts(8),
-    getContentList({ status: 'published', limit: 3 }),
+interface PageProps {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  if (!locales.includes(locale as Locale)) return {};
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'home' });
+
+  return {
+    title: t('meta_title'),
+    description: t('meta_description'),
+    alternates: buildLocaleAlternates(locale, ''),
+  };
+}
+
+export default async function HomePage({ params }: PageProps) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
+  const [t, tCommon, tProduct, tMaterials, featuredProducts, contentResult] = await Promise.all([
+    getTranslations({ locale, namespace: 'home' }),
+    getTranslations({ locale, namespace: 'common' }),
+    getTranslations({ locale, namespace: 'product' }),
+    getTranslations({ locale, namespace: 'materials' }),
+    getFeaturedProducts(8, locale),
+    getContentList({ status: 'published', limit: 3, locale }),
   ]);
+
   const recentPosts = contentResult.data;
+  const dateLocale = getDateFnsLocale(locale);
 
   return (
     <main className="min-h-screen bg-background font-sans antialiased">
@@ -30,20 +57,20 @@ export default async function HomePage() {
         <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
           <div className="max-w-3xl animate-slide-up">
             <span className="inline-block px-4 py-1.5 rounded-full bg-amber-600/20 text-amber-100 text-sm font-medium mb-8 tracking-wide backdrop-blur-sm border border-amber-400/30">
-              Direct from Manufacturer
+              {t('hero_badge')}
             </span>
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold text-white leading-tight mb-6">
-              Curated Malaysian Oak Furniture<br />for Modern Homes
+              {t('hero_title_line1')}<br />{t('hero_title_line2')}
             </h1>
             <p className="text-lg sm:text-xl text-amber-100/80 mb-10 max-w-2xl leading-relaxed">
-              Discover timeless pieces crafted from premium Malaysian Oak. Direct from our workshop to your door — no middlemen, no markups, just honest furniture at honest prices.
+              {t('hero_subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 href="/products"
                 className="btn btn-primary btn-lg"
               >
-                Shop Collection
+                {t('cta_shop')}
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
@@ -52,7 +79,7 @@ export default async function HomePage() {
                 href="/collections"
                 className="btn btn-lg bg-white/10 hover:bg-white/20 text-white border border-white/30 backdrop-blur-sm transition-all"
               >
-                Browse Collections
+                {t('cta_collections')}
               </Link>
             </div>
           </div>
@@ -65,18 +92,18 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 max-w-4xl mx-auto gap-8 text-center">
             <div className="py-4">
               <Factory className="mx-auto h-9 w-9 text-amber-700 mb-3" strokeWidth={1.5} />
-              <h3 className="font-medium text-stone-900 mb-1">Direct from Workshop</h3>
-              <p className="text-sm text-stone-600">No middlemen, honest factory pricing</p>
+              <h3 className="font-medium text-stone-900 mb-1">{t('trust_workshop_title')}</h3>
+              <p className="text-sm text-stone-600">{t('trust_workshop_desc')}</p>
             </div>
             <div className="py-4">
               <TreePine className="mx-auto h-9 w-9 text-amber-700 mb-3" strokeWidth={1.5} />
-              <h3 className="font-medium text-stone-900 mb-1">Solid Malaysian Oak</h3>
-              <p className="text-sm text-stone-600">100% sustainably sourced timber</p>
+              <h3 className="font-medium text-stone-900 mb-1">{t('trust_oak_title')}</h3>
+              <p className="text-sm text-stone-600">{t('trust_oak_desc')}</p>
             </div>
             <div className="py-4">
               <ShieldCheck className="mx-auto h-9 w-9 text-amber-700 mb-3" strokeWidth={1.5} />
-              <h3 className="font-medium text-stone-900 mb-1">Quality Guaranteed</h3>
-              <p className="text-sm text-stone-600">Heirloom standards, built to last</p>
+              <h3 className="font-medium text-stone-900 mb-1">{t('trust_quality_title')}</h3>
+              <p className="text-sm text-stone-600">{t('trust_quality_desc')}</p>
             </div>
           </div>
         </div>
@@ -86,8 +113,12 @@ export default async function HomePage() {
       <section className="py-20 lg:py-28 bg-stone-100/50 border-b border-stone-200">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16 animate-slide-up">
-            <h2 className="font-display text-4xl sm:text-5xl font-semibold text-stone-900 mb-4">Our Collections</h2>
-            <p className="text-lg text-stone-600 max-w-2xl mx-auto">Each collection tells a story of craftsmanship, material, and design philosophy — curated for the way you live.</p>
+            <h2 className="font-display text-4xl sm:text-5xl font-semibold text-stone-900 mb-4">
+              {t('collections_title')}
+            </h2>
+            <p className="text-lg text-stone-600 max-w-2xl mx-auto">
+              {t('collections_subtitle')}
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -96,7 +127,7 @@ export default async function HomePage() {
               <div className="relative aspect-[4/3] overflow-hidden">
                 <Image
                   src="https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/335048/335048-breda-1-5m-tv-cabinet-109167/0.webp"
-                  alt="Breda Collection - TV cabinets and sideboards in warm walnut and natural finishes"
+                  alt={t('breda_alt')}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -105,7 +136,7 @@ export default async function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-tr from-amber-600/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="collection-overlay absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
                   <span className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-stone-900 font-semibold rounded-lg hover:bg-stone-100 transition-colors shadow-lg">
-                    Explore Breda
+                    {t('explore_collection', { name: 'Breda' })}
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                     </svg>
@@ -113,15 +144,19 @@ export default async function HomePage() {
                 </div>
               </div>
               <div className="p-6">
-                <span className="inline-block px-3 py-1 text-xs font-medium text-amber-900 bg-amber-50 rounded-full mb-3 border border-amber-200">Malaysian Oak</span>
+                <span className="inline-block px-3 py-1 text-xs font-medium text-amber-900 bg-amber-50 rounded-full mb-3 border border-amber-200">
+                  {t('oak_badge')}
+                </span>
                 <h3 className="font-display text-2xl font-semibold text-stone-900 mb-2">Breda</h3>
-                <p className="text-stone-600 mb-4">Working desks, TV cabinets and sideboards in warm Walnut/Natural combinations.</p>
+                <p className="text-stone-600 mb-4">{t('breda_desc')}</p>
                 <div className="flex flex-wrap gap-1.5 mb-4">
-                  <span className="px-2 py-1 text-xs font-medium rounded bg-stone-100 text-stone-700">Walnut</span>
-                  <span className="px-2 py-1 text-xs font-medium rounded bg-stone-100 text-stone-700">Natural</span>
-                  <span className="px-2 py-1 text-xs font-medium rounded bg-stone-100 text-stone-700">White Marble</span>
+                  <span className="px-2 py-1 text-xs font-medium rounded bg-stone-100 text-stone-700">{tMaterials('finishes.walnut')}</span>
+                  <span className="px-2 py-1 text-xs font-medium rounded bg-stone-100 text-stone-700">{tMaterials('finishes.natural')}</span>
+                  <span className="px-2 py-1 text-xs font-medium rounded bg-stone-100 text-stone-700">{tMaterials('finishes.white_marble')}</span>
                 </div>
-                <span className="text-sm font-medium text-amber-700 hover:text-amber-800 inline-flex items-center gap-1 transition-colors">View 8 products →</span>
+                <span className="text-sm font-medium text-amber-700 hover:text-amber-800 inline-flex items-center gap-1 transition-colors">
+                  {t('view_products_count', { count: 8 })}
+                </span>
               </div>
             </Link>
 
@@ -130,7 +165,7 @@ export default async function HomePage() {
               <div className="relative aspect-[4/3] overflow-hidden">
                 <Image
                   src="https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/134127/134127-dover-coffee-table-109113/0.webp"
-                  alt="Dover Collection - Modern coffee tables and living room furniture"
+                  alt={t('dover_alt')}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -139,7 +174,7 @@ export default async function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-tr from-amber-600/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="collection-overlay absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
                   <span className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-stone-900 font-semibold rounded-lg hover:bg-stone-100 transition-colors shadow-lg">
-                    Explore Dover
+                    {t('explore_collection', { name: 'Dover' })}
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                     </svg>
@@ -147,14 +182,18 @@ export default async function HomePage() {
                 </div>
               </div>
               <div className="p-6">
-                <span className="inline-block px-3 py-1 text-xs font-medium text-amber-900 bg-amber-50 rounded-full mb-3 border border-amber-200">Malaysian Oak</span>
+                <span className="inline-block px-3 py-1 text-xs font-medium text-amber-900 bg-amber-50 rounded-full mb-3 border border-amber-200">
+                  {t('oak_badge')}
+                </span>
                 <h3 className="font-display text-2xl font-semibold text-stone-900 mb-2">Dover</h3>
-                <p className="text-stone-600 mb-4">Complete living room collections with coffee, console, side tables and desks.</p>
+                <p className="text-stone-600 mb-4">{t('dover_desc')}</p>
                 <div className="flex flex-wrap gap-1.5 mb-4">
-                  <span className="px-2 py-1 text-xs font-medium rounded bg-stone-100 text-stone-700">Walnut</span>
-                  <span className="px-2 py-1 text-xs font-medium rounded bg-stone-100 text-stone-700">Natural</span>
+                  <span className="px-2 py-1 text-xs font-medium rounded bg-stone-100 text-stone-700">{tMaterials('finishes.walnut')}</span>
+                  <span className="px-2 py-1 text-xs font-medium rounded bg-stone-100 text-stone-700">{tMaterials('finishes.natural')}</span>
                 </div>
-                <span className="text-sm font-medium text-amber-700 hover:text-amber-800 inline-flex items-center gap-1 transition-colors">View 6 products →</span>
+                <span className="text-sm font-medium text-amber-700 hover:text-amber-800 inline-flex items-center gap-1 transition-colors">
+                  {t('view_products_count', { count: 6 })}
+                </span>
               </div>
             </Link>
 
@@ -163,7 +202,7 @@ export default async function HomePage() {
               <div className="relative aspect-[4/3] overflow-hidden">
                 <Image
                   src="https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/335043/335043-castor-1-5m-tv-cabinet-1141021325/0.webp"
-                  alt="Castor Collection - Contemporary TV cabinets and entertainment units"
+                  alt={t('castor_alt')}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -172,7 +211,7 @@ export default async function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-tr from-amber-600/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="collection-overlay absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
                   <span className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-stone-900 font-semibold rounded-lg hover:bg-stone-100 transition-colors shadow-lg">
-                    Explore Castor
+                    {t('explore_collection', { name: 'Castor' })}
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                     </svg>
@@ -182,20 +221,22 @@ export default async function HomePage() {
               <div className="p-6">
                 <span className="inline-block px-3 py-1 text-xs font-medium text-purple-700 bg-purple-50 rounded-full mb-3">Luooma</span>
                 <h3 className="font-display text-2xl font-semibold text-stone-900 mb-2">Castor</h3>
-                <p className="text-stone-600 mb-4">Minimalist three-tone finish combinations for modern entertainment centers.</p>
+                <p className="text-stone-600 mb-4">{t('castor_desc')}</p>
                 <div className="flex flex-wrap gap-1.5 mb-4">
-                  <span className="px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-700">Black</span>
-                  <span className="px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-700">Natural</span>
-                  <span className="px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-700">Space Blue</span>
+                  <span className="px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-700">{tMaterials('finishes.black')}</span>
+                  <span className="px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-700">{tMaterials('finishes.natural')}</span>
+                  <span className="px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-700">{tMaterials('finishes.space_blue')}</span>
                 </div>
-                <span className="text-sm font-medium text-purple-600 hover:text-purple-700 inline-flex items-center gap-1 transition-colors">View 5 products →</span>
+                <span className="text-sm font-medium text-purple-600 hover:text-purple-700 inline-flex items-center gap-1 transition-colors">
+                  {t('view_products_count', { count: 5 })}
+                </span>
               </div>
             </Link>
           </div>
 
           <div className="text-center mt-12 animate-slide-up">
             <Link href="/collections" className="btn btn-outline btn-lg">
-              View All 19 Collections
+              {t('view_all_collections')}
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
@@ -209,27 +250,32 @@ export default async function HomePage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 animate-slide-up">
             <div>
-              <h2 className="font-display text-4xl sm:text-5xl font-semibold text-stone-900 mb-2">Featured Products</h2>
-              <p className="text-lg text-stone-600">Handpicked bestsellers and new arrivals</p>
+              <h2 className="font-display text-4xl sm:text-5xl font-semibold text-stone-900 mb-2">
+                {t('featured_products_title')}
+              </h2>
+              <p className="text-lg text-stone-600">{t('featured_products_subtitle')}</p>
             </div>
             <Link
               href="/products"
               className="text-sm font-medium text-amber-700 hover:text-amber-800 inline-flex items-center gap-1 transition-colors"
             >
-              View All <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+              {tCommon('view_all')} <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
             </Link>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" role="list">
             {featuredProducts.map((product) => {
               const primaryImage = product.product_images?.find((img) => img.is_primary) || product.product_images?.[0];
+              const collectionLabel =
+                product.collection?.name ||
+                getCollectionName(product.collection_id, tProduct('collection_fallback'));
               return (
                 <Link
                   key={product.id}
                   href={`/products/${product.slug}`}
                   className="group relative bg-white rounded-xl border border-stone-200 overflow-hidden hover:shadow-lg transition-shadow duration-300"
                   role="listitem"
-                  aria-label={`View ${product.name}`}
+                  aria-label={tProduct('view_product_aria', { name: product.name })}
                 >
                   <div className="relative aspect-square overflow-hidden bg-stone-100">
                     {primaryImage ? (
@@ -251,24 +297,28 @@ export default async function HomePage() {
                     {/* Badges */}
                     <div className="absolute top-3 left-3 flex flex-col gap-1.5">
                       {product.is_new && (
-                        <span className="px-2.5 py-0.5 text-xs font-medium text-amber-900 bg-amber-50 border border-amber-200 rounded-full shadow-xs">New</span>
+                        <span className="px-2.5 py-0.5 text-xs font-medium text-amber-900 bg-amber-50 border border-amber-200 rounded-full shadow-xs">
+                          {t('new_badge')}
+                        </span>
                       )}
                       {product.is_bestseller && (
-                        <span className="px-2.5 py-0.5 text-xs font-medium text-stone-900 bg-white/90 border border-stone-200 rounded-full shadow-xs backdrop-blur-xs">Bestseller</span>
+                        <span className="px-2.5 py-0.5 text-xs font-medium text-stone-900 bg-white/90 border border-stone-200 rounded-full shadow-xs backdrop-blur-xs">
+                          {t('bestseller_badge')}
+                        </span>
                       )}
                     </div>
                   </div>
 
                   <div className="p-5">
                     <p className="text-xs font-medium text-amber-800 uppercase tracking-wide mb-1">
-                      {getCollectionName(product.collection_id)}
+                      {collectionLabel}
                     </p>
                     <h3 className="font-medium text-stone-900 mb-1.5 line-clamp-1 group-hover:text-primary transition-colors">
                       {product.name}
                     </h3>
                     <div className="flex items-baseline gap-2">
                       <span className="text-2xl font-bold text-stone-900 tabular-nums">
-                        {formatPrice(product.price_usd)}
+                        {formatPrice(product.price_usd, 'MYR', locale)}
                       </span>
                     </div>
                   </div>
@@ -284,20 +334,24 @@ export default async function HomePage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
             <div>
-              <span className="inline-block px-4 py-1.5 rounded-full bg-amber-600/10 text-amber-800 text-sm font-medium mb-6 border border-amber-200">Our Philosophy</span>
-              <h2 className="font-display text-4xl sm:text-5xl font-semibold text-stone-900 mb-6 leading-tight">Crafted with Intention,<br />Priced with Integrity</h2>
+              <span className="inline-block px-4 py-1.5 rounded-full bg-amber-600/10 text-amber-800 text-sm font-medium mb-6 border border-amber-200">
+                {t('philosophy_badge')}
+              </span>
+              <h2 className="font-display text-4xl sm:text-5xl font-semibold text-stone-900 mb-6 leading-tight">
+                {t('philosophy_title_line1')}<br />{t('philosophy_title_line2')}
+              </h2>
               <div className="space-y-4 text-stone-600">
-                <p className="text-lg leading-relaxed">Every piece of Lotten furniture begins in our Malaysian workshop, where sustainably sourced oak meets generations of woodworking expertise. We control the entire journey — from timber selection to final finish — so you receive heirloom-quality furniture without the showroom markup.</p>
-                <p className="text-lg leading-relaxed">No middlemen. No inflated prices. Just honest craftsmanship delivered direct to your home.</p>
+                <p className="text-lg leading-relaxed">{t('philosophy_p1')}</p>
+                <p className="text-lg leading-relaxed">{t('philosophy_p2')}</p>
               </div>
               <Link href="/about" className="btn btn-primary mt-8">
-                Read Our Story <svg className="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                {t('read_our_story')} <svg className="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
               </Link>
             </div>
             <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-stone-200">
               <Image
                 src="https://pub-ce9098702cc5447ab9a26a9e41c7bf1a.r2.dev/products/335048/335048-breda-1-5m-tv-cabinet-109167/0.webp"
-                alt="Lotten workshop - craftsmen working on Malaysian Oak furniture"
+                alt={t('workshop_alt')}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="w-full h-full object-cover"
@@ -316,20 +370,20 @@ export default async function HomePage() {
               <div>
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-200 text-xs font-semibold tracking-wide uppercase mb-3">
                   <BookOpen className="w-3.5 h-3.5" />
-                  Journal & Care Guides
+                  {t('stories_badge')}
                 </span>
                 <h2 className="font-display text-4xl sm:text-5xl font-semibold text-stone-900 mb-2">
-                  Stories, Guides & Inspiration
+                  {t('stories_title')}
                 </h2>
                 <p className="text-lg text-stone-600 max-w-xl">
-                  Explore styling advice, timber care wisdom, and design philosophy direct from our craftspeople.
+                  {t('stories_subtitle')}
                 </p>
               </div>
               <Link
                 href="/blog"
                 className="mt-4 sm:mt-0 text-sm font-semibold text-amber-800 hover:text-amber-900 inline-flex items-center gap-1.5 transition-colors group"
               >
-                View all articles
+                {t('view_all_articles')}
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </div>
@@ -345,12 +399,12 @@ export default async function HomePage() {
                   : `/blog/${post.slug}`;
 
                 const typeBadge = post.type === 'guide'
-                  ? 'Care Guide'
+                  ? t('type_guide')
                   : post.type === 'lookbook'
-                  ? 'Lookbook'
+                  ? t('type_lookbook')
                   : post.type === 'page'
-                  ? 'Page'
-                  : 'Article';
+                  ? t('type_page')
+                  : t('type_article');
 
                 return (
                   <Link
@@ -386,13 +440,13 @@ export default async function HomePage() {
                           {post.published_at && (
                             <span className="flex items-center gap-1">
                               <Calendar className="w-3.5 h-3.5" />
-                              {format(new Date(post.published_at), 'MMM d, yyyy')}
+                              {format(new Date(post.published_at), 'MMM d, yyyy', { locale: dateLocale })}
                             </span>
                           )}
                           {post.read_time_minutes && (
                             <span className="flex items-center gap-1">
                               <Clock className="w-3.5 h-3.5" />
-                              {post.read_time_minutes} min read
+                              {t('min_read', { minutes: post.read_time_minutes })}
                             </span>
                           )}
                         </div>
@@ -407,7 +461,7 @@ export default async function HomePage() {
                       </div>
 
                       <div className="pt-4 border-t border-stone-100 flex items-center text-sm font-semibold text-amber-800 group-hover:text-amber-900">
-                        Read Story
+                        {t('read_story')}
                         <ArrowRight className="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-1" />
                       </div>
                     </div>
@@ -422,10 +476,10 @@ export default async function HomePage() {
       {/* Newsletter */}
       <section className="py-20 bg-amber-900 text-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="font-display text-4xl sm:text-5xl font-semibold mb-4">Stay Inspired</h2>
-          <p className="text-lg text-amber-100/80 mb-8 max-w-2xl mx-auto">Get design inspiration, new collection previews, and exclusive offers delivered to your inbox.</p>
+          <h2 className="font-display text-4xl sm:text-5xl font-semibold mb-4">{t('newsletter_title')}</h2>
+          <p className="text-lg text-amber-100/80 mb-8 max-w-2xl mx-auto">{t('newsletter_subtitle')}</p>
           <NewsletterForm />
-          <p className="mt-4 text-sm text-amber-100/60">No spam. Unsubscribe anytime.</p>
+          <p className="mt-4 text-sm text-amber-100/60">{t('newsletter_note')}</p>
         </div>
       </section>
     </main>

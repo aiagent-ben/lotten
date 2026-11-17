@@ -163,6 +163,17 @@ describe('proxy - locale handling', () => {
 
     expect(res.headers.get('location')).toBeNull();
     expect(res.headers.get('x-middleware-rewrite')).toBeNull();
+    expect(res.headers.get('x-middleware-request-x-next-intl-locale')).toBe('en');
+  });
+
+  it('propagates the matched locale header for /my requests', async () => {
+    mockSupabase({ user: null, settings: { maintenance_mode: false } });
+    const proxy = await loadProxy();
+
+    const res = await proxy(makeRequest('/my/products'));
+
+    expect(res.headers.get('location')).toBeNull();
+    expect(res.headers.get('x-middleware-request-x-next-intl-locale')).toBe('my');
   });
 });
 
@@ -171,13 +182,13 @@ describe('proxy - maintenance mode', () => {
     vi.clearAllMocks();
   });
 
-  it('rewrites non-maintenance pages to the maintenance page when enabled', async () => {
+  it('rewrites non-maintenance pages to the maintenance page preserving locale', async () => {
     mockSupabase({ user: null, settings: { maintenance_mode: true } });
     const proxy = await loadProxy();
 
-    const res = await proxy(makeRequest('/en/products'));
+    const res = await proxy(makeRequest('/my/products'));
 
-    expect(res.headers.get('x-middleware-rewrite')).toMatch(/\/en\/maintenance$/);
+    expect(res.headers.get('x-middleware-rewrite')).toMatch(/\/my\/maintenance$/);
   });
 
   it('does not rewrite the maintenance page itself', async () => {

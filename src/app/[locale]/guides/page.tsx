@@ -1,53 +1,69 @@
 import { Metadata } from 'next';
-import { getContentList, getContentCategories } from '@/lib/data/content';
-import Link from 'next/link';
 import Image from 'next/image';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
+import { getContentList, getContentCategories } from '@/lib/data/content';
+import { getDateFnsLocale } from '@/lib/i18n/localize';
+import { buildLocaleAlternates } from '@/lib/i18n/seo';
+import { locales, type Locale } from '@/i18n/routing';
 import { format } from 'date-fns';
-import { ChevronRight, Calendar, Clock, Tag, BookOpen, Shield, Sparkles } from 'lucide-react';
+import { Calendar, Clock, BookOpen, Shield, Sparkles } from 'lucide-react';
 
 interface PageProps {
-  searchParams: Promise<{ 
-    page?: string; 
-    category?: string; 
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{
+    page?: string;
+    category?: string;
     tag?: string;
     search?: string;
   }>;
 }
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  if (!locales.includes(locale as Locale)) return {};
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'guide' });
   return {
-    title: 'Care Guides - Oak & Home',
-    description: 'Comprehensive care guides for your Malaysian Oak furniture. Learn how to maintain, clean, and protect your investment.',
+    title: t('meta_title'),
+    description: t('meta_description'),
+    alternates: buildLocaleAlternates(locale, '/guides'),
   };
 }
 
-export default async function GuidesPage({ searchParams }: PageProps) {
-  const params = await searchParams;
+export default async function GuidesPage({ params: routeParams, searchParams }: PageProps) {
+  const [{ locale }, params] = await Promise.all([routeParams, searchParams]);
+  setRequestLocale(locale);
+
   const page = parseInt(params.page || '1');
   const category = params.category;
   const tag = params.tag;
   const search = params.search;
 
-  const [contentResult, categories] = await Promise.all([
-    getContentList({ 
-      type: 'guide', 
-      status: 'published', 
-      page, 
+  const [t, tCommon, contentResult, categories] = await Promise.all([
+    getTranslations({ locale, namespace: 'guide' }),
+    getTranslations({ locale, namespace: 'common' }),
+    getContentList({
+      type: 'guide',
+      status: 'published',
+      page,
       perPage: 12,
       category: category || undefined,
       tag: tag || undefined,
       search: search || undefined,
+      locale,
     }),
-    getContentCategories('guide'),
+    getContentCategories('guide', locale),
   ]);
 
-  const { data: guides, count, totalPages } = contentResult;
+  const { data: guides, totalPages } = contentResult;
+  const dateLocale = getDateFnsLocale(locale);
 
   const guideCategories = [
-    { slug: 'care-guide', name: 'Care & Maintenance', icon: Shield, description: 'Protect and preserve your furniture' },
-    { slug: 'cleaning', name: 'Cleaning Tips', icon: Sparkles, description: 'Safe cleaning methods for oak' },
-    { slug: 'styling-tips', name: 'Styling Guides', icon: BookOpen, description: 'Design inspiration for your space' },
-    { slug: 'assembly', name: 'Assembly Help', icon: BookOpen, description: 'Step-by-step assembly guides' },
+    { slug: 'care-guide', name: t('cat_care_name'), icon: Shield, description: t('cat_care_desc') },
+    { slug: 'cleaning', name: t('cat_cleaning_name'), icon: Sparkles, description: t('cat_cleaning_desc') },
+    { slug: 'styling-tips', name: t('cat_styling_name'), icon: BookOpen, description: t('cat_styling_desc') },
+    { slug: 'assembly', name: t('cat_assembly_name'), icon: BookOpen, description: t('cat_assembly_desc') },
   ];
 
   return (
@@ -55,12 +71,10 @@ export default async function GuidesPage({ searchParams }: PageProps) {
       <header className="mb-12">
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-900 border border-amber-200 rounded-full text-sm font-medium mb-6">
           <BookOpen className="w-4 h-4 text-amber-700" />
-          Care Guides
+          {t('badge')}
         </div>
-        <h1 className="text-4xl lg:text-5xl font-bold text-stone-900 mb-4">Furniture Care Guides</h1>
-        <p className="text-xl text-stone-600 max-w-2xl">
-          Expert advice to keep your Malaysian Oak furniture looking beautiful for generations.
-        </p>
+        <h1 className="text-4xl lg:text-5xl font-bold text-stone-900 mb-4">{t('title')}</h1>
+        <p className="text-xl text-stone-600 max-w-2xl">{t('subtitle')}</p>
       </header>
 
       {/* Category Quick Links */}
@@ -92,30 +106,29 @@ export default async function GuidesPage({ searchParams }: PageProps) {
         {/* Sidebar */}
         <aside className="lg:w-64 flex-shrink-0">
           <div className="sticky top-24 space-y-8">
-            {/* Categories Filter */}
             {categories.length > 0 && (
               <div>
-                <h3 className="font-semibold text-stone-900 mb-4">Categories</h3>
+                <h3 className="font-semibold text-stone-900 mb-4">{t('categories')}</h3>
                 <ul className="space-y-2">
                   <li>
-                    <Link 
-                      href="/guides" 
+                    <Link
+                      href="/guides"
                       className={`block px-3 py-2 rounded-lg text-sm transition-colors ${
                         !category ? 'bg-amber-50 text-amber-900 font-medium' : 'text-stone-600 hover:bg-stone-50'
                       }`}
                     >
-                      All Guides
+                      {t('all_guides')}
                     </Link>
                   </li>
                   {categories.map((cat) => (
-                    <li key={cat}>
-                      <Link 
-                        href={`/guides?category=${encodeURIComponent(cat)}`} 
+                    <li key={cat.value}>
+                      <Link
+                        href={`/guides?category=${encodeURIComponent(cat.value)}`}
                         className={`block px-3 py-2 rounded-lg text-sm transition-colors ${
-                          category === cat ? 'bg-amber-50 text-amber-900 font-medium' : 'text-stone-600 hover:bg-stone-50'
+                          category === cat.value ? 'bg-amber-50 text-amber-900 font-medium' : 'text-stone-600 hover:bg-stone-50'
                         }`}
                       >
-                        {cat}
+                        {cat.label}
                       </Link>
                     </li>
                   ))}
@@ -127,11 +140,9 @@ export default async function GuidesPage({ searchParams }: PageProps) {
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
               <h4 className="font-semibold text-amber-950 mb-3 flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-amber-700" />
-                Quick Tip
+                {t('quick_tip')}
               </h4>
-              <p className="text-sm text-amber-800 leading-relaxed">
-                Dust weekly with a soft, dry microfiber cloth. Avoid harsh chemicals — a damp cloth with mild soap is all you need for deeper cleaning.
-              </p>
+              <p className="text-sm text-amber-800 leading-relaxed">{t('quick_tip_text')}</p>
             </div>
           </div>
         </aside>
@@ -141,8 +152,8 @@ export default async function GuidesPage({ searchParams }: PageProps) {
           {guides.length === 0 ? (
             <div className="text-center py-16">
               <BookOpen className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-              <h3 className="text-xl font-medium text-stone-900 mb-2">No guides found</h3>
-              <p className="text-stone-600">Try adjusting your filters or search terms.</p>
+              <h3 className="text-xl font-medium text-stone-900 mb-2">{t('no_guides')}</h3>
+              <p className="text-stone-600">{t('no_guides_desc')}</p>
             </div>
           ) : (
             <>
@@ -175,9 +186,9 @@ export default async function GuidesPage({ searchParams }: PageProps) {
                               {guide.category}
                             </span>
                           )}
-                          {guide.tags.slice(0, 3).map((tag) => (
-                            <span key={tag} className="px-2.5 py-0.5 text-xs bg-stone-100 text-stone-700 font-medium rounded-full">
-                              {tag}
+                          {guide.tags.slice(0, 3).map((tagItem) => (
+                            <span key={tagItem} className="px-2.5 py-0.5 text-xs bg-stone-100 text-stone-700 font-medium rounded-full">
+                              {tagItem}
                             </span>
                           ))}
                           {guide.tags.length > 3 && (
@@ -201,13 +212,13 @@ export default async function GuidesPage({ searchParams }: PageProps) {
                         {guide.published_at && (
                           <time dateTime={guide.published_at} className="flex items-center gap-1">
                             <Calendar className="w-3.5 h-3.5 text-stone-400" />
-                            {format(new Date(guide.published_at), 'MMM d, yyyy')}
+                            {format(new Date(guide.published_at), 'MMM d, yyyy', { locale: dateLocale })}
                           </time>
                         )}
                         {guide.read_time_minutes && (
                           <span className="flex items-center gap-1">
                             <Clock className="w-3.5 h-3.5 text-stone-400" />
-                            {guide.read_time_minutes} min
+                            {t('min_short', { minutes: guide.read_time_minutes })}
                           </span>
                         )}
                       </div>
@@ -218,24 +229,24 @@ export default async function GuidesPage({ searchParams }: PageProps) {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <nav className="flex items-center justify-center gap-2" aria-label="Pagination">
+                <nav className="flex items-center justify-center gap-2" aria-label={tCommon('pagination_aria')}>
                   {page > 1 && (
-                    <Link 
+                    <Link
                       href={`/guides?page=${page - 1}${category ? `&category=${encodeURIComponent(category)}` : ''}${tag ? `&tag=${encodeURIComponent(tag)}` : ''}`}
                       className="btn btn-outline btn-sm"
                     >
-                      Previous
+                      {tCommon('previous')}
                     </Link>
                   )}
                   <span className="px-4 text-sm text-stone-600 tabular-nums">
-                    Page {page} of {totalPages}
+                    {tCommon('page_of', { page, total: totalPages })}
                   </span>
                   {page < totalPages && (
-                    <Link 
+                    <Link
                       href={`/guides?page=${page + 1}${category ? `&category=${encodeURIComponent(category)}` : ''}${tag ? `&tag=${encodeURIComponent(tag)}` : ''}`}
                       className="btn btn-outline btn-sm"
                     >
-                      Next
+                      {tCommon('next')}
                     </Link>
                   )}
                 </nav>

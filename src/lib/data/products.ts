@@ -1,166 +1,279 @@
+import { cache } from 'react';
+import { unstable_cache } from 'next/cache';
 import { createServiceClient } from '@/lib/db/client';
-import type { Brand, Collection, Product, ProductVariant, MaterialSpec, ColorOption, ProductImage } from '@/lib/types/database';
+import type { Brand, Collection, Product } from '@/lib/types/database';
+import {
+  localizeBrand,
+  localizeCollection,
+  localizeProduct,
+  toBcp47Locale,
+} from '@/lib/i18n/localize';
 
-// Per-request promise cache (module-level, survives across invocations in same process)
-let productsPromise: Promise<Product[]> | null = null;
-let collectionsPromise: Promise<Collection[]> | null = null;
-let brandsPromise: Promise<Brand[]> | null = null;
+const PRODUCT_CHUNK_SIZE = 120;
 
-async function loadProductsFromSupabase(): Promise<Product[]> {
-  const supabase = createServiceClient();
-  const { data, error } = await supabase
-    .from('products')
-    .select('*, product_images(*)')
-    .eq('is_active', true)
-    .order('sort_order', { ascending: true });
-
-  if (error) {
-    console.error('Error loading products from Supabase:', error);
-    throw error;
+async function withRetry<T>(fn: () => Promise<T>, retries = 3): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      if (attempt < retries) {
+        const delayMs = 150 * Math.pow(2, attempt) + Math.floor(Math.random() * 150);
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
+    }
   }
+  throw lastError;
+}
 
-  return data || [];
+async function loadActiveProductCount(): Promise<number> {
+  return withRetry(async () => {
+    const supabase = createServiceClient();
+    const { count, error } = await supabase
+      .from('products')
+      .select('id', { count: 'exact', head: true })
+      .eq('is_active', true);
+
+    if (error) {
+      console.error('Error counting products from Supabase:', error);
+      throw error;
+    }
+
+    return count ?? 0;
+  });
+}
+
+async function loadProductsChunkFromSupabase(chunkIndex: number): Promise<Product[]> {
+  return withRetry(async () => {
+    const from = chunkIndex * PRODUCT_CHUNK_SIZE;
+    const to = from + PRODUCT_CHUNK_SIZE - 1;
+    const supabase = createServiceClient();
+    const { data, error } = await supabase
+      .from('products')
+      .select('*, product_images(*)')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+      .order('id', { ascending: true })
+      .range(from, to);
+
+    if (error) {
+      console.error('Error loading products from Supabase:', error);
+      throw error;
+    }
+
+    return data || [];
+  });
 }
 
 async function loadCollectionsFromSupabase(): Promise<Collection[]> {
-  const supabase = createServiceClient();
-  const { data, error } = await supabase
-    .from('collections')
-    .select('*')
-    .eq('is_active', true)
-    .order('sort_order', { ascending: true });
+  return withRetry(async () => {
+    const supabase = createServiceClient();
+    const { data, error } = await supabase
+      .from('collections')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true });
 
-  if (error) {
-    console.error('Error loading collections from Supabase:', error);
-    throw error;
-  }
+    if (error) {
+      console.error('Error loading collections from Supabase:', error);
+      throw error;
+    }
 
-  return data || [];
+    return data || [];
+  });
 }
 
 async function loadBrandsFromSupabase(): Promise<Brand[]> {
-  const supabase = createServiceClient();
-  const { data, error } = await supabase
-    .from('brands')
-    .select('*')
-    .order('sort_order', { ascending: true });
+  return withRetry(async () => {
+    const supabase = createServiceClient();
+    const { data, error } = await supabase
+      .from('brands')
+      .select('*')
+      .order('sort_order', { ascending: true });
 
-  if (error) {
-    console.error('Error loading brands from Supabase:', error);
-    throw error;
-  }
+    if (error) {
+      console.error('Error loading brands from Supabase:', error);
+      throw error;
+    }
 
-  return data || [];
+    return data || [];
+  });
 }
 
-function fetchProducts(): Promise<Product[]> {
-  if (!productsPromise) {
-    productsPromise = loadProductsFromSupabase();
+const getCachedProductCount = unstable_cache(
+  loadActiveProductCount,
+  ['catalog-product-count-v1'],
+  { revalidate: 3600, tags: ['products'] }
+);
+
+const getCachedProductsChunk = unstable_cache(
+  loadProductsChunkFromSupabase,
+  ['catalog-products-chunk-v1'],
+  { revalidate: 3600, tags: ['products'] }
+);
+
+const getCachedCollections = unstable_cache(
+  loadCollectionsFromSupabase,
+  ['catalog-collections-v1'],
+  { revalidate: 3600, tags: ['collections'] }
+);
+
+const getCachedBrands = unstable_cache(
+  loadBrandsFromSupabase,
+  ['catalog-brands-v1'],
+  { revalidate: 3600, tags: ['brands'] }
+);
+
+async function runWithCacheFallback<T>(cachedFn: () => Promise<T>, directFn: () => Promise<T>): Promise<T> {
+  try {
+    return await cachedFn();
+  } catch (err) {
+    if (err instanceof Error && err.message.includes('incrementalCache')) {
+      return directFn();
+    }
+    throw err;
   }
-  return productsPromise;
 }
 
-function fetchCollections(): Promise<Collection[]> {
-  if (!collectionsPromise) {
-    collectionsPromise = loadCollectionsFromSupabase();
-  }
-  return collectionsPromise;
-}
+// Per-request deduplication via React.cache with graceful fallback outside Next.js (Vitest/CLI)
+const fetchCollections = cache((): Promise<Collection[]> =>
+  runWithCacheFallback(getCachedCollections, loadCollectionsFromSupabase)
+);
 
-function fetchBrands(): Promise<Brand[]> {
-  if (!brandsPromise) {
-    brandsPromise = loadBrandsFromSupabase();
-  }
-  return brandsPromise;
-}
+const fetchBrands = cache((): Promise<Brand[]> =>
+  runWithCacheFallback(getCachedBrands, loadBrandsFromSupabase)
+);
+
+const fetchProducts = cache(async (): Promise<Product[]> => {
+  const [totalCount, collections] = await Promise.all([
+    runWithCacheFallback(getCachedProductCount, loadActiveProductCount),
+    fetchCollections(),
+  ]);
+
+  const chunkCount = Math.max(1, Math.ceil(totalCount / PRODUCT_CHUNK_SIZE));
+  const chunks = await Promise.all(
+    Array.from({ length: chunkCount }, (_, index) =>
+      runWithCacheFallback(
+        () => getCachedProductsChunk(index),
+        () => loadProductsChunkFromSupabase(index)
+      )
+    )
+  );
+
+  const collectionById = new Map(collections.map((c) => [c.id, c]));
+  return chunks.flat().map((product) => ({
+    ...product,
+    collection: product.collection_id ? collectionById.get(product.collection_id) : undefined,
+  }));
+});
 
 // ============= Public API =============
 
-export async function getAllActiveProducts(): Promise<Product[]> {
+export async function getAllActiveProducts(locale = 'en'): Promise<Product[]> {
   const products = await fetchProducts();
-  return products.filter(p => p.is_active);
+  return products.filter((p) => p.is_active).map((p) => localizeProduct(p, locale));
 }
 
-export async function getProductBySlug(slug: string): Promise<Product | null> {
+export async function getProductBySlug(slug: string, locale = 'en'): Promise<Product | null> {
   const products = await fetchProducts();
-  return products.find(p => p.slug === slug || p.id === slug) || null;
+  const found = products.find((p) => p.slug === slug || p.id === slug);
+  return found ? localizeProduct(found, locale) : null;
 }
 
-export async function getProductById(id: string): Promise<Product | null> {
+export async function getProductById(id: string, locale = 'en'): Promise<Product | null> {
   const products = await fetchProducts();
-  return products.find(p => p.id === id) || null;
+  const found = products.find((p) => p.id === id);
+  return found ? localizeProduct(found, locale) : null;
 }
 
-export async function getProductsByCollection(collectionId: string): Promise<Product[]> {
+export async function getProductsByCollection(collectionId: string, locale = 'en'): Promise<Product[]> {
   const products = await fetchProducts();
-  return products.filter(p => p.collection_id === collectionId && p.is_active);
+  return products
+    .filter((p) => p.collection_id === collectionId && p.is_active)
+    .map((p) => localizeProduct(p, locale));
 }
 
-export async function getFeaturedProducts(limit?: number): Promise<Product[]> {
+export async function getFeaturedProducts(limit?: number, locale = 'en'): Promise<Product[]> {
   const products = await fetchProducts();
-  const featured = products.filter(p => p.is_active && (p.is_new || p.is_bestseller));
-  const result = featured.length > 0 ? featured : products.filter(p => p.is_active);
-  return limit ? result.slice(0, limit) : result;
+  const featured = products.filter((p) => p.is_active && (p.is_new || p.is_bestseller));
+  const result = featured.length > 0 ? featured : products.filter((p) => p.is_active);
+  const sliced = limit ? result.slice(0, limit) : result;
+  return sliced.map((p) => localizeProduct(p, locale));
 }
 
-export async function getAllProducts(): Promise<Product[]> {
-  return fetchProducts();
+export async function getAllProducts(locale = 'en'): Promise<Product[]> {
+  const products = await fetchProducts();
+  return products.map((p) => localizeProduct(p, locale));
 }
 
-export async function getCollections(): Promise<Collection[]> {
-  return fetchCollections();
-}
-
-export async function getAllCollections(): Promise<Collection[]> {
-  return fetchCollections();
-}
-
-export async function getCollectionsByBrand(brandId: string): Promise<Collection[]> {
+export async function getCollections(locale = 'en'): Promise<Collection[]> {
   const collections = await fetchCollections();
-  return collections.filter(c => c.brand_id === brandId);
+  return collections.map((c) => localizeCollection(c, locale));
 }
 
-export async function getCollectionBySlug(slug: string): Promise<Collection | null> {
+export async function getAllCollections(locale = 'en'): Promise<Collection[]> {
   const collections = await fetchCollections();
-  return collections.find(c => c.slug === slug) || null;
+  return collections.map((c) => localizeCollection(c, locale));
 }
 
-export async function getCollectionById(id: string): Promise<Collection | null> {
+export async function getCollectionsByBrand(brandId: string, locale = 'en'): Promise<Collection[]> {
   const collections = await fetchCollections();
-  return collections.find(c => c.id === id) || null;
+  return collections
+    .filter((c) => c.brand_id === brandId)
+    .map((c) => localizeCollection(c, locale));
 }
 
-export async function getBrands(): Promise<Brand[]> {
-  return fetchBrands();
+export async function getCollectionBySlug(slug: string, locale = 'en'): Promise<Collection | null> {
+  const collections = await fetchCollections();
+  const found = collections.find((c) => c.slug === slug);
+  return found ? localizeCollection(found, locale) : null;
 }
 
-export async function getBrandBySlug(slug: string): Promise<Brand | null> {
+export async function getCollectionById(id: string, locale = 'en'): Promise<Collection | null> {
+  const collections = await fetchCollections();
+  const found = collections.find((c) => c.id === id);
+  return found ? localizeCollection(found, locale) : null;
+}
+
+export async function getBrands(locale = 'en'): Promise<Brand[]> {
   const brands = await fetchBrands();
-  return brands.find(b => b.slug === slug) || null;
+  return brands.map((b) => localizeBrand(b, locale));
 }
 
-export async function getBrandById(id: string): Promise<Brand | null> {
+export async function getBrandBySlug(slug: string, locale = 'en'): Promise<Brand | null> {
   const brands = await fetchBrands();
-  return brands.find(b => b.id === id) || null;
+  const found = brands.find((b) => b.slug === slug);
+  return found ? localizeBrand(found, locale) : null;
+}
+
+export async function getBrandById(id: string, locale = 'en'): Promise<Brand | null> {
+  const brands = await fetchBrands();
+  const found = brands.find((b) => b.id === id);
+  return found ? localizeBrand(found, locale) : null;
 }
 
 // Products by brand
-export async function getProductsByBrand(brandId: string): Promise<Product[]> {
-  const [collections, products] = await Promise.all([getCollections(), getAllProducts()]);
-  const collectionsOfBrand = collections.filter(c => c.brand_id === brandId).map(c => c.id);
-  return products.filter(p => p.is_active && collectionsOfBrand.includes(p.collection_id || ''));
+export async function getProductsByBrand(brandId: string, locale = 'en'): Promise<Product[]> {
+  const [collections, products] = await Promise.all([getCollections(locale), getAllProducts(locale)]);
+  const collectionsOfBrand = collections.filter((c) => c.brand_id === brandId).map((c) => c.id);
+  return products.filter((p) => p.is_active && collectionsOfBrand.includes(p.collection_id || ''));
 }
 
 // Formatting utilities
-export function formatPrice(price: number | string, locale: string = 'en-MY'): string {
+export function formatPrice(
+  price: number | string,
+  locale: string = 'en-MY',
+  contactLabel: string = 'Contact for Price'
+): string {
   const priceNum = typeof price === 'string' ? parseFloat(price) : price;
-  if (isNaN(priceNum) || priceNum === 0) return 'Contact for Price';
-  
+  if (isNaN(priceNum) || priceNum === 0) return contactLabel;
+
   // FX rate from USD to MYR - configurable via env var, fallback to 4.5
   const fxRate = parseFloat(process.env.USD_TO_MYR_RATE || '4.5');
   const myrPrice = priceNum * fxRate;
-  
-  return new Intl.NumberFormat(locale, {
+
+  return new Intl.NumberFormat(toBcp47Locale(locale), {
     style: 'currency',
     currency: 'MYR',
     minimumFractionDigits: 0,
@@ -183,5 +296,4 @@ export function getColorHex(colorCode: string): string {
   return colorMap[colorCode] || '#8B7355';
 }
 
-// Type exports
-export type { Brand, Collection, Product, ProductVariant, MaterialSpec, ColorOption, ProductImage } from '@/lib/types/database';// force redeploy
+export type { Brand, Collection, Product, ProductVariant, MaterialSpec, ColorOption, ProductImage } from '@/lib/types/database';

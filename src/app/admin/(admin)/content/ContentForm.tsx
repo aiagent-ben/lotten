@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { RichTextEditor } from '@/components/admin/RichTextEditor';
+import { LocaleTabsBar, type AdminEditLocale } from '@/components/admin/LocaleTabsBar';
+import type { ContentPageTranslation, LocaleTranslations } from '@/lib/types/database';
 import { Save, X, ChevronLeft, Calendar, Tag, Image, Globe, Search, Loader2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -29,6 +31,7 @@ interface ContentFormData {
   style_tags: string; // comma-separated string
   featured_products: string; // comma-separated string
   hotspots: string; // JSON string
+  translations: LocaleTranslations<ContentPageTranslation>;
 }
 
 interface ContentFormProps {
@@ -60,8 +63,10 @@ export function ContentForm({ isNew = true }: ContentFormProps) {
     style_tags: '', // comma-separated
     featured_products: '', // comma-separated
     hotspots: '[]',
+    translations: {},
   });
 
+  const [activeLocale, setActiveLocale] = useState<AdminEditLocale>('en');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -116,6 +121,7 @@ export function ContentForm({ isNew = true }: ContentFormProps) {
             style_tags: Array.isArray(content.style_tags) ? content.style_tags.join(', ') : (content.style_tags || ''),
             featured_products: Array.isArray(content.featured_products) ? content.featured_products.join(', ') : (content.featured_products || ''),
             hotspots: content.hotspots ? (typeof content.hotspots === 'string' ? content.hotspots : JSON.stringify(content.hotspots, null, 2)) : '[]',
+            translations: content.translations && typeof content.translations === 'object' ? content.translations : {},
           });
         }
       } else {
@@ -126,6 +132,37 @@ export function ContentForm({ isNew = true }: ContentFormProps) {
       setError('Failed to load content');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const activeTranslation: Partial<ContentPageTranslation> =
+    activeLocale === 'en' ? {} : formData.translations?.[activeLocale] || {};
+
+  const updateTranslationField = <K extends keyof ContentPageTranslation>(
+    field: K,
+    value: ContentPageTranslation[K]
+  ) => {
+    if (activeLocale === 'en') return;
+    setFormData((prev) => ({
+      ...prev,
+      translations: {
+        ...prev.translations,
+        [activeLocale]: {
+          ...(prev.translations?.[activeLocale] || {}),
+          [field]: value,
+        },
+      },
+    }));
+  };
+
+  const handleLocalizedTextChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    if (activeLocale === 'en') {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    } else {
+      updateTranslationField(name as keyof ContentPageTranslation, value as never);
     }
   };
 
@@ -140,7 +177,11 @@ export function ContentForm({ isNew = true }: ContentFormProps) {
 
   const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const tags = e.target.value.split(',').map(t => t.trim()).filter(Boolean);
-    setFormData(prev => ({ ...prev, tags }));
+    if (activeLocale === 'en') {
+      setFormData(prev => ({ ...prev, tags }));
+    } else {
+      updateTranslationField('tags', tags);
+    }
   };
 
   const handleStyleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -258,22 +299,33 @@ export function ContentForm({ isNew = true }: ContentFormProps) {
       )}
 
       <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-8">
+        <LocaleTabsBar
+          activeLocale={activeLocale}
+          onChange={setActiveLocale}
+          hasTranslation={(loc) => {
+            const tr = formData.translations?.[loc];
+            return Boolean(tr && (tr.title || tr.body_mdx || tr.excerpt));
+          }}
+        />
+
         {/* Basic Information */}
         <fieldset className="space-y-6">
           <legend className="form-section-title">Basic Information</legend>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="title" className="label">Title *</label>
+              <label htmlFor="title" className="label">
+                Title {activeLocale === 'en' ? '*' : `(${activeLocale.toUpperCase()})`}
+              </label>
               <input
                 type="text"
                 id="title"
                 name="title"
-                value={formData.title}
-                onChange={handleChange}
-                placeholder="Enter content title"
+                value={activeLocale === 'en' ? formData.title : (activeTranslation.title ?? '')}
+                onChange={handleLocalizedTextChange}
+                placeholder={activeLocale === 'en' ? 'Enter content title' : formData.title || 'Enter translated title'}
                 className="input mt-1"
-                required
+                required={activeLocale === 'en'}
               />
             </div>
 
@@ -326,28 +378,32 @@ export function ContentForm({ isNew = true }: ContentFormProps) {
             </div>
 
             <div>
-              <label htmlFor="category" className="label">Category</label>
+              <label htmlFor="category" className="label">
+                Category {activeLocale !== 'en' && `(${activeLocale.toUpperCase()})`}
+              </label>
               <input
                 type="text"
                 id="category"
                 name="category"
-                value={formData.category}
-                onChange={handleChange}
-                placeholder="e.g., care-guide, styling-tips, trends"
+                value={activeLocale === 'en' ? formData.category : (activeTranslation.category ?? '')}
+                onChange={handleLocalizedTextChange}
+                placeholder={activeLocale === 'en' ? 'e.g., care-guide, styling-tips, trends' : formData.category || 'Translated category label'}
                 className="input mt-1"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="excerpt" className="label">Excerpt</label>
+            <label htmlFor="excerpt" className="label">
+              Excerpt {activeLocale !== 'en' && `(${activeLocale.toUpperCase()})`}
+            </label>
             <textarea
               id="excerpt"
               name="excerpt"
-              value={formData.excerpt}
-              onChange={handleChange}
+              value={activeLocale === 'en' ? formData.excerpt : (activeTranslation.excerpt ?? '')}
+              onChange={handleLocalizedTextChange}
               rows={4}
-              placeholder="Brief summary for cards and SEO (max 300 chars)"
+              placeholder={activeLocale === 'en' ? 'Brief summary for cards and SEO (max 300 chars)' : formData.excerpt || 'Translated summary'}
               className="textarea input mt-1 min-h-[6.5rem]"
               maxLength={300}
             />
@@ -356,10 +412,19 @@ export function ContentForm({ isNew = true }: ContentFormProps) {
 
         {/* Content Editor */}
         <fieldset className="space-y-6 border-t border-gray-100 pt-6">
-          <legend className="form-section-title">Content (MDX)</legend>
+          <legend className="form-section-title">
+            Content (MDX) {activeLocale !== 'en' && `— ${activeLocale.toUpperCase()}`}
+          </legend>
           <RichTextEditor
-            value={formData.body_mdx}
-            onChange={(value) => setFormData(prev => ({ ...prev, body_mdx: value }))}
+            key={activeLocale}
+            value={activeLocale === 'en' ? formData.body_mdx : (activeTranslation.body_mdx ?? '')}
+            onChange={(value) => {
+              if (activeLocale === 'en') {
+                setFormData(prev => ({ ...prev, body_mdx: value }));
+              } else {
+                updateTranslationField('body_mdx', value);
+              }
+            }}
             placeholder="Write your content in Markdown/MDX..."
           />
         </fieldset>
@@ -391,14 +456,16 @@ export function ContentForm({ isNew = true }: ContentFormProps) {
               </div>
             </div>
             <div>
-              <label htmlFor="featured_image_alt" className="label">Alt Text</label>
+              <label htmlFor="featured_image_alt" className="label">
+                Alt Text {activeLocale !== 'en' && `(${activeLocale.toUpperCase()})`}
+              </label>
               <input
                 type="text"
                 id="featured_image_alt"
                 name="featured_image_alt"
-                value={formData.featured_image_alt}
-                onChange={handleChange}
-                placeholder="Describe the image for accessibility"
+                value={activeLocale === 'en' ? formData.featured_image_alt : (activeTranslation.featured_image_alt ?? '')}
+                onChange={handleLocalizedTextChange}
+                placeholder={activeLocale === 'en' ? 'Describe the image for accessibility' : formData.featured_image_alt || 'Translated alt text'}
                 className="input mt-1"
               />
             </div>
@@ -420,12 +487,14 @@ export function ContentForm({ isNew = true }: ContentFormProps) {
           <legend className="form-section-title">Tags & Categorization</legend>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="label">Tags</label>
+              <label className="label">
+                Tags {activeLocale !== 'en' && `(${activeLocale.toUpperCase()})`}
+              </label>
               <input
                 type="text"
-                value={formData.tags.join(', ')}
+                value={activeLocale === 'en' ? formData.tags.join(', ') : (activeTranslation.tags || []).join(', ')}
                 onChange={handleTagsChange}
-                placeholder="tag1, tag2, tag3"
+                placeholder={activeLocale === 'en' ? 'tag1, tag2, tag3' : formData.tags.join(', ') || 'Translated tags'}
                 className="input mt-1"
               />
               <p className="caption text-gray-500 mt-1">Comma-separated</p>
@@ -456,15 +525,83 @@ export function ContentForm({ isNew = true }: ContentFormProps) {
             </div>
 
             <div className="md:col-span-2">
-              <label className="label">Hotspots (JSON)</label>
-              <textarea
-                value={formData.hotspots}
-                onChange={handleHotspotsChange}
-                rows={8}
-                placeholder='[{"productId": "prod-123", "x": 50, "y": 30, "label": "Sofa", "tooltip": "Breda 3-Seater"}]'
-                className="textarea input mt-1 font-mono text-sm min-h-[9rem]"
-              />
-              <p className="caption text-gray-500 mt-1">For lookbooks - clickable product hotspots on image</p>
+              {activeLocale === 'en' ? (
+                <>
+                  <label className="label">Hotspots (JSON)</label>
+                  <textarea
+                    value={formData.hotspots}
+                    onChange={handleHotspotsChange}
+                    rows={8}
+                    placeholder='[{"productId": "prod-123", "x": 50, "y": 30, "label": "Sofa", "tooltip": "Breda 3-Seater"}]'
+                    className="textarea input mt-1 font-mono text-sm min-h-[9rem]"
+                  />
+                  <p className="caption text-gray-500 mt-1">For lookbooks - clickable product hotspots on image</p>
+                </>
+              ) : (
+                <div className="space-y-3">
+                  <label className="label">Hotspot Labels ({activeLocale.toUpperCase()})</label>
+                  {(() => {
+                    let baseHotspots: Array<{ productId?: string; label?: string; tooltip?: string }> = [];
+                    try {
+                      const parsed = JSON.parse(formData.hotspots || '[]');
+                      if (Array.isArray(parsed)) baseHotspots = parsed;
+                    } catch {
+                      baseHotspots = [];
+                    }
+                    if (baseHotspots.length === 0) {
+                      return <p className="text-sm text-gray-500">Add hotspots in English first to translate their labels.</p>;
+                    }
+                    const currentSpots = activeTranslation.hotspots || [];
+                    return baseHotspots.map((spot, idx) => {
+                      const trSpot = currentSpots.find((s) => s.productId === spot.productId) || currentSpots[idx] || {};
+                      return (
+                        <div key={`${spot.productId || idx}-${idx}`} className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-lg border border-gray-200 bg-gray-50">
+                          <div>
+                            <label className="text-xs font-medium text-gray-600">
+                              Label ({spot.label || `#${idx + 1}`})
+                            </label>
+                            <input
+                              type="text"
+                              value={trSpot.label ?? ''}
+                              placeholder={spot.label || ''}
+                              onChange={(e) => {
+                                const next = baseHotspots.map((b, i) => {
+                                  const existing = currentSpots.find((s) => s.productId === b.productId) || currentSpots[i] || {};
+                                  return i === idx
+                                    ? { productId: b.productId, label: e.target.value, tooltip: existing.tooltip ?? '' }
+                                    : { productId: b.productId, label: existing.label ?? '', tooltip: existing.tooltip ?? '' };
+                                });
+                                updateTranslationField('hotspots', next);
+                              }}
+                              className="input mt-1 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-gray-600">
+                              Tooltip ({spot.tooltip || `#${idx + 1}`})
+                            </label>
+                            <input
+                              type="text"
+                              value={trSpot.tooltip ?? ''}
+                              placeholder={spot.tooltip || ''}
+                              onChange={(e) => {
+                                const next = baseHotspots.map((b, i) => {
+                                  const existing = currentSpots.find((s) => s.productId === b.productId) || currentSpots[i] || {};
+                                  return i === idx
+                                    ? { productId: b.productId, label: existing.label ?? '', tooltip: e.target.value }
+                                    : { productId: b.productId, label: existing.label ?? '', tooltip: existing.tooltip ?? '' };
+                                });
+                                updateTranslationField('hotspots', next);
+                              }}
+                              className="input mt-1 text-sm"
+                            />
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              )}
             </div>
           </div>
         </fieldset>
@@ -474,14 +611,16 @@ export function ContentForm({ isNew = true }: ContentFormProps) {
           <legend className="form-section-title">SEO</legend>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="seo_title" className="label">Meta Title</label>
+              <label htmlFor="seo_title" className="label">
+                Meta Title {activeLocale !== 'en' && `(${activeLocale.toUpperCase()})`}
+              </label>
               <input
                 type="text"
                 id="seo_title"
                 name="seo_title"
-                value={formData.seo_title}
-                onChange={handleChange}
-                placeholder="Defaults to content title"
+                value={activeLocale === 'en' ? formData.seo_title : (activeTranslation.seo_title ?? '')}
+                onChange={handleLocalizedTextChange}
+                placeholder={activeLocale === 'en' ? 'Defaults to content title' : formData.seo_title || 'Translated meta title'}
                 className="input mt-1"
               />
             </div>
@@ -500,14 +639,16 @@ export function ContentForm({ isNew = true }: ContentFormProps) {
             </div>
 
             <div className="md:col-span-2">
-              <label htmlFor="seo_description" className="label">Meta Description</label>
+              <label htmlFor="seo_description" className="label">
+                Meta Description {activeLocale !== 'en' && `(${activeLocale.toUpperCase()})`}
+              </label>
               <textarea
                 id="seo_description"
                 name="seo_description"
-                value={formData.seo_description}
-                onChange={handleChange}
+                value={activeLocale === 'en' ? formData.seo_description : (activeTranslation.seo_description ?? '')}
+                onChange={handleLocalizedTextChange}
                 rows={4}
-                placeholder="Defaults to excerpt"
+                placeholder={activeLocale === 'en' ? 'Defaults to excerpt' : formData.seo_description || 'Translated meta description'}
                 className="textarea input mt-1 min-h-[6.5rem]"
                 maxLength={160}
               />

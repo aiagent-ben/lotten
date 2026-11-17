@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/db/client';
 import { verifyAdminAuth } from '@/lib/auth/admin';
 import { sanitizePostgrestSearch } from '@/lib/db/sanitize';
+import { safeRevalidateTag } from '@/lib/i18n/cache';
 
 export async function GET(request: NextRequest) {
   const authError = await verifyAdminAuth(request);
@@ -71,33 +72,39 @@ export async function POST(request: NextRequest) {
 
     const readTime = body.read_time_minutes || (body.body_mdx ? Math.max(1, Math.ceil(body.body_mdx.trim().split(/\s+/).length / 200)) : 1);
 
+    const insertPayload: Record<string, unknown> = {
+      slug: body.slug,
+      title: body.title,
+      body_mdx: body.body_mdx,
+      excerpt: body.excerpt || null,
+      type: body.type,
+      status: body.status || 'draft',
+      category: body.category || null,
+      tags: Array.isArray(body.tags) ? body.tags : [],
+      room_type: body.room_type || null,
+      style_tags: Array.isArray(body.style_tags) ? body.style_tags : [],
+      featured_products: Array.isArray(body.featured_products) ? body.featured_products : [],
+      hotspots: Array.isArray(body.hotspots) ? body.hotspots : [],
+      featured_image_url: body.featured_image_url || null,
+      featured_image_alt: body.featured_image_alt || null,
+      seo_title: body.seo_title || null,
+      seo_description: body.seo_description || null,
+      seo_og_image: body.seo_og_image || null,
+      published_at: body.status === 'published' ? (body.published_at || new Date().toISOString()) : (body.published_at || null),
+      scheduled_at: body.scheduled_at || null,
+      author_id: body.author_id || null,
+      read_time_minutes: readTime,
+      template: body.template || 'default',
+      is_featured: Boolean(body.is_featured),
+    };
+
+    if (body.translations && typeof body.translations === 'object') {
+      insertPayload.translations = body.translations;
+    }
+
     const { data, error } = await supabase
       .from('content_pages')
-      .insert({
-        slug: body.slug,
-        title: body.title,
-        body_mdx: body.body_mdx,
-        excerpt: body.excerpt || null,
-        type: body.type,
-        status: body.status || 'draft',
-        category: body.category || null,
-        tags: Array.isArray(body.tags) ? body.tags : [],
-        room_type: body.room_type || null,
-        style_tags: Array.isArray(body.style_tags) ? body.style_tags : [],
-        featured_products: Array.isArray(body.featured_products) ? body.featured_products : [],
-        hotspots: Array.isArray(body.hotspots) ? body.hotspots : [],
-        featured_image_url: body.featured_image_url || null,
-        featured_image_alt: body.featured_image_alt || null,
-        seo_title: body.seo_title || null,
-        seo_description: body.seo_description || null,
-        seo_og_image: body.seo_og_image || null,
-        published_at: body.status === 'published' ? (body.published_at || new Date().toISOString()) : (body.published_at || null),
-        scheduled_at: body.scheduled_at || null,
-        author_id: body.author_id || null,
-        read_time_minutes: readTime,
-        template: body.template || 'default',
-        is_featured: Boolean(body.is_featured),
-      })
+      .insert(insertPayload)
       .select()
       .single();
 
@@ -105,6 +112,8 @@ export async function POST(request: NextRequest) {
       console.error('Error inserting content page:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    safeRevalidateTag('content');
 
     // Handle categories if explicit IDs or string category provided
     if (body.categoryIds && body.categoryIds.length > 0) {

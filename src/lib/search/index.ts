@@ -43,6 +43,12 @@ export interface ProductHit {
   name: string;
   slug: string;
   short_description: string | null;
+  name_my?: string | null;
+  short_description_my?: string | null;
+  collection_name_my?: string | null;
+  name_zh?: string | null;
+  short_description_zh?: string | null;
+  collection_name_zh?: string | null;
   price_usd: number;
   collection_id: string;
   collection_name: string;
@@ -177,15 +183,43 @@ export function buildFilterString(filters: SearchFilters): string[] {
   return filterParts;
 }
 
+function projectSearchHitLocale(hit: ProductHit, locale: string): ProductHit {
+  if (locale === 'my') {
+    return {
+      ...hit,
+      name: hit.name_my?.trim() || hit.name,
+      short_description: hit.short_description_my?.trim() || hit.short_description,
+      collection_name: hit.collection_name_my?.trim() || hit.collection_name,
+    };
+  }
+  if (locale === 'zh') {
+    return {
+      ...hit,
+      name: hit.name_zh?.trim() || hit.name,
+      short_description: hit.short_description_zh?.trim() || hit.short_description,
+      collection_name: hit.collection_name_zh?.trim() || hit.collection_name,
+    };
+  }
+  return hit;
+}
+
 export async function searchProducts(
   query: string = '',
   filters: SearchFilters = {},
   page: number = 1,
   limit: number = 20,
-  sort: string[] = ['sort_order:asc']
+  sort: string[] = ['sort_order:asc'],
+  locale: string = 'en'
 ): Promise<SearchResult> {
   const filterString = buildFilterString(filters);
   const offset = (page - 1) * limit;
+
+  const highlightAttrs =
+    locale === 'my'
+      ? ['name_my', 'short_description_my', 'name', 'short_description']
+      : locale === 'zh'
+      ? ['name_zh', 'short_description_zh', 'name', 'short_description']
+      : ['name', 'short_description'];
 
   const searchParams: any = {
     q: query,
@@ -201,15 +235,15 @@ export async function searchProducts(
       'stock_available',
       'price_usd',
     ],
-    attributesToHighlight: ['name', 'short_description'],
-    attributesToCrop: ['short_description'],
+    attributesToHighlight: highlightAttrs,
+    attributesToCrop: ['short_description', 'short_description_my', 'short_description_zh'],
     cropLength: 200,
   };
 
   const result = await meilisearch.index(PRODUCTS_INDEX).search(query, searchParams);
 
   return {
-    hits: result.hits as ProductHit[],
+    hits: (result.hits as ProductHit[]).map((hit) => projectSearchHitLocale(hit, locale)),
     estimatedTotalHits: result.estimatedTotalHits ?? 0,
     facets: (result as any).facets as SearchFacets,
     processingTimeMs: result.processingTimeMs,

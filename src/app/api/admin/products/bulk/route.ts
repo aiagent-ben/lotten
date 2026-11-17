@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { createServiceClient } from '@/lib/db/client';
 import { verifyAdminAuth } from '@/lib/auth/admin';
 import { validateCsrfToken } from '@/lib/csrf';
+import { safeRevalidateTag } from '@/lib/i18n/cache';
 
 export async function POST(request: NextRequest) {
   const authError = await verifyAdminAuth(request);
@@ -50,6 +51,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
     }
 
+    safeRevalidateTag('products');
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json(
