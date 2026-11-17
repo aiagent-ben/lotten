@@ -20,6 +20,13 @@ const cormorantDisplay = Cormorant_Garamond({
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={cn("h-full antialiased", interSans.variable, cormorantDisplay.variable)}>
+      <head>
+        <script
+          src="https://analytics.ahrefs.com/analytics.js"
+          data-key="PajpQgo4HGinw17tro/UmA"
+          async
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
         <LocaleProvider>{children}</LocaleProvider>
       </body>
