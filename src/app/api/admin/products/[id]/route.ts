@@ -3,6 +3,7 @@ import { createServiceClient } from '@/lib/db/client';
 import { verifyAdminAuth } from '@/lib/auth/admin';
 import { normalizeCategories } from '@/lib/categories';
 import { safeRevalidateTag } from '@/lib/i18n/cache';
+import { syncProductInMeilisearch } from '@/lib/search/reindex';
 
 export async function GET(
   request: NextRequest,
@@ -97,8 +98,6 @@ export async function PUT(
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  safeRevalidateTag('products');
-
   // Synchronize images if provided
   if (body.images !== undefined) {
     const images = typeof body.images === 'string' ? JSON.parse(body.images) : body.images;
@@ -145,5 +144,12 @@ export async function PUT(
     }
   }
   
+  safeRevalidateTag('products');
+  try {
+    await syncProductInMeilisearch(productId);
+  } catch (err) {
+    console.error('Meilisearch product sync error:', err);
+  }
+
   return NextResponse.json({ data });
 }

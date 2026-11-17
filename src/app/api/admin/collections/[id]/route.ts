@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/db/client';
 import { verifyAdminAuth } from '@/lib/auth/admin';
 import { safeRevalidateTag } from '@/lib/i18n/cache';
+import { syncCollectionProductsInMeilisearch } from '@/lib/search/reindex';
 
 export async function GET(
   request: NextRequest,
@@ -55,5 +56,13 @@ export async function PUT(
   }
 
   safeRevalidateTag('collections');
+  safeRevalidateTag('products');
+  if (data?.id) {
+    try {
+      await syncCollectionProductsInMeilisearch(data.id);
+    } catch (err) {
+      console.error('Meilisearch collection sync error:', err);
+    }
+  }
   return NextResponse.json({ data });
 }

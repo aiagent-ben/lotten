@@ -4,6 +4,8 @@ import { createServiceClient } from '@/lib/db/client';
 import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { revalidatePath } from 'next/cache';
+import { safeRevalidateTag } from '@/lib/i18n/cache';
+import { syncProductInMeilisearch } from '@/lib/search/reindex';
 
 const r2Client = new S3Client({
   region: 'auto',
@@ -112,6 +114,12 @@ export async function createProductImageRecord(
   }
 
   revalidatePath(`/admin/products/${productId}/edit`);
+  safeRevalidateTag('products');
+  try {
+    await syncProductInMeilisearch(productId);
+  } catch (err) {
+    console.error('Meilisearch product image create sync error:', err);
+  }
   return { success: true, image: { id: data.id } };
 }
 
@@ -139,16 +147,26 @@ export async function updateProductImage(
     }
   }
 
-  const { error } = await supabase
+  const { data: updatedRow, error } = await supabase
     .from('product_images')
     .update(updates)
-    .eq('id', imageId);
+    .eq('id', imageId)
+    .select('product_id')
+    .single();
 
   if (error) {
     return { success: false, error: error.message };
   }
 
   revalidatePath('/admin/products');
+  safeRevalidateTag('products');
+  if (updatedRow?.product_id) {
+    try {
+      await syncProductInMeilisearch(updatedRow.product_id);
+    } catch (err) {
+      console.error('Meilisearch product image update sync error:', err);
+    }
+  }
   return { success: true };
 }
 
@@ -164,6 +182,13 @@ export async function deleteProductImage(
     return deleteResult;
   }
 
+  // Look up product_id before deleting
+  const { data: imgRow } = await supabase
+    .from('product_images')
+    .select('product_id')
+    .eq('id', imageId)
+    .maybeSingle();
+
   // Delete from database
   const { error } = await supabase.from('product_images').delete().eq('id', imageId);
 
@@ -172,6 +197,14 @@ export async function deleteProductImage(
   }
 
   revalidatePath('/admin/products');
+  safeRevalidateTag('products');
+  if (imgRow?.product_id) {
+    try {
+      await syncProductInMeilisearch(imgRow.product_id);
+    } catch (err) {
+      console.error('Meilisearch product image delete sync error:', err);
+    }
+  }
   return { success: true };
 }
 
@@ -192,5 +225,20 @@ export async function reorderProductImages(
   }
 
   revalidatePath('/admin/products');
+  safeRevalidateTag('products');
+  if (imageIds.length > 0) {
+    try {
+      const { data: firstImg } = await supabase
+        .from('product_images')
+        .select('product_id')
+        .eq('id', imageIds[0])
+        .maybeSingle();
+      if (firstImg?.product_id) {
+        await syncProductInMeilisearch(firstImg.product_id);
+      }
+    } catch (err) {
+      console.error('Meilisearch product image reorder sync error:', err);
+    }
+  }
   return { success: true };
 }

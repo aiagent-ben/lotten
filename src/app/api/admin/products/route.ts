@@ -5,6 +5,11 @@ import { validateCsrfToken } from '@/lib/csrf';
 import { sanitizePostgrestSearch } from '@/lib/db/sanitize';
 import { normalizeCategories } from '@/lib/categories';
 import { safeRevalidateTag } from '@/lib/i18n/cache';
+import {
+  deleteProductsInMeilisearch,
+  syncProductInMeilisearch,
+  syncProductsInMeilisearch,
+} from '@/lib/search/reindex';
 
 export async function GET(request: NextRequest) {
   const authError = await verifyAdminAuth(request);
@@ -130,6 +135,17 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
       }
 
+      safeRevalidateTag('products');
+      try {
+        if (action === 'delete') {
+          await deleteProductsInMeilisearch(productIds);
+        } else {
+          await syncProductsInMeilisearch(productIds);
+        }
+      } catch (err) {
+        console.error('Meilisearch bulk sync error:', err);
+      }
+
       return NextResponse.json({ success: true });
     }
 
@@ -190,8 +206,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    safeRevalidateTag('products');
-
     // Insert images if provided
     if (images && images.length > 0) {
       const productImages = images.map((img: any, index: number) => ({
@@ -217,6 +231,13 @@ export async function POST(request: NextRequest) {
         is_active: variant.is_active !== false,
       }));
       await supabase.from('product_variants').insert(productVariants);
+    }
+
+    safeRevalidateTag('products');
+    try {
+      await syncProductInMeilisearch(product.id);
+    } catch (err) {
+      console.error('Meilisearch product sync error:', err);
     }
 
     return NextResponse.json({ data: product });

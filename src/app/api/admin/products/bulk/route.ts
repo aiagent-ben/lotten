@@ -3,6 +3,10 @@ import { createServiceClient } from '@/lib/db/client';
 import { verifyAdminAuth } from '@/lib/auth/admin';
 import { validateCsrfToken } from '@/lib/csrf';
 import { safeRevalidateTag } from '@/lib/i18n/cache';
+import {
+  deleteProductsInMeilisearch,
+  syncProductsInMeilisearch,
+} from '@/lib/search/reindex';
 
 export async function POST(request: NextRequest) {
   const authError = await verifyAdminAuth(request);
@@ -52,6 +56,15 @@ export async function POST(request: NextRequest) {
     }
 
     safeRevalidateTag('products');
+    try {
+      if (action === 'delete') {
+        await deleteProductsInMeilisearch(productIds);
+      } else {
+        await syncProductsInMeilisearch(productIds);
+      }
+    } catch (err) {
+      console.error('Meilisearch bulk sync error:', err);
+    }
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json(
